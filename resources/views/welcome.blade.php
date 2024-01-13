@@ -136,8 +136,9 @@
         color: #202020;
         -webkit-line-clamp: 2 !important;
         margin-bottom: 1px;
-        font-weight: 500;
-        font-size: 1em;
+        font-weight: 700;
+        font-size: 19px;
+        letter-spacing: -.2px;
     }
 
     .title-rifa-destaque p {
@@ -154,14 +155,13 @@
     /* Card Rifa Normal */
     /* *************************************************************** */
     .card-rifa img {
-        width: 100px;
-        height: 100px;
+        width: 300px;
         border-radius: 10px;
     }
 
     .card-rifa {
         background: #fff;
-        padding: 5px;
+        padding: 15px;
         margin-bottom: 10px;
         border-radius: 10px;
         display: flex
@@ -311,7 +311,7 @@
             </div>
             <div class="col-md-3">
                 <div class="d-flex" style="column-gap: 15px; background: #ffffff9c; border-radius: 10px; padding: 10px;">
-                    <div class="step" style="width: 70px;height: 70px;background: #0000000d;border-radius: 50px;font-size: 25px;text-align: center;padding: 10px;"><img src="https://cdn.icon-icons.com/icons2/989/PNG/512/Ribbon_Purple_icon-icons.com_75198.png"></div>
+                    <div class="step" style="width: 70px;height: 70px;background: #0000000d;border-radius: 50px;font-size: 25px;text-align: center;padding: 10px;"><img src="https://t4.ftcdn.net/jpg/05/42/44/99/360_F_542449981_MUnHerAwhqwrIsi1TTkTjSJgt1M8ZpxX.png"></div>
                     <div style="display: grid; align-content: center;">
                         <p style="margin-bottom: 0; font-weight: 700;">Pague o QR Code</p>
                         <p style="margin-bottom: 0; font-size: 12px;">Escolha sua sorte</p>
@@ -373,6 +373,12 @@
                                     <h1>{{ $product->name }}</h1>
                                     <p>{{ $product->subname }}</p>
 
+                                    <div>
+                                        Top Compradores
+                                    </div>
+                                    <div>
+                                        Bilhetes Premiados
+                                    </div>
                                     <div style="width: 100%;">
                                         {!! $product->status() !!}
                                         @if ($product->draw_date)
