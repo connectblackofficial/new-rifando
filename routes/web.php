@@ -52,7 +52,7 @@ Route::middleware(['check'])->group(function () {
         Route::put('/cliente/update/{id}', 'HomeAdminController@updateCliente')->name('clientes.update');
 
 
-        Route::get('home', 'HomeAdminController@index')->name('home');
+        Route::get('dashboard', 'HomeAdminController@index')->name('home');
         Route::get('adicionar-sorteio', 'ProductAdminController@index')->name('adminProduct');
         Route::post('add-sorteio', 'ProductAdminController@addProduct')->name('addProduct');
         Route::post('duplicar-sorteio', 'ProductAdminController@duplicar')->name('duplicarProduct');

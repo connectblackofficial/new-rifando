@@ -155,10 +155,6 @@
         return isApple;
     }
 
-    function duvidas() {
-        window.open('https://api.whatsapp.com/send?phone={{ $user->telephone }}', '_blank');
-    }
-
     function verRifa(route) {
         window.location.href = route
     }
@@ -651,7 +647,7 @@
     @endif
 
     <div class="row justify-content-center" style="max-width: 100vw !important;">
-        <div class="col-12 rifas {{ $config->tema }}">
+        <div class="col-12 rifas">
             <div class="container app-main" id="app-main">
                 @yield('content')
             </div>

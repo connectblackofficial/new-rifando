@@ -20,7 +20,7 @@ class HomeAdminController extends Controller
         $participantes = Participante::select('valor', 'reservados', 'pagos')->get();
         $rifas = Product::where('status', '=', 'Ativo')->get();
 
-        return view('home-admin', [
+        return view('admin.dashboard', [
             'participantes' => $participantes,
             'rifas' => $rifas
         ]);
