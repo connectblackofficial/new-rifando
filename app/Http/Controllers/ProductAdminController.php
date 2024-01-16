@@ -76,28 +76,6 @@ class ProductAdminController extends Controller
         return redirect('/meus-sorteios')->with('success', 'Rifa ('.$name_rifa.') excluida com Sucesso');
     }
 
-    //FUNÇÃO PARA SLUG
-    public static function createSlug($string)
-    {
-
-        $table = array(
-            'Š' => 'S', 'š' => 's', 'Đ' => 'Dj', 'đ' => 'dj', 'Ž' => 'Z', 'ž' => 'z', 'Č' => 'C', 'č' => 'c', 'Ć' => 'C', 'ć' => 'c',
-            'À' => 'A', 'Á' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 'Å' => 'A', 'Æ' => 'A', 'Ç' => 'C', 'È' => 'E', 'É' => 'E',
-            'Ê' => 'E', 'Ë' => 'E', 'Ì' => 'I', 'Í' => 'I', 'Î' => 'I', 'Ï' => 'I', 'Ñ' => 'N', 'Ò' => 'O', 'Ó' => 'O', 'Ô' => 'O',
-            'Õ' => 'O', 'Ö' => 'O', 'Ø' => 'O', 'Ù' => 'U', 'Ú' => 'U', 'Û' => 'U', 'Ü' => 'U', 'Ý' => 'Y', 'Þ' => 'B', 'ß' => 'Ss',
-            'à' => 'a', 'á' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a', 'å' => 'a', 'æ' => 'a', 'ç' => 'c', 'è' => 'e', 'é' => 'e',
-            'ê' => 'e', 'ë' => 'e', 'ì' => 'i', 'í' => 'i', 'î' => 'i', 'ï' => 'i', 'ð' => 'o', 'ñ' => 'n', 'ò' => 'o', 'ó' => 'o',
-            'ô' => 'o', 'õ' => 'o', 'ö' => 'o', 'ø' => 'o', 'ù' => 'u', 'ú' => 'u', 'û' => 'u', 'ý' => 'y', 'ý' => 'y', 'þ' => 'b',
-            'ÿ' => 'y', 'Ŕ' => 'R', 'ŕ' => 'r', '/' => '-', ' ' => '-'
-        );
-
-        // -- Remove duplicated spaces
-        $stripped = preg_replace(array('/\s{2,}/', '/[\t\n]/'), ' ', $string);
-
-
-        // -- Returns the slug
-        return strtolower(strtr($string, $table));
-    }
 
     public function addProduct(Request $request)
     {
@@ -123,15 +101,15 @@ class ProductAdminController extends Controller
             ->first();
 
         if($request->gateway == 'mp' && !$codeKeyPIX->key_pix){
-            return Redirect::back()->withErrors('Para utilizar o gaeway de pagamento Mercado Pago é necessário informar o token na sessão "Meu Perfil"');
+            return Redirect::back()->withErrors('Para utilizar o gateway de pagamento Mercado Pago é necessário informar o token na sessão "Meu Perfil"');
         }
 
         if($request->gateway == 'asaas' && !$codeKeyPIX->token_asaas){
-            return Redirect::back()->withErrors('Para utilizar o gaeway de pagamento ASAAS é necessário informar o token na sessão "Meu Perfil"');
+            return Redirect::back()->withErrors('Para utilizar o gateway de pagamento ASAAS é necessário informar o token na sessão "Meu Perfil"');
         }
 
         if($request->gateway == 'paggue' && (!$codeKeyPIX->paggue_client_key || !$codeKeyPIX->paggue_client_secret)){
-            return Redirect::back()->withErrors('Para utilizar o gaeway de pagamento Paggue é necessário informar o CLIENT KEY e CLIENT SECRET na sessão "Meu Perfil"');
+            return Redirect::back()->withErrors('Para utilizar o gateway de pagamento Paggue é necessário informar o CLIENT KEY e CLIENT SECRET na sessão "Meu Perfil"');
         }
 
         
@@ -145,7 +123,7 @@ class ProductAdminController extends Controller
                 'processado' => true,
                 'status' => 'Ativo',
                 'type_raffles' => 'automatico',
-                'slug' => $this->createSlug($request->name),
+                'slug' => createSlug($request->name),
                 'user_id' => Auth::user()->id,
                 'visible' => 0,
                 'minimo' => $request->minimo,
@@ -560,7 +538,7 @@ class ProductAdminController extends Controller
                 'processado' => true,
                 'status' => 'Ativo',
                 'type_raffles' => 'automatico',
-                'slug' => $this->createSlug($rifa->name),
+                'slug' => createSlug($rifa->name),
                 'user_id' => Auth::user()->id,
                 'visible' => 0,
                 'minimo' => $rifa->minimo,

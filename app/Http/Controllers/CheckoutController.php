@@ -6,18 +6,13 @@ use App\Customer;
 use App\Models\Participante;
 use App\Models\Premio;
 use App\Models\Product;
-use App\Models\Raffle;
-use App\Participant;
+use App\Models\User;
 use App\Payment_pix;
-use App\User;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Redirect;
-use QRcode;
 
 class CheckoutController extends Controller
 {

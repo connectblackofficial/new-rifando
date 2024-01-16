@@ -1,0 +1,1 @@
+<th><?=htmlLabel("%%label%%")?></th>

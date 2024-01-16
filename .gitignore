@@ -16,3 +16,4 @@ yarn-error.log
 composer.lock
 error_log
 /storage/*
+/public/index.php

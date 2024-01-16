@@ -5,11 +5,9 @@ namespace App\Models;
 use App\CreateProductimage;
 use App\Promocao;
 use App\RifaAfiliado;
-use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 class Product extends Model
 {

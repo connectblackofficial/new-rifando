@@ -1,0 +1,1 @@
+<td><?=itemRowView($formatFieldsFn, $item, '%%field%%')?></td>

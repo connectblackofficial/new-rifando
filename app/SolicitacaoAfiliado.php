@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class SolicitacaoAfiliado extends Model
@@ -26,6 +27,7 @@ class SolicitacaoAfiliado extends Model
 
     public function status()
     {
+
         if($this->pago){
             return '<span class="badge bg-success">PAGO</span>';
         }

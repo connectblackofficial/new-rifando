@@ -1,0 +1,74 @@
+{
+  "fields": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "telephone",
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "type": "select",
+      "options": {
+        "0": "Inactive",
+        "1": "Active"
+      }
+    },
+    {
+      "name": "afiliado",
+      "type": "select",
+      "options": {
+        "0": "Yes",
+        "1": "No"
+      }
+    },
+    {
+      "name": "pix",
+      "type": "string"
+    },
+    {
+      "name": "cpf",
+      "type": "string"
+    },
+    {
+      "name": "email",
+      "type": "email"
+    },
+    {
+      "name": "password",
+      "type": "password"
+    }
+  ],
+  "validations": [
+    {
+      "field": "name",
+      "rules": "required|max:191"
+    },
+    {
+      "field": "telephone",
+      "rules": "required|numeric"
+    },
+    {
+      "field": "status",
+      "rules": "required|in:0,1"
+    },
+    {
+      "field": "afiliado",
+      "rules": "required|in:0,1"
+    },
+    {
+      "field": "email",
+      "rules": "required|email"
+    },
+    {
+      "field": "pix",
+      "rules": "max:191"
+    },
+    {
+      "field": "cpf",
+      "rules": "required|max:191"
+    }
+  ]
+}

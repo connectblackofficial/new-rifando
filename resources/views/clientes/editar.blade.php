@@ -9,7 +9,7 @@
                     @method('PUT')
                     <div class="row mb-3">
                         <div class="col d-flex justify-content-center">
-                            <h2>Editar Cliente</b></h2>
+                            <h2>Editar Cliente</h2>
                         </div>
                     </div>
 
@@ -24,6 +24,7 @@
                     @endif
 
                     <div class="row mt-2">
+
                         <div class="col-md-6">
                             <label>Nome</label>
                             <input type="text" name="nome" value="{{ $cliente->nome }}" class="form-control">

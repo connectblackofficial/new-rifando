@@ -11,6 +11,7 @@
     <meta name="robots" content="noindex">
     <meta name="googlebot" content="noindex">
 
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
 
     <!-- Google Font: Source Sans Pro -->
@@ -34,7 +35,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
-    <title><?php echo @$data['social']->name; ?></title>
+    <link href="{{ asset('/css/custom-admin2.css?r'.rand(1111,9999)) }}" rel="stylesheet" >
+
+    <title><?php echo @$data['social']->name; ?> @if(isset($pgTitle)) - {{$pgTitle}} @endif</title>
 
     <style>
         #loadingSystem {

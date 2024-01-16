@@ -3,9 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\AutoMessage;
-use App\Participant;
-use App\Product;
-use App\CreateProductimage;
 use App\Customer;
 use App\Environment;
 use App\GanhosAfiliado;
@@ -14,18 +11,14 @@ use App\Models\Participante;
 use App\Models\Premio;
 use App\Models\Product as ModelsProduct;
 use App\Models\Raffle;
+use App\Models\User;
+use App\Participant;
 use App\RifaAfiliado;
-use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Storage;
-use QRcode;
 
 class ProductController extends Controller
 {

@@ -4,10 +4,9 @@ namespace App\Http\Controllers;
 
 use App\GanhosAfiliado;
 use App\Models\Product;
-use App\Product as AppProduct;
+use App\Models\User;
 use App\RifaAfiliado;
 use App\SolicitacaoAfiliado;
-use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

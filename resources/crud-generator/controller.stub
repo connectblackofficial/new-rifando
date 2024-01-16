@@ -1,0 +1,42 @@
+<?php
+
+namespace DummyNamespace;
+
+use DummyRootNamespaceHttp\Requests;
+use DummyRootNamespaceHttp\Controllers\Controller;
+
+use DummyRootNamespace{{modelNamespace}}{{modelName}};
+use Illuminate\Http\Request;
+use App\Traits\CrudTrait;
+use {{validationRequestNamespace}}{{validationRequestName}};
+class DummyClass extends Controller
+{
+    use CrudTrait;
+    private $crudName="{{crudName}}";
+    private $routeGroup="{{routeGroup}}";
+    private $crudNameSingular="{{crudNameSingular}}";
+
+    public function __construct()
+    {
+        $this->modelClass = {{modelName}}::class;
+    }
+
+
+
+    public function store({{validationRequestName}} $request)
+    {
+
+        return $this->processStore($request);
+    }
+
+    public function update({{validationRequestName}} $request, $id)
+    {
+
+        return $this->processUpdate($request,$id);
+    }
+
+
+
+
+
+}

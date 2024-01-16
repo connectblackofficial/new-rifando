@@ -8,11 +8,9 @@ use App\CreateProductimage;
 use App\Environment;
 use App\Promocao;
 use App\RifaAfiliado;
-use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 class Product extends Model
 {

@@ -60,5 +60,7 @@ class Kernel extends HttpKernel
         'isAdmin' => \App\Http\Middleware\IsAdminMiddleware::class,
         'isAfiliado' => \App\Http\Middleware\IsAfiliadoMiddleware::class,
         'check' => \App\Http\Middleware\ExpiradasMiddleware::class,
+        'isSuperAdmin' => \App\Http\Middleware\IsSuperAdminMiddleware::class,
+
     ];
 }

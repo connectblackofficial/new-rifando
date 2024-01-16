@@ -40,13 +40,12 @@
                     <div class="table-title">
                         <div class="row mb-3">
                             <div class="col d-flex justify-content-center">
-                                <h2>Clientes</b></h2>
+                                <h2>Clientes</h2>
                             </div>
                             <div class="row-12 mb-3 d-flex" style="justify-content: space-between;">
 
                                 <form method="GET" action="{{ route('clientes') }}" class="form-inline my-2 my-lg-0">
-                                    <input class="form-control mr-sm-2" type="search" name="search"
-                                        placeholder="Pesquisar" aria-label="Search" value="{{ $search }}">
+                                    <input type="text" class="form-control" name="search" placeholder="Search..." value="{{ request('search') }}">
                                     <button class="btn btn-outline-secondary my-2 my-sm-0 border border-secondary text-dark" type="submit">Buscar</button>
                                 </form>
                             </div>
