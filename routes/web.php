@@ -1,12 +1,24 @@
 <?php
 
+use App\Models\Participant;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/pwd', function () {
-    return Hash::make("123456");
+    dd(Participant::inRandomOrder()->select('name')->first());
+    $tables = \Illuminate\Support\Facades\DB::select('SHOW TABLES');
+    $tables = array_map('current', $tables);
+    $list = [];
+    foreach ($tables as $table) {
+        if (Schema::hasColumn($table, 'user_id')) {
+
+            DB::table($table)->update(["user_id" => 1]);
+        }
+
+    }
+    return json_encode($list);
 });
 
-Route::middleware(['check'])->group(function () {
+Route::middleware(['check', 'subDomain'])->group(function () {
 
     Route::prefix('area-afiliado')->group(function () {
         require_once base_path('routes/groups/affiliate.php');
@@ -18,13 +30,7 @@ Route::middleware(['check'])->group(function () {
 
     require_once base_path('routes/groups/public.php');
 
+
 });
 
 
-Route::get('super-admin/users', [\App\Http\Controllers\SuperAdmin\UsersController::class, 'index'])->name('super-admin.users.index');
-Route::get('super-admin/users/create', [\App\Http\Controllers\SuperAdmin\UsersController::class, 'create'])->name('super-admin.users.create');
-Route::post('super-admin/users', [\App\Http\Controllers\SuperAdmin\UsersController::class, 'store'])->name('super-admin.users.store');
-Route::get('super-admin/users/{pk}', [\App\Http\Controllers\SuperAdmin\UsersController::class, 'show'])->name('super-admin.users.show');
-Route::get('super-admin/users/{pk}/edit', [\App\Http\Controllers\SuperAdmin\UsersController::class, 'edit'])->name('super-admin.users.edit');
-Route::put('super-admin/users/{pk}', [\App\Http\Controllers\SuperAdmin\UsersController::class, 'update'])->name('super-admin.users.update');
-Route::delete('super-admin/users/{pk}', [\App\Http\Controllers\SuperAdmin\UsersController::class, 'destroy'])->name('super-admin.users.destroy');

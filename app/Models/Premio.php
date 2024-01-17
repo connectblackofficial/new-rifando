@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class Premio extends Model
 {
+    use ModelSiteOwnerTrait;
+
     protected $fillable = [
         'product_id',
         'participant_id',
@@ -14,7 +17,8 @@ class Premio extends Model
         'descricao',
         'ganhador',
         'cota',
-        'foto'
+        'foto',
+        'user_id'
     ];
 
     public function rifa()
@@ -24,13 +28,12 @@ class Premio extends Model
 
     public function participante()
     {
-        if($this->participant_id != null){
-            return $this->hasOne(Participante::class, 'id', 'participant_id')->first();
+        if ($this->participant_id != null) {
+            return $this->hasOne(Participant::class, 'id', 'participant_id')->first();
+        } else {
+            return new Participant();
         }
-        else{
-            return new Participante();
-        }
-        
+
     }
 
     public function linkWpp()
@@ -40,4 +43,10 @@ class Premio extends Model
 
         return $link;
     }
+
+    public function scopeWinners($query)
+    {
+        return $query->where('descricao', '!=', '')->where('ganhador', '!=', '');
+    }
+
 }

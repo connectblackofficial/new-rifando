@@ -1,12 +1,11 @@
-@import "/resources/assets/public/plugins/bootstrap-icons-1.8.1/bootstrap-icons.css";
-@import "/resources/assets/public/css/fonts-google.css";
-@import "/resources/assets/public/plugins/fontawesome-free/css/all.min.css";
-@import "/resources/assets/public/dist/css/adminlte.min.css";
-@import "/resources/assets/public/plugins/summernote/summernote-bs4.min.css";
-@import "/resources/assets/public/plugins/codemirror/codemirror.css";
-
-@import "/resources/assets/public/plugins/codemirror/theme/monokai.css";
-@import "/resources/assets/public/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css";
-@import "/resources/assets/public/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css";
-
-
+@import "../../../public/vendor/font-awesome/css/all.min.css";
+@import "../../../public/plugins/bootstrap-icons-1.8.1/bootstrap-icons.css";
+@import "../../../public/css/fonts-google.css";
+@import "../../../public/dist/css/adminlte.min.css";
+@import "../../../public/plugins/summernote/summernote-bs4.min.css";
+@import "../../../public/plugins/codemirror/codemirror.css";
+@import "../../../public/plugins/codemirror/theme/monokai.css";
+@import "../../../public/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css";
+@import "../../../public/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css";
+@import "../../../public/vendor/bootstrap-5.0.2/dist/css/bootstrap.css";
+@import "../../../public/css/custom-admin2.css";

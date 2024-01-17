@@ -1,44 +1,10 @@
 @extends('layouts.app')
 
-<link rel="manifest" href="/manifest.json">
-<script type="text/javascript" src="sw.js"></script>
-<style>
-    body {
-        background: #000 !important;
-    }
-</style>
-
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"
-    integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+@section("scripts-top")
 <script>
-    $(function(e) {
-        // if (isIOS()) {
-        //     $('#app-main').attr('style', 'margin-top: 100px !important');
-        // }
-    })
 
-    function isIOS() {
-        var ua = navigator.userAgent.toLowerCase();
 
-        //Lista de dispositivos que acessar
-        var iosArray = ['iphone', 'ipod'];
 
-        var isApple = false;
-
-        if (ua.includes('iphone') || ua.includes('ipod')) {
-            isApple = true
-        }
-
-        return isApple;
-    }
-
-    function duvidas() {
-        window.open('https://api.whatsapp.com/send?phone={{ $user->telephone }}', '_blank');
-    }
-
-    function verRifa(route) {
-        window.location.href = route
-    }
 </script>
 
 
@@ -193,7 +159,7 @@
     }
 </style>
 
-
+@endsection
 @section('content')
     <style>
         .duvida {
@@ -306,6 +272,12 @@
 
                 {{-- Outras Rifas --}}
                 @foreach ($products->where('favoritar', '=', 0) as $product)
+                    <?php
+                        $imagem=$product->imagem();
+                        if(!isset($imagem['id'])){
+                            continue;
+                        }
+                        ?>
                     <a href="{{ route('product', ['slug' => $product->slug]) }}"
                         class="sorteio sorteio-{{ strtolower($product->status) }} {{ $product->status == 'Finalizado' ? 'd-none' : '' }}">
                         <div class="card-rifa {{ $config->tema }}">
@@ -349,33 +321,8 @@
     </div>
 
     <script>
-        function showAtivos(el) {
-            document.getElementById('btn-concluidos').classList.remove('bg-info');
-            document.getElementById('btn-concluidos').classList.add('bg-secondary');
-            el.classList.add('bg-info');
 
-            document.querySelectorAll('.sorteio').forEach((el) => {
-                el.classList.add('d-none')
-            });
 
-            document.querySelectorAll('.sorteio-ativo').forEach((el) => {
-                el.classList.remove('d-none')
-            });
-        }
-
-        function showConcluidos(el) {
-            document.getElementById('btn-ativos').classList.remove('bg-info');
-            document.getElementById('btn-ativos').classList.add('bg-secondary');
-            el.classList.add('bg-info');
-
-            document.querySelectorAll('.sorteio').forEach((el) => {
-                el.classList.add('d-none')
-            });
-
-            document.querySelectorAll('.sorteio-finalizado').forEach((el) => {
-                el.classList.remove('d-none')
-            });
-        }
     </script>
 
     <br><br>

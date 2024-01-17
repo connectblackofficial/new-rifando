@@ -3,40 +3,42 @@
 namespace App\Http\Controllers;
 
 use App\AutoMessage;
-use App\Customer;
 use App\Environment;
 use App\GanhosAfiliado;
+use App\Models\Customer;
 use App\Models\Order;
-use App\Models\Participante;
+use App\Models\Participant;
+use App\Models\PaymentPix;
 use App\Models\Premio;
+use App\Models\Product;
 use App\Models\Product as ModelsProduct;
 use App\Models\Raffle;
-use App\Models\User;
-use App\Participant;
 use App\RifaAfiliado;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
+use MercadoPago\Payment;
+use MercadoPago\SDK;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        $ganhadores = Premio::where('descricao', '!=', null)->where('ganhador', '!=', '')->get();
+        $ganhadores = Premio::siteOwner()->where('descricao', '!=', null)->where('ganhador', '!=', '')->get();
 
-        $products = ModelsProduct::select($this->fieldsRifa)->where('visible', '=', 1)->orderBy('id', 'desc')->get();
+        $products = ModelsProduct::select($this->fieldsRifa)->siteOwner()->isVisible()->orderBy('id', 'desc')->get();
 
-        $winners = ModelsProduct::select('winner')->where('status', '=', 'Finalizado')->where('visible', '=', 1)->where('winner', '!=', null)->get();
-        
-        $config = DB::table('consulting_environments')->where('id', '=', 1)->first();
+        $winners = ModelsProduct::select('winner')->siteOwner()->winners()->get();
+
+        $config = getSiteConfig();
 
         return view('welcome', [
             'products' => $products,
             'winners' => $winners,
             'ganhadores' => $ganhadores,
-            'user' => User::find(1),
+            'user' => getSiteOwnerUser(),
             'productModel' => ModelsProduct::find(4),
             'config' => $config
         ]);
@@ -48,15 +50,15 @@ class ProductController extends Controller
 
         $products = ModelsProduct::where('visible', '=', 1)->orderBy('id', 'desc')->get();
 
-        $winners = ModelsProduct::where('status', '=', 'Finalizado')->where('visible', '=', 1)->where('winner', '!=', null)->get();
-        
-        $config = DB::table('consulting_environments')->where('id', '=', 1)->first();
+        $winners = ModelsProduct::winners()->get();
+
+        $config = getSiteConfig();
 
         return view('sorteios', [
             'products' => $products,
             'winners' => $winners,
             'ganhadores' => $ganhadores,
-            'user' => User::find(1),
+            'user' => getSiteOwnerUser(),
             'productModel' => ModelsProduct::find(4),
             'config' => $config
         ]);
@@ -64,119 +66,43 @@ class ProductController extends Controller
 
     public function product($slug, $tokenAfiliado = null)
     {
-        $productSlug = DB::table('products')
-        ->select('id')
-        ->where('products.slug', '=', $slug)
-        ->first();
-        
-        $productID = $productSlug->id;
-
-        // Verificando se sorteio ja expirou para finalizar automatico.
+        $productData = Product::siteOwner()->whereSlug($slug)->first();
+        if (!isset($productData['id'])) {
+            abort(404);
+        }
+        $productID = $productData->id;
         $this->verificaSorteio($productID);
-        
-        $user = DB::table('users')
-        ->select('users.name', 'users.telephone', 'products.type_raffles')
-        ->leftJoin('products', 'products.user_id', 'users.id')
-        ->leftJoin('consulting_environments', 'consulting_environments.user_id', 'users.id')
-        ->where('products.id', '=', $productID)
-        ->first();
+        $user = getSiteOwnerUser();
 
-        $imagens = DB::table('products_images')
-        ->select('products_images.name')
-        ->join('products', 'products.id', '=', 'products_images.product_id')
-        ->where('products.id', '=', $productID)
-        ->get();
+        $imagens = $productData->images()->get();
 
-        $productDetail = DB::table('products')
-        ->select('products.id', 'products.name', 'products.subname', 'products.product', 'products.price', 'products_images.name as image', 'products.status', 'products.draw_date', 'products.draw_prediction', 'products.winner')
-        ->leftJoin('products_images', 'products.id', 'products_images.product_id')
-        ->where('products.id', '=', $productID)
-        ->orderBy('products_images.name', 'ASC')
-        ->get();
 
-        $bookProduct = DB::table('products')
-        ->select('products.name', 'products.price', 'raffles.number', 'raffles.status', 'products.status as statusProduct', 'participant.name as participant', 'participant.created_at')
-        ->join('raffles', 'products.id', '=', 'raffles.product_id')
-        ->leftJoin('participant', 'raffles.id', 'participant.raffles_id')
-        ->where('products.id', '=', $productID)
-        ->get();
+        $productDetail = $productData;
 
-        $productDescription = DB::table('product_description')
-        ->select('product_description.description', 'product_description.video')
-        ->join('products', 'products.id', '=', 'product_description.product_id')
-        ->where('products.id', '=', $productID)
-        ->first();
 
-        //TOTAIS DE NÚMEROS
-        // $totalNumbers = DB::table('products')
-        //     ->select('raffles.status')
-        //     ->join('raffles', 'products.id', '=', 'raffles.product_id')
-        //     ->where('products.id', '=', $productID)
-        //     ->count();
+        $productDescription = $productData->descriptions()->select('description', 'video')->first();
 
-        // $totalDispo = DB::table('products')
-        //     ->select('raffles.status')
-        //     ->join('raffles', 'products.id', '=', 'raffles.product_id')
-        //     ->where('products.id', '=', $productID)
-        //     ->where('raffles.status', '=', 'Disponível')
-        //     ->count();
+        $productModel = $productData;
 
-        // $totalReser = DB::table('products')
-        //     ->select('raffles.status')
-        //     ->join('raffles', 'products.id', '=', 'raffles.product_id')
-        //     ->where('products.id', '=', $productID)
-        //     ->where('raffles.status', '=', 'Reservado')
-        //     ->count();
+        $config = getSiteConfig();
 
-        
-        // $totalPago = DB::table('products')
-        //     ->select('raffles.status')
-        //     ->join('raffles', 'products.id', '=', 'raffles.product_id')
-        //     ->where('products.id', '=', $productID)
-        //     ->where('raffles.status', '=', 'Pago')
-        //     ->count();
-
-        // $valueProduct = DB::table('products')
-        //     ->select('price')
-        //     ->where('products.id', '=', $productID)
-        //     ->first();
-
-        // $value50 = str_replace(',', '.', $valueProduct->price) * 50;
-        // $value100 = str_replace(',', '.', $valueProduct->price) * 100;
-        // $value150 = str_replace(',', '.', $valueProduct->price) * 150;
-        // $value200 = str_replace(',', '.', $valueProduct->price) * 200;
-
-        // $result50 = $value50 - ($value50 * 10 / 100);
-        // $result100 = $value100 - ($value100 * 10 / 100);
-        // $result150 = $value150 - ($value150 * 10 / 100);
-        // $result200 = $value200 - ($value200 * 10 / 100);
-
-        $productModel = ModelsProduct::select($this->fieldsRifa)->find($productID);
-
-        $config = DB::table('consulting_environments')->where('id', '=', 1)->first();
-
+        $activePromo = $productModel->promosAtivas();
         $arrayProducts = [
             'tokenAfiliado' => $tokenAfiliado,
             'imagens' => $imagens,
             'product' => $productDetail,
-            'bookProduct' => $bookProduct,
             'productDescription' => $productDescription ? $productDescription->description : '',
             'productDescriptionVideo' => $productDescription ? $productDescription->video : '',
             'totalNumbers' => $productModel->qtd,
             'totalDispo' => $productModel->qtdNumerosDisponiveis(),
             'totalReser' => $productModel->qtdNumerosReservados(),
             'totalPago' => $productModel->qtdNumerosPagos(),
-            'user' => $user->name,
             'telephone' => $user->telephone,
-            'type_raffles' => $user->type_raffles,
-            // 'result50' => number_format($result50, 2, ",", "."),
-            // 'result100' => number_format($result100, 2, ",", "."),
-            // 'result150' => number_format($result150, 2, ",", "."),
-            // 'result200' => number_format($result200, 2, ",", "."),
+            'type_raffles' => $productDetail->type_raffles,
             'productModel' => $productModel,
             'ranking' => $productModel->ranking(),
             'config' => $config,
-            'user' => User::find(1),
+            'activePromos'=>$activePromo
         ];
 
 
@@ -185,10 +111,10 @@ class ProductController extends Controller
 
     public function verificaSorteio($productId)
     {
-        
+
         // Verificando se sorteio ja expirou ou se ja foi vendido todas as cotas para finalizar automatico.
-        $product = ModelsProduct::select($this->fieldsRifa)->find($productId);
-        if($product->qtdNumerosDisponiveis() == 0){
+        $product = ModelsProduct::getByIdWithSiteCheck($productId);
+        if ($product->qtdNumerosDisponiveis() == 0) {
             $product->status = 'Finalizado';
             $product->update();
         }
@@ -196,22 +122,71 @@ class ProductController extends Controller
 
     public function randomParticipant()
     {
-        $userRandom = Participant::inRandomOrder()->select('name')->first();
-        $resultUserRandom = explode(' ', $userRandom->name);
-
+        $nomesSobrenomes = [
+            "João Silva",
+            "Ana Santos",
+            "Pedro Oliveira",
+            "Maria Pereira",
+            "Luiz Almeida",
+            "Fernanda Lima",
+            "Carlos Rodrigues",
+            "Mariana Fernandes",
+            "Rafael Sousa",
+            "Isabela Costa",
+            "Gustavo Gomes",
+            "Larissa Santos",
+            "Lucas Ribeiro",
+            "Camila Nunes",
+            "André Barbosa",
+            "Carolina Castro",
+            "Eduardo Ferreira",
+            "Beatriz Cunha",
+            "Antônio Santos",
+            "Juliana Lima",
+            "Felipe Pereira",
+            "Amanda Martins",
+            "Daniel Oliveira",
+            "Laura Fernandes",
+            "Bruno Alves",
+            "Natália Barbosa",
+            "Vinícius Castro",
+            "Letícia Silva",
+            "Gabriel Cunha",
+            "Lívia Ribeiro",
+            "Leonardo Sousa",
+            "Ana Clara Costa",
+            "Mateus Gomes",
+            "Isadora Santos",
+            "Thiago Pereira",
+            "Raquel Lima",
+            "José Silva",
+            "Patrícia Fernandes",
+            "Diego Almeida",
+            "Júlia Castro",
+            "Fábio Oliveira",
+            "Mariana Pereira",
+            "Roberto Santos",
+            "Carla Lima",
+            "Marcelo Fernandes",
+            "Rita Barbosa",
+            "Ricardo Gomes",
+            "Renata Castro",
+            "Paulo Silva",
+            "Bianca Oliveira"
+        ];
+        $indiceSorteado = rand(0, count($nomesSobrenomes) - 1);
+        $nomeSorteado = $nomesSobrenomes[$indiceSorteado];
+        $resultUserRandom = explode(' ', $nomeSorteado);
         return json_encode($resultUserRandom);
     }
 
     public function getRaffles(Request $request)
     {
-        $bookProduct = DB::table('products')
-        ->select('products.name', 'products.price', 'raffles.number', 'raffles.status', 'products.status as statusProduct', 'participant.name as participant', 'participant.created_at', 'products.qtd_zeros')
-        ->join('raffles', 'products.id', '=', 'raffles.product_id')
-        ->leftJoin('participant', 'raffles.id', 'participant.raffles_id')
-        ->where('products.id', '=', $request->idProductURL)
-        ->get();
-        
-        $rifa = ModelsProduct::find($request->idProductURL);
+        $productData = Product::siteOwner()->whereId($request->idProductURL)->first();
+        if (!isset($productData['id'])) {
+            abort(404);
+        }
+        $rifa = $productData;
         $numbers = $rifa->numbers();
 
         foreach ($rifa->participantes() as $participante) {
@@ -224,103 +199,28 @@ class ProductController extends Controller
         sort($numbers);
 
         foreach ($numbers as $number) {
-            $bg = env('APP_URL') == 'rifasonline.link' ? '#A0A1A3' : '#585858';
+            $bg = '#585858';
             $ex = explode("-", $number);
             $number = $ex[0];
-            
+
             $status = 'disponivel';
-            if(isset($ex[1])){
+            if (isset($ex[1])) {
                 $status = $ex[1];
                 $nome = $ex[2];
             }
 
-            if($status == 'disponivel'){
-                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter ".$status."' onclick=\"selectRaffles('" . $number . "', '" . $number . "')\" style='background-color: ".$bg.";color: #000;' id=" . $number . ">" . $number . "</a>";
-            }
-            else if($status == 'reservado'){
+            if ($status == 'disponivel') {
+                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . "' onclick=\"selectRaffles('" . $number . "', '" . $number . "')\" style='background-color: " . $bg . ";color: #000;' id=" . $number . ">" . $number . "</a>";
+            } else if ($status == 'reservado') {
                 $nome = 'Reservado por ' . $nome;
-                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter ".$status."' onclick=\"infoParticipante('" . $nome . "')\" style='background-color: rgb(13,202,240);color: #000;' id=" . $number . ">" . $number . "</a>";
-            }
-            else if($status == 'pago'){
+                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . "' onclick=\"infoParticipante('" . $nome . "')\" style='background-color: rgb(13,202,240);color: #000;' id=" . $number . ">" . $number . "</a>";
+            } else if ($status == 'pago') {
                 $nome = 'Pago por ' . $nome;
-                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter ".$status."' onclick=\"infoParticipante('" . $nome . "')\" style='background-color: #28a745;color: #000;' id=" . $number . ">" . $number . "</a>";
+                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . "' onclick=\"infoParticipante('" . $nome . "')\" style='background-color: #28a745;color: #000;' id=" . $number . ">" . $number . "</a>";
             }
 
-            
-
-            // if ($rifa->status === 'Ativo') {
-            //     if ($number['status'] === 'Disponivel') {
-            //         $resultRaffles[] = "<a href='javascript:void(0);' class='number filter disponivel' onclick=\"selectRaffles('" . $number['number'] . "', '" . $number['key'] . "')\" style='background-color: #585858;color: #000;' id=" . $number['number'] . ">" . $number['number'] . "</a>";
-            //     } else if ($number['status']  == "Reservado") {
-            //         $resultRaffles[] = "<a href='javascript:void(0);' class='number filter reservado' onclick=\"timeNumbers(this)\" style='background-color: #d7d5d5;color: #000;display:none;' id=" . $number['number'] . " data-toggle='tooltip' data-placement='top' data-html='true' title='Reservado por: " . $rifa->getParticipanteById($number['participant_id']) . "'><input type='hidden' id='createdAt" . $number['number'] . "' value=''>" . $number['number'] . "</a>";
-            //     } else if ($number['status'] == "Pago") {
-            //         $resultRaffles[] = "<a href='javascript:void(0);' class='number filter pago' style='background-color: #28a745;color: #fff;display:none;' id='" . $number['number'] . "' data-toggle='tooltip' data-placement='top' title='Pago por: " . $rifa->getParticipanteById($number['participant_id']) . "'>" . $number['number'] . "</a>";
-            //     }
-            // } else if ($rifa->status === 'Agendado') {
-            //     if ($number['status'] === 'Disponivel') {
-            //         $resultRaffles[] = "<a href='javascript:void(0);' class='number filter disponivel' onclick=\"alert('Sorteio agendado não é mais possível reservar!')\" style='background-color: #f1f1f1;color: #000;' id=" . $number['number'] . ">" . $number['number'] . "</a>";
-            //     } else if ($number['status']  == "Reservado") {
-            //         $resultRaffles[] = "<a href='javascript:void(0);' class='number filter reservado' style='background-color: #0F9EE2;color: #fff;' id=" . $number['number'] . " data-toggle='tooltip' data-placement='top' data-html='true' title='Reservado por: " . $rifa->getParticipanteById($number['participant_id']) . "'><input type='hidden' id='createdAt" . $number['number'] . "' value=''>" . $number['number'] . "</a>";
-            //     } else if ($number['status'] == "Pago") {
-            //         $resultRaffles[] = "<a href='javascript:void(0);' class='number filter pago' style='background-color: #28a745;color: #fff;' id='" . $number['number'] . "' data-toggle='tooltip' data-placement='top' title='Pago por: " . $rifa->getParticipanteById($number['participant_id']) . "'>" . $number['number'] . "</a>";
-            //     }
-            // } else if ($rifa->status === 'Finalizado') {
-            //     if ($number['status'] === 'Disponivel') {
-            //         $resultRaffles[] = "<a href='javascript:void(0);' class='number filter disponivel' onclick=\"alert('Sorteio finalizado não é mais possível reservar!')\" style='background-color: #f1f1f1;color: #fff;' id=" . $number['number'] . ">" . $number['number'] . "</a>";
-            //     } else if ($number['status']  == "Reservado") {
-            //         $resultRaffles[] = "<a href='javascript:void(0);' class='number filter reservado' style='background-color: #0F9EE2;color: #fff;' id=" . $number['number'] . " data-toggle='tooltip' data-placement='top' data-html='true' title='Reservado por: " . $rifa->getParticipanteById($number['participant_id']) . "'><input type='hidden' id='createdAt" . $number['number'] . "' value=''>" . $number['number'] . "</a>";
-            //     } else if ($number['status'] == "Pago") {
-            //         $resultRaffles[] = "<a href='javascript:void(0);' class='number filter pago' style='background-color: #28a745;color: #fff;' id='" . $number['number'] . "' data-toggle='tooltip' data-placement='top' title='Pago por: " . $rifa->getParticipanteById($number['participant_id']) . "'>" . $number['number'] . "</a>";
-            //     }
-            // } else {
-            //     $resultRaffles[] = null;
-            // }
         }
 
-
-        // foreach ($bookProduct as $raffles) {
-
-        //     // Mostrando a qtd de zeros qe esta configurado no painel
-        //     if ($raffles->qtd_zeros != null || $raffles->qtd_zeros == 0) {
-        //         $number = intval($raffles->number); // retira os 0 convertendo para inteiro
-        //         $number = strval($number);          // converte novamente para string
-        //         for ($i = 0; $i < $raffles->qtd_zeros; $i++) {
-        //             $number = '0' . $number;
-        //         }
-
-        //         $number = $raffles->number;
-        //     } else {
-        //         $number = $raffles->number;
-        //     }
-
-        //     if ($raffles->statusProduct === 'Ativo') {
-        //         if ($raffles->status === 'Disponível') {
-        //             $resultRaffles[] = "<a href='javascript:void(0);' class='number filter disponivel' onclick=\"selectRaffles('" . $number . "')\" style='background-color: #585858;color: #000;' id=" . $number . ">" . $number . "</a>";
-        //         } else if ($raffles->status  == "Reservado") {
-        //             $resultRaffles[] = "<a href='javascript:void(0);' class='number filter reservado' onclick=\"timeNumbers(this)\" style='background-color: #d7d5d5;color: #000;display:none;' id=" . $number . " data-toggle='tooltip' data-placement='top' data-html='true' title='Reservado por: " . $raffles->participant . "'><input type='hidden' id='createdAt" . $number . "' value=''>" . $number . "</a>";
-        //         } else if ($raffles->status == "Pago") {
-        //             $resultRaffles[] = "<a href='javascript:void(0);' class='number filter pago' style='background-color: #28a745;color: #fff;display:none;' id='" . $number . "' data-toggle='tooltip' data-placement='top' title='Pago por: " . $raffles->participant . "'>" . $number . "</a>";
-        //         }
-        //     } else if ($raffles->statusProduct === 'Agendado') {
-        //         if ($raffles->status === 'Disponível') {
-        //             $resultRaffles[] = "<a href='javascript:void(0);' class='number filter disponivel' onclick=\"alert('Sorteio agendado não é mais possível reservar!')\" style='background-color: #f1f1f1;color: #000;' id=" . $number . ">" . $number . "</a>";
-        //         } else if ($raffles->status  == "Reservado") {
-        //             $resultRaffles[] = "<a href='javascript:void(0);' class='number filter reservado' style='background-color: #0F9EE2;color: #fff;' id=" . $number . " data-toggle='tooltip' data-placement='top' data-html='true' title='Reservado por: " . $raffles->participant . "'><input type='hidden' id='createdAt" . $number . "' value=''>" . $number . "</a>";
-        //         } else if ($raffles->status == "Pago") {
-        //             $resultRaffles[] = "<a href='javascript:void(0);' class='number filter pago' style='background-color: #28a745;color: #fff;' id='" . $number . "' data-toggle='tooltip' data-placement='top' title='Pago por: " . $raffles->participant . "'>" . $number . "</a>";
-        //         }
-        //     } else if ($raffles->statusProduct === 'Finalizado') {
-        //         if ($raffles->status === 'Disponível') {
-        //             $resultRaffles[] = "<a href='javascript:void(0);' class='number filter disponivel' onclick=\"alert('Sorteio finalizado não é mais possível reservar!')\" style='background-color: #f1f1f1;color: #fff;' id=" . $number . ">" . $number . "</a>";
-        //         } else if ($raffles->status  == "Reservado") {
-        //             $resultRaffles[] = "<a href='javascript:void(0);' class='number filter reservado' style='background-color: #0F9EE2;color: #fff;' id=" . $number . " data-toggle='tooltip' data-placement='top' data-html='true' title='Reservado por: " . $raffles->participant . "'><input type='hidden' id='createdAt" . $number . "' value=''>" . $number . "</a>";
-        //         } else if ($raffles->status == "Pago") {
-        //             $resultRaffles[] = "<a href='javascript:void(0);' class='number filter pago' style='background-color: #28a745;color: #fff;' id='" . $number . "' data-toggle='tooltip' data-placement='top' title='Pago por: " . $raffles->participant . "'>" . $number . "</a>";
-        //         }
-        //     } else {
-        //         $resultRaffles[] = null;
-        //     }
-        // }
 
         return json_encode($resultRaffles);
     }
@@ -340,33 +240,34 @@ class ProductController extends Controller
         DB::beginTransaction();
         try {
             //Cadastrando customer
-            if($request->customer == 0){
+            if ($request->customer == 0) {
                 $customer = Customer::create([
                     'nome' => $request->name,
-                    'telephone' => $request->telephone
+                    'telephone' => $request->telephone,
+                    'user_id' => getSiteOwner()
+
                 ]);
-            }
-            else{
-                $customer = Customer::find($request->customer);
+            } else {
+                $customer = Customer::getByIdWithSiteCheck($request->customer);
             }
 
 
-            $prod = ModelsProduct::select($this->fieldsRifa)->find($request->productID);
+            $prod = ModelsProduct::siteOwner()->whereId($request->productID)->first();
 
             // Validando link de afiliado,
-            $afiliado = RifaAfiliado::where('token', '=', $request->tokenAfiliado)->first();
+            $afiliado = RifaAfiliado::siteOwner()->where('token', '=', $request->tokenAfiliado)->first();
 
             $path = 'numbers/' . $prod->id . '.json';
             //$jsonString = file_get_contents($path);
 
-            if($request->qtdNumbers > 10000){
+            if ($request->qtdNumbers > 10000) {
                 return Redirect::back()->withErrors('Você só pode comprar no máximo 10.000 números por vez');
-            }   
+            }
 
-            if(!$request->name){
+            if (!$request->name) {
                 return Redirect::back()->withErrors('Campo nome é obrigatório!');
             }
-            if(!$request->telephone){
+            if (!$request->telephone) {
                 return Redirect::back()->withErrors('Campo telefone é obrigatório!');
             }
 
@@ -377,10 +278,7 @@ class ProductController extends Controller
                 ]);
             }
 
-            $codeKeyPIX = DB::table('consulting_environments')
-            ->select('key_pix', 'token_asaas')
-            ->where('user_id', '=', 1)
-            ->first();
+            $codeKeyPIX = getSiteConfig();
 
             $integracaoGateway = true;
             if ($prod->gateway == 'mp' && $codeKeyPIX->key_pix == null) {
@@ -395,20 +293,24 @@ class ProductController extends Controller
             } else {
 
                 $statusProduct = DB::table('products')
-                ->select('status')
-                ->where('products.id', '=', $request->productID)
-                ->first();
+                    ->select('status')
+                    ->where('products.id', '=', $request->productID)
+                    ->first();
 
-                //dd($request->productID);
+                $statusProduct = Product::select('status')
+                    ->siteOwner()
+                    ->where('products.id', '=', $request->productID)
+                    ->first();
 
                 if ($statusProduct->status == "Ativo") {
 
                     $user = DB::table('users')
-                    ->select('users.name', 'users.telephone', 'products.type_raffles')
-                    ->leftJoin('products', 'products.user_id', 'users.id')
-                    ->leftJoin('consulting_environments', 'consulting_environments.user_id', 'users.id')
-                    ->where('products.id', '=', $request->productID)
-                    ->first();
+                        ->select('users.name', 'users.telephone', 'products.type_raffles')
+                        ->leftJoin('products', 'products.user_id', 'users.id')
+                        ->leftJoin('consulting_environments', 'consulting_environments.user_id', 'users.id')
+                        ->where('products.id', '=', $request->productID)
+                        ->where('products.user_id', getSiteOwner())
+                        ->first();
 
                     if ($user->type_raffles == 'manual') {
                         $validatedData = $request->validate([
@@ -450,11 +352,11 @@ class ProductController extends Controller
                     }
 
 
-
                     if (str_starts_with($prod->modo_de_jogo, 'fazendinha')) {
                         $numbers = $request->numberSelected;
                         $resutlNumbers = explode(",", $numbers);
                     } else {
+
                         if ($prod->type_raffles == 'manual' || $prod->type_raffles == 'mesclado') {
                             $numbers = $request->numberSelected;
                             $resutlNumbers = explode(",", $numbers);
@@ -468,20 +370,20 @@ class ProductController extends Controller
                             foreach ($resutlNumbers as $key => $value) {
                                 $expl = explode("-", $value);
                                 $number = end($expl);
-                                
 
-                                $participantesPorNumero = Participante::where('product_id', '=', $request->productID)->where('numbers', 'like', '%'.$number.'%')->get();
-                                
+
+                                $participantesPorNumero = Participant::siteOwner()->where('product_id', '=', $request->productID)->where('numbers', 'like', '%' . $number . '%')->get();
+
                                 foreach ($participantesPorNumero as $key => $part) {
-                                    if(array_search($number, $part->numbers()) || array_search($number, $part->numbers()) == 0){
+                                    if (array_search($number, $part->numbers()) || array_search($number, $part->numbers()) == 0) {
                                         $numerosValidos = false;
                                         break;
                                     }
-                                    
+
                                 }
                             }
 
-                            if(!$numerosValidos){
+                            if (!$numerosValidos) {
                                 return Redirect::back()->withErrors('Um ou mais números escolhidos já foram comprados por outra pessoa! Tente novamente');
                             }
 
@@ -502,10 +404,11 @@ class ProductController extends Controller
                             $prod->saveNumbers($numbersRifa);
 
                         } else {
+
                             $disponiveis = $prod->numbers();
                             // shuffle($numbersRifa);
                             // dd($numbersRifa);
-                            
+
                             // $disponiveis = array_filter($numbersRifa, function ($number) {
                             //     return $number['status'] == 'Disponivel';
                             // });
@@ -532,10 +435,11 @@ class ProductController extends Controller
                     }
 
                     $product = DB::table('products')
-                    ->select('products.*', 'products_images.name as image')
-                    ->join('products_images', 'products.id', 'products_images.product_id')
-                    ->where('products.id', '=', $request->productID)
-                    ->first();
+                        ->select('products.*', 'products_images.name as image')
+                        ->join('products_images', 'products.id', 'products_images.product_id')
+                        ->where('products.id', '=', $request->productID)
+                        ->where('products.user_id', getSiteOwner())
+                        ->first();
 
                     // Validando minimo e maximo de compra da rifa
                     if (isset($randomNumbers)) {
@@ -562,7 +466,6 @@ class ProductController extends Controller
                     $resultPricePIX = number_format($price, 2, ".", ",");
 
 
-                    
                     if ($request->promo != null && $request->promo > 0) {
                         $resultPrice = $request->promo;
                         $resultPricePIX = $this->formatMoney($request->promo);
@@ -574,18 +477,24 @@ class ProductController extends Controller
                     }
 
                     // Verifica se algum numero escolhido ja possui reserva (WDM New)
-                    $verifyReserved = DB::table('raffles')
-                    ->select('*')
-                    ->where('raffles.product_id', '=', $request->productID)
-                    ->whereIn('raffles.number', $resutlNumbers)
-                    ->where('raffles.status', '<>', 'Disponível')
-                    ->get();
 
-                    if ($verifyReserved->count() > 0) {
+                    $verifyReserved = Raffle::siteOwner()->isReserved($request->productID, $resutlNumbers)->count();
+
+
+                    $reservedQty = Raffle::siteOwner()
+                        ->where('raffles.product_id', '=', $request->productID)
+                        ->whereIn('raffles.number', $resutlNumbers)
+                        ->isReserved()
+                        ->count();
+
+
+                    if ($reservedQty > 0) {
                         return Redirect::back()->withErrors('Acabaram de reservar um ou mais numeros escolhidos, por favor escolha outros números :)');
                     } else {
-                        
-                        $participante = DB::table('participant')->insertGetId([
+
+                        $numbers = isset($selecionados) ? json_encode($selecionados) : json_encode($resutlNumbers);
+                        $participante = Participant::create([
+                            'user_id' => getSiteOwner(),
                             'customer_id' => $customer->id,
                             'name' => $request->name,
                             'telephone' => $request->telephone,
@@ -594,7 +503,7 @@ class ProductController extends Controller
                             'valor' => $resultPricePIX,
                             'reservados' => count($resutlNumbers),
                             'product_id' => $request->productID,
-                            'numbers' => isset($selecionados) ? json_encode($selecionados) : json_encode($resutlNumbers),
+                            'numbers' => $numbers,
                             'created_at' => Carbon::now(),
                             'updated_at' => Carbon::now()
                         ]);
@@ -623,19 +532,17 @@ class ProductController extends Controller
                         ]);
 
 
-
-
                         // Atualiza os numeros escolhidos para reservados
                         DB::table('raffles')
-                        ->where('product_id', '=', $request->productID)
-                        ->whereIn('raffles.number', $resutlNumbers)
-                        ->update(
-                            [
-                                'status' => 'Reservado',
-                                'participant_id' => $participante,
-                                'updated_at' => Carbon::now()
-                            ]
-                        );
+                            ->where('product_id', '=', $request->productID)
+                            ->whereIn('raffles.number', $resutlNumbers)
+                            ->update(
+                                [
+                                    'status' => 'Reservado',
+                                    'participant_id' => $participante,
+                                    'updated_at' => Carbon::now()
+                                ]
+                            );
                     }
 
                     $order = Order::create([
@@ -653,8 +560,8 @@ class ProductController extends Controller
                     $percentagePriceUnic = ($percentage / 100) * $priceUnicFormat;
                     $resultPriceUnic = $priceUnicFormat + $percentagePriceUnic + 0.50;
 
-                    if($afiliado != null){
-                        $part = Participante::find($participante);
+                    if ($afiliado != null) {
+                        $part = Participant::find($participante);
                         GanhosAfiliado::create([
                             'product_id' => $prod->id,
                             'participante_id' => $participante,
@@ -712,91 +619,56 @@ class ProductController extends Controller
 
     public function mensagemWPPCompra($participanteID)
     {
-        $admin = User::find(1);
-        $config = Environment::find(1);
-        $participante = Participante::find($participanteID);
+        $admin = getSiteOwnerUser();
+        $config = getSiteConfig();
+        $participante = Participant::find($participanteID);
         $msgAdmin = AutoMessage::where('identificador', '=', 'compra-admin')->first();
         $msgCliente = AutoMessage::where('identificador', '=', 'compra-cliente')->first();
         $apiURL = env('URL_API_CRIAR_WHATS');
 
-        if($config->token_api_wpp != null){
+        if ($config->token_api_wpp != null) {
 
-            // ============== Mensagem para o admin
-            // ============================================== //
-            // if($msgAdmin->msg != null && $msgAdmin->msg != ''){
-            //     $mensagem = $msgAdmin->getMessage($participante);
-            //     $owerPhone = '55' . str_replace(["(", ")", "-", " "], "", $admin->telephone);
-            
-            //     try {
-            //         $data = [
-            //             'receiver'  => $owerPhone,
-            //             'msgtext'   => $mensagem,
-            //             'token'     => $config->token_api_wpp,
-            //         ];
-            
-            //         $ch = curl_init();
-            //         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
-            //         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-            //         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            //         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
-            //         curl_setopt($ch, CURLOPT_URL, $apiURL);
-            //         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-            //         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-            //         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-            //         $response = curl_exec($ch);
-            //         curl_close($ch);
-            //     } catch (\Throwable $th) {
-            
-            //     }
-            // }
-
-            // ============== Mensagem para o cliente
-            // ============================================== //
-            if($msgCliente->msg != null && $msgCliente->msg != ''){
+            if ($msgCliente->msg != null && $msgCliente->msg != '') {
                 $mensagem = $msgCliente->getMessage($participante);
                 $customerPhone = '55' . str_replace(["(", ")", "-", " "], "", $participante->telephone);
-                
+
                 try {
                     $url = "https://api.whatapi.dev";
-                    $token  = base64_decode($config->token_api_wpp );
+                    $token = base64_decode($config->token_api_wpp);
                     $numero = $customerPhone;
 
 // testar o envio com essa formatacao abaixo. se nao for comente a linha 13 e descomente a 14 para testar novamente.
-                    $mensagem = str_replace("\r\n","\\n",$mensagem);
+                    $mensagem = str_replace("\r\n", "\\n", $mensagem);
 //$mensagem = preg_replace('/\\\n|\n|#&@/i', '\n', $mensagem);
 
                     $curl = curl_init();
 
                     curl_setopt_array($curl, array(
-                      CURLOPT_URL => $url.'/message/text?key='.$token.'',
-                      CURLOPT_RETURNTRANSFER => true,
-                      CURLOPT_ENCODING => '',
-                      CURLOPT_MAXREDIRS => 10,
-                      CURLOPT_TIMEOUT => 0,
-                      CURLOPT_FOLLOWLOCATION => true,
-                      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                      CURLOPT_CUSTOMREQUEST => 'POST',
-                      CURLOPT_POSTFIELDS =>'{
-                        "id": "'.$numero.'",
-                        "message": "'.$mensagem.'",
+                        CURLOPT_URL => $url . '/message/text?key=' . $token . '',
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_ENCODING => '',
+                        CURLOPT_MAXREDIRS => 10,
+                        CURLOPT_TIMEOUT => 0,
+                        CURLOPT_FOLLOWLOCATION => true,
+                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                        CURLOPT_CUSTOMREQUEST => 'POST',
+                        CURLOPT_POSTFIELDS => '{
+                        "id": "' . $numero . '",
+                        "message": "' . $mensagem . '",
                         "msdelay": "3000"
                     }',
-                    CURLOPT_HTTPHEADER => array(
-                        'Content-Type: application/json',
-                        'Authorization: Bearer @@N855cd65@@'
-                    ),
-                ));
+                        CURLOPT_HTTPHEADER => array(
+                            'Content-Type: application/json',
+                            'Authorization: Bearer @@N855cd65@@'
+                        ),
+                    ));
 
                     $response = curl_exec($curl);
                     curl_close($curl);
 
-                    
-                    
-                    
-                    
-                    
+
                 } catch (\Throwable $th) {
-                    
+
                 }
             }
         }
@@ -805,7 +677,7 @@ class ProductController extends Controller
     public function gerarPIX(ModelsProduct $product, $resultPricePIX, $email, $name, $participante, $cpf, $telefone)
     {
 
-        if($resultPricePIX == 0){
+        if ($resultPricePIX == 0) {
             $response['codePIXID'] = uniqid();
             $response['codePIX'] = 'gratis';
             $response['qrCode'] = '';
@@ -813,60 +685,9 @@ class ProductController extends Controller
             return $response;
         }
 
-        $codeKeyPIX = DB::table('consulting_environments')
-        ->select('key_pix', 'token_asaas', 'paggue_client_key', 'paggue_client_secret')
-        ->where('user_id', '=', 1)
-        ->first();
+        $codeKeyPIX = getSiteConfig();
 
         if ($product->gateway == 'mp') {
-          /* OLD MERCADOPAGO
-          
-          \MercadoPago\SDK::setAccessToken($codeKeyPIX->key_pix);
-
-            $resultPricePIX = str_replace(",", "", $resultPricePIX);
-
-            $payment = new \MercadoPago\Payment();
-            $payment->transaction_amount = $resultPricePIX;
-            $payment->description = "Participação da ação " . $product->id . ' - ' . $product->name;
-            $payment->payment_method_id = "pix";
-
-
-            $payment->payer = array(
-                "email" => $email ? $email : "mestredoscript@gmail.com",
-                "first_name" => $name,
-                "identification" => array(
-                    "type" => "hash",
-                    "number" => date('YmdHis')
-                )
-            );
-
-            $payment->notification_url = env('APP_NAME') == 'local' ? '' : route('api.notificaoMP');
-            $payment->external_reference = $participante;
-            $payment->save();
-
-            $object = (object) $payment;
-
-            if (isset($object->error->message) == 'payer.email must be a valid email') {
-                $response['error'] = 'Erro ao gerar o QR Code!';
-                return $response;
-            }
-
-            if (isset($object->error->message) == 'Invalid user identification number') {
-                $response['error'] = 'CPF inválido!';
-                return $response;
-            }
-
-            $codePIXID = $object->id;
-            $codePIX = $object->point_of_interaction->transaction_data->qr_code;
-            $qrCode = $object->point_of_interaction->transaction_data->qr_code_base64;
-
-            $response['codePIXID'] = $codePIXID;
-            $response['codePIX'] = $codePIX;
-            $response['qrCode'] = $qrCode;
-
-            return $response; 
-            
-            END OLD MERCADOPAGO */
             $idempotency_key = uniqid();
             $url = 'https://api.mercadopago.com/v1/payments';
             $resultPricePIX = str_replace(",", "", $resultPricePIX);
@@ -901,11 +722,11 @@ class ProductController extends Controller
                 'X-Idempotency-Key: ' . $idempotency_key
             ]);
 
-            $responsex = curl_exec($ch); 
-            $data = json_decode($responsex, true);  
+            $responsex = curl_exec($ch);
+            $data = json_decode($responsex, true);
 
-             
-            curl_close($ch); 
+
+            curl_close($ch);
 
             $codePIXID = $data['id'];
             $codePIX = $data['point_of_interaction']['transaction_data']['qr_code'];
@@ -915,8 +736,8 @@ class ProductController extends Controller
             $response['codePIX'] = $codePIX;
             $response['qrCode'] = $qrCode;
 
-            return $response;     
-            
+            return $response;
+
         } else if ($product->gateway == 'asaas') {
             $idCliente = $this->getOrCreateClienteAsaas($name, $email, $cpf, $telefone);
 
@@ -935,10 +756,10 @@ class ProductController extends Controller
                 'form_params' => [
                     "externalReference" => $participante,
                     "description" => "Participação da ação " . $product->id . ' - ' . $product->name,
-                    "customer" =>  $idCliente,
-                    "billingType" =>  "PIX",
+                    "customer" => $idCliente,
+                    "billingType" => "PIX",
                     'dueDate' => date('Y-m-d', strtotime($dataDeExpiracao)),
-                    "value" =>  $resultPricePIX,
+                    "value" => $resultPricePIX,
                 ]
             ]);
 
@@ -958,7 +779,7 @@ class ProductController extends Controller
             include(app_path() . '/ThirdParty/phpqrcode/qrlib.php');
 
             $payload = array(
-                "client_key"    => $codeKeyPIX->paggue_client_key,
+                "client_key" => $codeKeyPIX->paggue_client_key,
                 "client_secret" => $codeKeyPIX->paggue_client_secret
             );
 
@@ -1040,9 +861,9 @@ class ProductController extends Controller
     public function getOrCreateClienteAsaas($nome, $email, $cpf, $telefone)
     {
         $codeKeyPIX = DB::table('consulting_environments')
-        ->select('key_pix', 'token_asaas')
-        ->where('user_id', '=', 1)
-        ->first();
+            ->select('key_pix', 'token_asaas')
+            ->where('user_id', '=', getSiteOwner())
+            ->first();
 
         $clientURL = 'https://www.asaas.com/api/v3/customers';
         $client = new \GuzzleHttp\Client([
@@ -1069,7 +890,7 @@ class ProductController extends Controller
                 'form_params' => [
                     "name" => $nome,
                     "email" => $email,
-                    "cpfCnpj" =>  $cpf,
+                    "cpfCnpj" => $cpf,
                     "mobilePhone" => $telefone
                 ]
             ]);
@@ -1086,11 +907,11 @@ class ProductController extends Controller
         //dd($request->product);
 
         $participants = Participant::select('name')
-        ->join('raffles', 'participant.raffles_id', 'raffles.id')
-        ->where('raffles.status', '=', 'Pago')
-        ->where('raffles.product_id', '=', $request->product)
-        ->inRandomOrder()
-        ->count();
+            ->join('raffles', 'participant.raffles_id', 'raffles.id')
+            ->where('raffles.status', '=', 'Pago')
+            ->where('raffles.product_id', '=', $request->product)
+            ->inRandomOrder()
+            ->count();
 
         //dd($teste->name);
 
@@ -1106,13 +927,13 @@ class ProductController extends Controller
         $resultTelephone = $ddd . $substr1 . $substr2;
 
         $numbersPaid = DB::table('participant')
-        ->select('raffles.number', 'raffles.status', 'products.name')
-        ->join('raffles', 'participant.raffles_id', 'raffles.id')
-        ->join('products', 'products.id', 'raffles.product_id')
-        ->where('participant.telephone', '=', $resultTelephone)
-        ->where('products.id', '=', $request->productID)
-        ->where('raffles.status', '=', 'Pago')
-        ->get();
+            ->select('raffles.number', 'raffles.status', 'products.name')
+            ->join('raffles', 'participant.raffles_id', 'raffles.id')
+            ->join('products', 'products.id', 'raffles.product_id')
+            ->where('participant.telephone', '=', $resultTelephone)
+            ->where('products.id', '=', $request->productID)
+            ->where('raffles.status', '=', 'Pago')
+            ->get();
 
         return $numbersPaid;
     }
@@ -1126,65 +947,42 @@ class ProductController extends Controller
         $resultTelephone = $ddd . $substr1 . $substr2;
 
         $pix = DB::table('participant')
-        ->select('raffles.number', 'key_pix')
-        ->leftJoin('payment_pix', 'participant.id', 'payment_pix.participant_id')
-        ->join('raffles', 'participant.raffles_id', 'raffles.id')
-        ->where('participant.telephone', '=', $resultTelephone)
-        ->where('participant.product_id', '=', $request->product)
-        ->get();
+            ->select('raffles.number', 'key_pix')
+            ->leftJoin('payment_pix', 'participant.id', 'payment_pix.participant_id')
+            ->join('raffles', 'participant.raffles_id', 'raffles.id')
+            ->where('participant.telephone', '=', $resultTelephone)
+            ->where('participant.product_id', '=', $request->product)
+            ->get();
 
         return $pix;
     }
 
     public function callbackPaymentMercadoPago(Request $request)
     {
-
-        //$resultCallBacks = $request->all();
-
-        /*$teste = array(
-            'action' => 'payment.updated',
-            'api_version' => 'v1',
-            'data' =>
-            array(
-                'id' => '53385711687',
-            ),
-            'date_created' => '2023-01-07T13:07:19Z',
-            'id' => 104558878009,
-            'live_mode' => true,
-            'type' => 'payment',
-            'user_id' => '197295574',
-            'data_id' => '53385711687',
-        );
-
-        Log::info($teste['data']['id']);*/
-
-        //QUANDO FOR TESTAR PELO POSTMAN COLOCAR O VALOR DO ARRAY 0 no request\/
-        //dd($request[0]['action']);
-
         if ($request['action'] == 'payment.updated') {
 
             DB::table('payment_pix')
-            ->where('key_pix', $request['data']['id'])
-            ->update(['status' => 'Concluída']);
+                ->where('key_pix', $request['data']['id'])
+                ->update(['status' => 'Concluída']);
 
             $updatingRaffles = DB::table('payment_pix')
-            ->join('participant', 'participant.id', '=', 'payment_pix.participant_id')
-            ->join('raffles', 'raffles.id', '=', 'participant.raffles_id')
-            ->where('payment_pix.key_pix', $request['data']['id'])
-            ->update(
-                [
-                    'raffles.status' => 'Pago',
-                    'raffles.updated_at' => Carbon::now()
-                ]
-            );
+                ->join('participant', 'participant.id', '=', 'payment_pix.participant_id')
+                ->join('raffles', 'raffles.id', '=', 'participant.raffles_id')
+                ->where('payment_pix.key_pix', $request['data']['id'])
+                ->update(
+                    [
+                        'raffles.status' => 'Pago',
+                        'raffles.updated_at' => Carbon::now()
+                    ]
+                );
 
             $participantEmail = DB::table('payment_pix')
-            ->select('participant.name', 'participant.email', 'participant.telephone', 'raffles.*', 'products.name as product', 'products.id as productID', 'products.ebook')
-            ->join('participant', 'participant.id', '=', 'payment_pix.participant_id')
-            ->join('raffles', 'raffles.id', '=', 'participant.raffles_id')
-            ->join('products', 'products.id', '=', 'participant.product_id')
-            ->where('payment_pix.key_pix', $request['data']['id'])
-            ->get();
+                ->select('participant.name', 'participant.email', 'participant.telephone', 'raffles.*', 'products.name as product', 'products.id as productID', 'products.ebook')
+                ->join('participant', 'participant.id', '=', 'payment_pix.participant_id')
+                ->join('raffles', 'raffles.id', '=', 'participant.raffles_id')
+                ->join('products', 'products.id', '=', 'participant.product_id')
+                ->where('payment_pix.key_pix', $request['data']['id'])
+                ->get();
 
             $rafflesNumber = [];
 
@@ -1195,7 +993,7 @@ class ProductController extends Controller
             $raffleImplode = implode(',', $rafflesNumber);
 
             $consultingEnvironment = DB::table('consulting_environments')
-            ->first();
+                ->first();
 
             $dddTelephone = substr($participantEmail[0]->telephone, 1, 2);
             $n1Telephone = substr($participantEmail[0]->telephone, 5, 5);
@@ -1249,59 +1047,31 @@ class ProductController extends Controller
         ]);
     }
 
-    public function teste()
-    {
-        $keyPix = 56565819514;
-        $codeKeyPIX = DB::table('consulting_environments')
-        ->select('key_pix')
-        ->where('user_id', '=', 1)
-        ->first();
-
-        if (env('APP_ENV') == 'local') {
-            $secretKey = 'TEST-330207199077363-081623-283cea3525fa71a8e4d1afa279bf8e8c-197295574';
-        } else {
-            $secretKey = $codeKeyPIX->key_pix;
-        }
-
-        \MercadoPago\SDK::setAccessToken($secretKey);
-
-        $payment = new \MercadoPago\Payment();
-
-        $payment = \MercadoPago\Payment::find_by_id($keyPix);
-        $payment->capture = true;
-        $payment->update();
-        dd($payment);
-    }
 
     public function notificacoesMP(Request $request)
     {
         try {
-            $codeKeyPIX = DB::table('consulting_environments')
-            ->select('key_pix')
-            ->where('user_id', '=', 1)
-            ->first();
-            
+            $paymentPix = PaymentPix::siteOwner()->whereId($request->id)->firstOrFail();
+            $codeKeyPIX = getSiteConfig();
+
             $accessToken = $codeKeyPIX->key_pix;
 
-            \MercadoPago\SDK::setAccessToken($accessToken);
+            SDK::setAccessToken($accessToken);
 
-            $payment = \MercadoPago\Payment::find_by_id($request->id);
+            $payment = Payment::find_by_id($paymentPix->id);
 
             if ($payment) {
                 if ($payment->status == 'cancelled') {
-                    DB::table('payment_pix')->where('id', '=', $request->id)->delete();
+                    $paymentPix->delete();
                 } else if ($payment->status == 'approved') {
 
-                    $participante = Participante::find($payment->external_reference);
+                    $participante = Participant::getByIdWithSiteCheck($payment->external_reference);
                     if ($participante) {
                         $rifa = $participante->rifa();
                         $rifa->confirmPayment($participante->id);
-
-                        DB::table('payment_pix')->where('id', '=', $request->id)->update([
-                            'status' => 'Aprovado'
-                        ]);
+                        $paymentPix->update(['status' => 'Aprovado']);
                     } else {
-                        DB::table('payment_pix')->where('id', '=', $request->id)->delete();
+                        $paymentPix->delete();
                     }
                 }
             }
@@ -1359,14 +1129,14 @@ class ProductController extends Controller
             $rifa = ModelsProduct::find($request->idRifa);
             $premios = $rifa->premios();
             $ganhadores = [];
-            
 
-            if($rifa->modo_de_jogo == 'numeros'){
+
+            if ($rifa->modo_de_jogo == 'numeros') {
                 foreach ($request->cotas as $key => $cota) {
                     foreach ($rifa->participantes() as $participante) {
                         $numbersParticipante = $participante->numbers();
                         $find = array_search($cota, $numbersParticipante);
-                        if(is_int($find)){
+                        if (is_int($find)) {
                             array_push($ganhadores, $participante->name);
                             $premios->where('ordem', '=', $key)->first()->update([
                                 'ganhador' => $participante->name,
@@ -1378,8 +1148,7 @@ class ProductController extends Controller
                         }
                     }
                 }
-            }
-            else{
+            } else {
                 foreach ($request->cotas as $key => $cota) {
                     $numero = $rifa->numbers()->where('number', '=', $cota)->first();
                     $participante = $numero->participante();
@@ -1390,9 +1159,9 @@ class ProductController extends Controller
                     ]);
                 }
             }
-            
 
-            return redirect()->back()->with(['success' => 'Ganhadores ('.implode(',', $ganhadores).') informados com sucesso!', 'sorteio' => $request->idRifa]);
+
+            return redirect()->back()->with(['success' => 'Ganhadores (' . implode(',', $ganhadores) . ') informados com sucesso!', 'sorteio' => $request->idRifa]);
         } catch (\Throwable $th) {
             return redirect()->back()->withErrors('Erro ao informar ganhadores');
         }
@@ -1404,7 +1173,7 @@ class ProductController extends Controller
         fwrite($req, $request);
         fclose($req);
 
-        $participante = Participante::find($request->external_id);
+        $participante = Participant::find($request->external_id);
         if ($participante && $request->status == '1') {
 
             Raffle::where('participant_id', '=', $participante->id)->update(['status' => 'Pago']);

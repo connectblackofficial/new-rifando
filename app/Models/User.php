@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserRolesEnum;
 use App\Environment;
 use App\GanhosAfiliado;
 use App\Traits\ModelAcessControllTrait;
@@ -103,12 +104,23 @@ class User extends Authenticatable
         }, 43800);
     }
 
-    public function getProductIdsCache()
+    public function getProductIdsCache($forceUpdate = false)
     {
         $cacheKey = $this->sitesProductsKey();
         $instance = $this;
         return getCacheOrCreate($cacheKey, $instance, function (self $instance) {
             return $instance->getUserProductIds();
-        }, 43800);
+        }, 43800, $forceUpdate);
+    }
+
+    public function isSuperAdmin()
+    {
+        return UserRolesEnum::SuperAdmin === $this->role;
+    }
+
+    public function scopeSiteOwner($query)
+    {
+        return $query->where("parent_id", getSiteOwner());
+
     }
 }

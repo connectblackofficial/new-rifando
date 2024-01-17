@@ -3,22 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\AutoMessage;
-use App\Customer;
 use App\Environment;
-use App\Models\Participante;
+use App\Models\Customer;
+use App\Models\Participant;
 use App\Models\Product;
-use App\Models\Raffle;
 use App\WhatsappMensagem;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class HomeAdminController extends Controller
 {
     public function index()
     {
-        $participantes = Participante::select('valor', 'reservados', 'pagos')->get();
-        $rifas = Product::where('status', '=', 'Ativo')->get();
+        $participantes = Participant::siteOwner()->select('valor', 'reservados', 'pagos')->get();
+        $rifas = Product::siteOwner()->where('status', '=', 'Ativo')->get();
 
         return view('admin.dashboard', [
             'participantes' => $participantes,
@@ -28,16 +25,17 @@ class HomeAdminController extends Controller
 
     public function wpp()
     {
-        if(WhatsappMensagem::all()->count() == 0){
-            for ($i=0; $i < 6; $i++) { 
-                WhatsappMensagem::create([]);
+
+        if (WhatsappMensagem::siteOwner()->count() == 0) {
+            for ($i = 0; $i < 6; $i++) {
+                WhatsappMensagem::create(['user_id' => getSiteOwner()]);
             }
         }
 
         $data = [
-            'msgs' => WhatsappMensagem::all(),
-            'autoMessages' => AutoMessage::where('id', '>', 0)->where('destinatario', '=', 'cliente')->orderBy('destinatario')->get(),
-            'config' => Environment::find(1)
+            'msgs' => WhatsappMensagem::siteOwner()->get(),
+            'autoMessages' => AutoMessage::siteOwner()->where('id', '>', 0)->where('destinatario', '=', 'cliente')->orderBy('destinatario')->get(),
+            'config' => getSiteConfigId()
         ];
 
 
@@ -47,19 +45,26 @@ class HomeAdminController extends Controller
     public function wppSalvar(Request $request)
     {
         foreach ($request->id as $key => $value) {
-            WhatsappMensagem::find($value)->update([
-                'titulo' => $request->titulo[$value],
-                'msg' => nl2br($request->msg[$value]),
-            ]);
+            $whatsappMensagem = WhatsappMensagem::getByIdWithSiteCheck($value);
+            if (isset($whatsappMensagem['id'])) {
+                $whatsappMensagem->update([
+                    'titulo' => $request->titulo[$value],
+                    'msg' => nl2br($request->msg[$value]),
+                ]);
+            }
         }
 
         foreach ($request->idAuto as $key => $value) {
-            AutoMessage::find($value)->update([
-                'msg' => $request->msgAuto[$value]
-            ]);
+
+            $autoMessage = AutoMessage::getByIdWithSiteCheck($value);
+            if (isset($autoMessage['id'])) {
+                $autoMessage->update([
+                    'msg' => $request->msgAuto[$value]
+                ]);
+            }
         }
 
-        Environment::find(1)->update([
+        Environment::where("id", getSiteConfigId())->update([
             'token_api_wpp' => $request->token_api_wpp
         ]);
 
@@ -68,11 +73,10 @@ class HomeAdminController extends Controller
 
     public function clientes(Request $request)
     {
-        if($request->search){
-            $clientes = Customer::where('nome', 'like', '%'.$request->search.'%')->get();
-        }
-        else{
-            $clientes = Customer::all();
+        if ($request->search) {
+            $clientes = Customer::siteOwner()->where('nome', 'like', '%' . $request->search . '%')->get();
+        } else {
+            $clientes = Customer::siteOwner()->get();
         }
 
         $data = [
@@ -85,7 +89,10 @@ class HomeAdminController extends Controller
 
     public function editarCliente($id)
     {
-        $cliente = Customer::find($id);
+        $cliente = Customer::getByIdWithSiteCheck($id);
+        if (!isset($cliente['id'])) {
+            abort(404);
+        }
 
         $data = [
             'cliente' => $cliente
@@ -97,10 +104,13 @@ class HomeAdminController extends Controller
 
     public function updateCliente($id, Request $request)
     {
-        $cliente = Customer::find($id);
+        $cliente = Customer::getByIdWithSiteCheck($id);
+        if (!isset($cliente['id'])) {
+            abort(404);
+        }
 
-        if($cliente->telephone != $request->telephone){
-            if(Customer::where('telephone', '=', $request->telephone)->get()->count() > 0){
+        if ($cliente->telephone != $request->telephone) {
+            if (Customer::siteOwner()->where('telephone', '=', $request->telephone)->count() > 0) {
                 return back()->withErrors('Telefone já cadastrado.');
             }
         }
@@ -110,7 +120,7 @@ class HomeAdminController extends Controller
             'telephone' => $request->telephone
         ]);
 
-        Participante::where('customer_id', '=', $cliente->id)->update([
+        Participant::siteOwner()->where('customer_id', '=', $cliente->id)->update([
             'name' => $request->nome,
             'telephone' => $request->telephone
         ]);

@@ -2,9 +2,12 @@
 
 namespace App;
 
+use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class Message extends Model
 {
-    protected $fillable = ['title', 'body'];
+    use ModelSiteOwnerTrait;
+
+    protected $fillable = ['title', 'body','user_id'];
 }

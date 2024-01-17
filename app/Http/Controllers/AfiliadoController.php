@@ -14,15 +14,16 @@ class AfiliadoController extends Controller
 {
     public function index()
     {
-        if (Auth::user()) {
-            if (!Auth::user()->afiliado) {
+        $user = Auth::user();
+        if ($user) {
+            if (!$user->afiliado) {
                 Auth::logout();
                 return redirect()->route('afiliado.home');
             }
 
 
             $data = [
-                'rifas' => Product::where('ganho_afiliado', '>', 0)->get()
+                'rifas' => Product::siteOwner()->where('ganho_afiliado', '>', 0)->get()
             ];
 
             return view('afiliados.home', $data);
@@ -33,20 +34,19 @@ class AfiliadoController extends Controller
 
     public function rifasAtivas()
     {
-        $rifas = Product::where('ganho_afiliado', '>', 0)->where('status', '=', 'Ativo')->get();
+        $rifas = Product::siteOwner()->where('ganho_afiliado', '>', 0)->where('status', '=', 'Ativo')->get();
         $user = Auth::user();
-        
+
 
         foreach ($rifas as $rifa) {
-            $afiliado = RifaAfiliado::where('product_id', '=', $rifa->id)->where('afiliado_id', '=', $user->id)->get();
-            
-            if($afiliado->count() > 0){
+            $afiliado = RifaAfiliado::siteOwner()->where('product_id', '=', $rifa->id)->where('afiliado_id', '=', $user->id)->get();
+
+            if ($afiliado->count() > 0) {
                 $rifa->checkAfiliado = true;
-                $af = RifaAfiliado::where('product_id', '=', $rifa->id)->where('afiliado_id', '=', $user->id)->first();
+                $af = RifaAfiliado::siteOwner()->where('product_id', '=', $rifa->id)->where('afiliado_id', '=', $user->id)->first();
                 $rifa->getAfiliadoToken = $af->token;
-        
-            }
-            else{
+
+            } else {
                 $rifa->checkAfiliado = false;
                 $rifa->getAfiliadoToken = '';
             }
@@ -65,7 +65,8 @@ class AfiliadoController extends Controller
         $credentials = [
             'email' => $request->email,
             'password' => $request->password,
-            'afiliado' => true
+            'afiliado' => true,
+            'parent_id' => getSiteOwner()
         ];
 
         if (Auth::attempt($credentials)) {
@@ -87,7 +88,7 @@ class AfiliadoController extends Controller
             return back()->withInput()->withErrors('Senhas não conferem!');
         }
 
-        if (User::where('email', '=', $request->email)->get()->count() > 0) {
+        if (User::siteOwner()->where('email', '=', $request->email)->count() > 0) {
             return back()->withInput()->withErrors('Email já possui cadastro!');
         }
 
@@ -99,7 +100,8 @@ class AfiliadoController extends Controller
             'password' => bcrypt($request->senha),
             'cpf' => $request->cpf,
             'pix' => $request->pix,
-            'afiliado' => true
+            'afiliado' => true,
+            'parent_id' => getSiteOwner()
         ]);
 
         Auth::login($user);
@@ -125,6 +127,7 @@ class AfiliadoController extends Controller
             ->join('participant', 'participant.id', '=', 'ganhos_afiliados.participante_id')
             ->where('afiliado_id', '=', Auth::user()->id)
             ->where('participant.pagos', '>', 0)
+            ->where("participant.user_id", getSiteOwner())
             ->get();
 
         $data = [
@@ -143,7 +146,8 @@ class AfiliadoController extends Controller
         RifaAfiliado::create([
             'product_id' => $idRifa,
             'afiliado_id' => Auth::user()->id,
-            'token' => uniqid()
+            'token' => uniqid(),
+            'user_id' => getSiteOwner()
         ]);
 
         return back()->with(['message' => 'Afiliado com sucesso!']);
@@ -154,22 +158,22 @@ class AfiliadoController extends Controller
         try {
             $afiliadoId = Auth::user()->id;
 
-            $ganhosPendentes = GanhosAfiliado::where('afiliado_id', '=', $afiliadoId)->where('solicitacao_id', '=', null)->sum('valor');
+            $ganhosPendentes = GanhosAfiliado::siteOwner()->where('afiliado_id', '=', $afiliadoId)->where('solicitacao_id', '=', null)->sum('valor');
             if ($ganhosPendentes == 0) {
                 return back()->withErrors('Você não tem nenhum valor disponível para saque!');
             }
 
             $solicitacao = SolicitacaoAfiliado::create([
-                'afiliado_id' => $afiliadoId
+                'afiliado_id' => $afiliadoId,
+                'user_id' => getSiteOwner()
             ]);
 
-            GanhosAfiliado::where('afiliado_id', '=', $afiliadoId)->update([
+            GanhosAfiliado::siteOwner()->where('afiliado_id', '=', $afiliadoId)->update([
                 'solicitacao_id' => $solicitacao->id
             ]);
 
             return back()->with(['message' => 'Solicitação de saque realizada com sucesso!']);
         } catch (\Throwable $th) {
-            dd($th);
             return back()->withErrors('Erro interno no sistema!');
         }
     }

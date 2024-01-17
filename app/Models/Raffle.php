@@ -2,10 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\ModelSiteOwnerTrait;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Raffle extends Model
 {
+    use ModelSiteOwnerTrait;
+
+    protected $fillable = ['user_id', 'number', 'status', 'product_id', 'participant_id'];
     protected $table = 'raffles';
 
     public function rifa()
@@ -15,7 +20,7 @@ class Raffle extends Model
 
     public function participante()
     {
-        return $this->hasOne(Participante::class, 'id', 'participant_id')->first();
+        return $this->hasOne(Participant::class, 'id', 'participant_id')->first();
     }
 
     public function statusFormated()
@@ -58,7 +63,7 @@ class Raffle extends Model
         $numero = Raffle::where('product_id', '=', $this->product_id)->where('number', '=', $ld)->first();
 
         return $numero;
-        
+
     }
 
     public function grupoFazendinha()
@@ -146,11 +151,26 @@ class Raffle extends Model
                 break;
         }
 
-        if(count($x) > 1){
+        if (count($x) > 1) {
             return $grupo . '-' . $x[1];
-        }
-        else{
+        } else {
             return $grupo;
         }
+    }
+
+    public function scopeIsReserved($query)
+    {
+        return $query->where('raffles.status', '<>', 'Disponível');
+    }
+
+    public static function simpleCreate($number, $productId,$userId)
+    {
+        $data = [
+            'user_id' => $userId,
+            'number' => $number,
+            'status' => 'Disponível',
+            'product_id' => $productId,
+        ];
+        return Raffle::create($data);
     }
 }

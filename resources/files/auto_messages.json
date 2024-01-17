@@ -1,0 +1,26 @@
+[
+  {
+    "identificador": "compra-admin",
+    "descricao": "Compra Realizada",
+    "destinatario": "admin",
+    "msg": "Compra Realizada!  Ação: {sorteio} Cliente: {nome} Valor: R$ {total}"
+  },
+  {
+    "identificador": "compra-cliente",
+    "descricao": "Compra Realizada",
+    "destinatario": "cliente",
+    "msg": "Olá *{nome}*, agradecemos a sua participação na ação : *{sorteio}*\r\n\r\n⚠️ ATENÇÃO! ⚠️⚠️ SEU PAGAMENTO ESTA *PENDENTE!*  \r\n\r\nCódigo do pedido: {id} \r\n\r\nValor total: R$ {total} \r\n\r\nPAGUE PELO SITE:\r\n\r\n{link}"
+  },
+  {
+    "identificador": "recebido-admin",
+    "descricao": "Pagamento Confirmado",
+    "destinatario": "admin",
+    "msg": "Pagamento Confirmado  Ação: {sorteio} Cliente: {nome} Valor: R$ {total}"
+  },
+  {
+    "identificador": "recebido-cliente",
+    "descricao": "Pagamento Confirmado",
+    "destinatario": "cliente",
+    "msg": "Tudo certo *{nome}*.  Pagamento confirmado, obrigado e boa sorte!"
+  }
+]

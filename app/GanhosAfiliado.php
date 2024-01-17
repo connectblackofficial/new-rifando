@@ -2,24 +2,28 @@
 
 namespace App;
 
-use App\Models\Participante;
+use App\Models\Participant;
 use App\Models\Product;
+use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class GanhosAfiliado extends Model
 {
+    use ModelSiteOwnerTrait;
+
     protected $fillable = [
         'product_id',
         'participante_id',
         'afiliado_id',
         'solicitacao_id',
         'valor',
-        'pago'
+        'pago',
+        'user_id'
     ];
 
     public function participante()
     {
-        return $this->hasOne(Participante::class, 'id', 'participante_id')->first();
+        return $this->hasOne(Participant::class, 'id', 'participante_id')->first();
     }
 
     public function rifa()

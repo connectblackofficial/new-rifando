@@ -1,96 +1,3 @@
-<!-- Modal FINALIZAR RESERVA (CHECKOUT) -->
-{{-- <div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1"
-    aria-labelledby="staticBackdropLabel" aria-hidden="true" style="z-index: 999999999;">
-    <div class="modal-dialog">
-        <form action="{{ route('bookProductManualy') }}" method="POST">
-            {{ csrf_field() }}
-            <div class="modal-content" style="border: none;">
-                <div class="modal-header" style="background-color: #939393;color: #fff;">
-                    <h5 class="modal-title" id="staticBackdropLabel">FINALIZAR RESERVA</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: #fff;">
-                        <span aria-hidden="true"></span>
-                    </button>
-                </div>
-                <div class="modal-body" style="background: #efefef;color: #939393;">
-                    <div class="form-group">
-                        <input type="hidden" name="tokenAfiliado" value="{{ $tokenAfiliado }}">
-                        @if ($type_raffles == 'manual')
-                            <label>Pagamento referente à participação na ação entre amigos
-                                <b>{{ $product[0]->product }}</b> com os números:</label>
-                        @else
-                            <label>Pagamento referente à participação na ação entre amigos
-                                <b>{{ $product[0]->product }}.</b></label>
-                        @endif
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="numberSelected" id="numberSelectedModal"
-                                    style="overflow-y: auto;width: 190px;"></div>
-                            </div>
-                        </div>
-                        @if (str_starts_with($productModel->modo_de_jogo, 'fazendinha'))
-                            <input type="hidden" class="form-control" name="" id="qtdNumbers">
-                        @else
-                            @if ($type_raffles == 'manual')
-                                <input type="hidden" class="form-control" name="qtdNumbers" id="qtdNumbers"
-                                    value="">
-                                <input type="hidden" class="form-control" name="rifaManual" id="qtdNumbers"
-                                    value="1">
-                            @else
-                                <input type="hidden" class="form-control" name="qtdNumbers" id="qtdNumbers">
-                            @endif
-                        @endif
-
-                        <input type="hidden" class="form-control" name="productName" value="{{ $product[0]->name }}">
-                        <input type="hidden" class="form-control" name="productID" value="{{ $product[0]->id }}">
-                        <input type="hidden" class="form-control" name="numberSelected" id="numberSelectedInput">
-                        @if ($type_raffles == 'manual')
-                            <small class="form-text" style="color: green;"><b>Valor a pagar: <small
-                                        style="font-size: 15px;" id="numberSelectedTotalModal"></small></b></small>
-                        @else
-                            <small class="form-text" style="color: green;"><b>Valor a pagar: <small
-                                        style="font-size: 15px;" id="numberSelectedTotalModal"></small></b></small>
-                        @endif
-                    </div>
-                    <!--<legend>Por favor, preencha os dados abaixo:</legend>-->
-                    <div class="form-group">
-                        <label>NOME COMPLETO</label>
-                        <input type="text" class="form-control"
-                            style="background-color: #fff;border: none;color: #333;" name="name"
-                            placeholder="Informe seu nome completo" required>
-                    </div>
-                    @if (!env('HIDE_EMAIL'))
-                        <div class="form-group">
-                            <label>E-mail (opcional)</label>
-                            <input type="email" class="form-control"
-                                style="background-color: #fff;border: none;color: #333;" name="email" id="email"
-                                placeholder="Informe o seu e-mail" maxlength="50" required>
-                        </div>
-                    @endif
-                    <div class="form-group {{ $productModel->gateway == 'asaas' ? '' : 'd-none' }}">
-                        <label>CPF (somente números)</label>
-                        <input type="number" class="form-control"
-                            style="background-color: #fff;border: none;color: #333;" name="cpf" id="cpf"
-                            placeholder="Informe o seu CPF" maxlength="50" required>
-                    </div>
-                    <div class="form-group">
-                        <label>CELULAR (Whatsapp)</label>
-                        <input type="text" class="form-control numbermask"
-                            style="background-color: #fff;border: none;color: #333;" name="telephone" id="telephone1"
-                            placeholder="Informe seu telefone com DDD" maxlength="15" required>
-                    </div>
-                    <input type="hidden" id="promo" name="promo">
-                    <!--<small class="form-text text-muted">Reservando seu(s) número(s), você declara que leu e concorda com nossos <a href="{{ url('terms-of-use') }}">Termos de Uso</a>.</small>-->
-                </div>
-                <div class="modal-footer" style="background: #939393;color: #fff;">
-                    <!--<button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>-->
-                    <button type="submit" onClick="this.form.submit(); this.disabled=true; this.innerHTML='PROCESSANDO...'; "
-                        class="btn btn-success"
-                        style="width: 100%;min-height: 60px;border: none;color: #fff;font-weight: bold;width: 100%;background-color: green">PROSSEGUIR</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div> --}}
 
 <div class="modal fade" id="staticBackdrop" data-backdrop="MODA" data-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true" style="z-index: 999999;">
@@ -133,8 +40,8 @@
                         @endif
 
                         <input type="hidden" id="qtdManual">
-                        <input type="hidden" class="form-control" name="productName" value="{{ $product[0]->name }}">
-                        <input type="hidden" class="form-control" name="productID" value="{{ $product[0]->id }}">
+                        <input type="hidden" class="form-control" name="productName" value="{{ $productModel->name }}">
+                        <input type="hidden" class="form-control" name="productID" value="{{ $productModel->id }}">
                         <input type="hidden" class="form-control" name="numberSelected" id="numberSelectedInput">
                     </div>
 
@@ -227,7 +134,7 @@
             type: 'POST',
             dataType: 'json',
             data: {
-                "phone": phone
+                "phone": phone,
             },
             success: function(response) {
                 loading()
@@ -316,7 +223,7 @@
                     <div class="col-md-12">
                         <form action="{{ route('consultingReservation') }}" method="POST" style="display: flex;">
                             {{ csrf_field() }}
-                            <input type="hidden" name="productID" value="{{ $product[0]->id }}">
+                            <input type="hidden" name="productID" value="{{ $productModel->id }}">
                             <input type="text" id="telephone3" name="telephone"
                                 style="background-color: #fff;border: none;color: #000;margin-right:5px;"
                                 aria-describedby="passwordHelpBlock" maxlength="15" placeholder="Celular com DDD"

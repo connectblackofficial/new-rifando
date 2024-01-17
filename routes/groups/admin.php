@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\SuperAdmin\UserController;
+use App\Http\Controllers\SuperAdmin\UsersController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeAdminController;
 use App\Http\Controllers\ProductAdminController;
@@ -92,10 +92,12 @@ Route::post('/selecioonar-rifa', [MySweepstakesController::class, 'getRifa'])->n
 Route::post('/buscar-cota-premiada', [MySweepstakesController::class, 'buscarCotaPremiada'])->name('buscarCotaPremiada');
 
 
-Route::get('super-admin/users', [\App\Http\Controllers\SuperAdmin\UsersController::class, 'index'])->name('super-admin.users.index');
-Route::get('super-admin/users/create', [\App\Http\Controllers\SuperAdmin\UsersController::class, 'create'])->name('super-admin.users.create');
-Route::post('super-admin/users', [\App\Http\Controllers\SuperAdmin\UsersController::class, 'store'])->name('super-admin.users.store');
-Route::get('super-admin/users/{pk}', [\App\Http\Controllers\SuperAdmin\UsersController::class, 'show'])->name('super-admin.users.show');
-Route::get('super-admin/users/{pk}/edit', [\App\Http\Controllers\SuperAdmin\UsersController::class, 'edit'])->name('super-admin.users.edit');
-Route::put('super-admin/users/{pk}', [\App\Http\Controllers\SuperAdmin\UsersController::class, 'update'])->name('super-admin.users.update');
-Route::delete('super-admin/users/{pk}', [\App\Http\Controllers\SuperAdmin\UsersController::class, 'destroy'])->name('super-admin.users.destroy');
+
+
+Route::get('super-admin/users', [UsersController::class, 'index'])->name('super-admin.users.index');
+Route::get('super-admin/users/create', [UsersController::class, 'create'])->name('super-admin.users.create');
+Route::post('super-admin/users', [UsersController::class, 'store'])->name('super-admin.users.store');
+Route::get('super-admin/users/{pk}', [UsersController::class, 'show'])->name('super-admin.users.show');
+Route::get('super-admin/users/{pk}/edit', [UsersController::class, 'edit'])->name('super-admin.users.edit');
+Route::put('super-admin/users/{pk}', [UsersController::class, 'update'])->name('super-admin.users.update');
+Route::delete('super-admin/users/{pk}', [UsersController::class, 'destroy'])->name('super-admin.users.destroy');

@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Participante;
+use App\Models\Participant;
 use App\Models\Raffle;
 use Closure;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +18,7 @@ class ExpiradasMiddleware
      */
     public function handle($request, Closure $next)
     {
-        $participantes = Participante::where('reservados', '>', 0)->get();
+        $participantes = Participant::where('reservados', '>', 0)->get();
         foreach ($participantes as $participante) {
             $rifa = $participante->rifa();
 
@@ -43,7 +43,7 @@ class ExpiradasMiddleware
                     ]);
                 }
 
-                Participante::find($participante->id)->delete();
+                Participant::find($participante->id)->delete();
 
                 DB::table('payment_pix')->where('participant_id', '=', $participante->id)->delete();
             }
@@ -51,7 +51,7 @@ class ExpiradasMiddleware
 
         // $codeKeyPIX = DB::table('consulting_environments')
         //     ->select('key_pix')
-        //     ->where('user_id', '=', 1)
+        //     ->where('user_id', '=', getSiteOwner())
         //     ->first();
 
         // $secretKey = $codeKeyPIX->key_pix;
@@ -66,7 +66,7 @@ class ExpiradasMiddleware
         // foreach ($pendentes as $value) {
         //     try {
         //         // Verificando se existe participante (se nao exister ja exclui o pedido)
-        //         $checkReserva = Participante::find($value->participant_id);
+        //         $checkReserva = Participant::find($value->participant_id);
         //         if ($checkReserva) {
         //             $realPixID = $value->key_pix;
 
@@ -77,7 +77,7 @@ class ExpiradasMiddleware
         //                     DB::table('payment_pix')->where('id', '=', $value->id)->delete();
         //                 } else if ($payment->status == 'approved') {
 
-        //                     $participante = Participante::find($payment->external_reference);
+        //                     $participante = Participant::find($payment->external_reference);
         //                     if ($participante) {
         //                         $rifa = $participante->rifa();
         //                         $rifa->confirmPayment($participante->id);

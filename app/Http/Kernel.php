@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\SubdomainMiddleware;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -61,6 +62,7 @@ class Kernel extends HttpKernel
         'isAfiliado' => \App\Http\Middleware\IsAfiliadoMiddleware::class,
         'check' => \App\Http\Middleware\ExpiradasMiddleware::class,
         'isSuperAdmin' => \App\Http\Middleware\IsSuperAdminMiddleware::class,
+        'subDomain' => SubdomainMiddleware::class
 
     ];
 }

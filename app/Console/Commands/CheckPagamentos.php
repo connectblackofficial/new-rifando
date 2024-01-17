@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Participante;
+use App\Models\Participant;
 use App\Models\Raffle;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -42,7 +42,7 @@ class CheckPagamentos extends Command
     {
         $codeKeyPIX = DB::table('consulting_environments')
             ->select('key_pix')
-            ->where('user_id', '=', 1)
+            ->where('user_id', '=', getSiteOwner())
             ->first();
 
         $secretKey = $codeKeyPIX->key_pix;
@@ -54,7 +54,7 @@ class CheckPagamentos extends Command
         foreach ($pendentes as $value) {
             try {
                 // Verificando se existe participante (se nao exister ja exclui o pedido)
-                $checkReserva = Participante::find($value->participant_id);
+                $checkReserva = Participant::find($value->participant_id);
                 if ($checkReserva) {
                     $realPixID = $value->key_pix;
 
@@ -65,7 +65,7 @@ class CheckPagamentos extends Command
                             DB::table('payment_pix')->where('id', '=', $value->id)->delete();
                         } else if ($payment->status == 'approved') {
 
-                            $participante = Participante::find($payment->external_reference);
+                            $participante = Participant::find($payment->external_reference);
                             if ($participante) {
                                 $rifa = $participante->rifa();
                                 $rifa->confirmPayment($participante->id);

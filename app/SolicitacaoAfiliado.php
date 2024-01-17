@@ -3,13 +3,17 @@
 namespace App;
 
 use App\Models\User;
+use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class SolicitacaoAfiliado extends Model
 {
+    use ModelSiteOwnerTrait;
+
     protected $fillable = [
         'afiliado_id',
-        'pago'
+        'pago',
+        'user_id'
     ];
 
     public function afiliado()

@@ -3,16 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Environment;
-use App\Models\Participante;
+use App\Models\Participant;
+use App\Models\PaymentPix;
 use App\Models\Product;
 use App\Models\Raffle;
-use App\Payment_pix;
-use App\Product as AppProduct;
 use Barryvdh\DomPDF\PDF;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\Process\Process;
 use Illuminate\Support\Facades\Http;
 
 //use Barryvdh\DomPDF\Facade\Pdf;
@@ -65,7 +61,7 @@ class TestController extends Controller
 
     public function wdm()
     {
-       $participantes = Participante::where('product_id', '=', 62)->get();
+       $participantes = Participant::where('product_id', '=', 62)->get();
 
        $data = [
         'participantes' => $participantes
@@ -76,7 +72,7 @@ class TestController extends Controller
 
     public function validaParticipantes($id)
     {
-        $participantes = Participante::where('product_id', '=', $id)->get();
+        $participantes = Participant::where('product_id', '=', $id)->get();
 
         $data = [
          'participantes' => $participantes
@@ -204,7 +200,7 @@ class TestController extends Controller
 
             $rifa->saveNumbers($numbersRifa);
 
-            // Participante::where('product_id', '=', $rifa->id)->update([
+            // Participant::where('product_id', '=', $rifa->id)->update([
             //     'conferido' => false
             // ]);
 
@@ -245,7 +241,7 @@ class TestController extends Controller
     public function refreshParticipante($id)
     {
         try {
-            $participante = Participante::find($id);
+            $participante = Participant::find($id);
 
             $numeros = Raffle::where('participant_id', '=', $participante->id)->get();
 
@@ -344,7 +340,7 @@ class TestController extends Controller
     {
         $codeKeyPIX = DB::table('consulting_environments')
             ->select('key_pix')
-            ->where('user_id', '=', 1)
+            ->where('user_id', '=', getSiteOwner())
             ->first();
 
         $secretKey = $codeKeyPIX->key_pix;
@@ -355,7 +351,7 @@ class TestController extends Controller
 
         \MercadoPago\SDK::setAccessToken($secretKey);
 
-        $pendentes = Payment_pix::where('status', '=', 'Pendente')->get();
+        $pendentes = PaymentPix::where('status', '=', 'Pendente')->get();
 
         $codes = [
             '61322685214', 
@@ -384,7 +380,7 @@ class TestController extends Controller
 
     public function defaultToken()
     {
-        $config = Environment::find(1)->update([
+        $config = getSiteConfig()->update([
             'key_pix' => null,
             'key_pix_public' => null
         ]);

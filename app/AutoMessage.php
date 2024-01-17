@@ -2,19 +2,23 @@
 
 namespace App;
 
-use App\Models\Participante;
+use App\Models\Participant;
+use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class AutoMessage extends Model
 {
+    use ModelSiteOwnerTrait;
+
     protected $fillable = [
         'identificador',
         'descricao',
         'destinatario',
-        'msg'
+        'msg',
+        'user_id'
     ];
 
-    public function getMessage(Participante $participante)
+    public function getMessage(Participant $participante)
     {
         $variaveis = [
             'id',
@@ -41,7 +45,7 @@ class AutoMessage extends Model
         return $message;
     }
 
-    public function replaceKey($key, Participante $participante)
+    public function replaceKey($key, Participant $participante)
     {
         switch ($key) {
             case 'id':

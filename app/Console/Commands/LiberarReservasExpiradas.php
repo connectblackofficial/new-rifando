@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Participante;
+use App\Models\Participant;
 use App\Models\Raffle;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -69,14 +69,14 @@ class LiberarReservasExpiradas extends Command
                     ]);
                 }
         
-                Participante::find($participante->id)->delete();
+                Participant::find($participante->id)->delete();
 
                 DB::table('payment_pix')->where('participant_id', '=', $participante->id)->delete();
             }
         }
 
         // Liberando reservas para o novo modelo
-        $participantes = Participante::where('reservados', '>', 0)->get();
+        $participantes = Participant::where('reservados', '>', 0)->get();
         foreach ($participantes as $participante) {
             $rifa = $participante->rifa();
 
@@ -102,7 +102,7 @@ class LiberarReservasExpiradas extends Command
                     ]);
                 }
         
-                Participante::find($participante->id)->delete();
+                Participant::find($participante->id)->delete();
 
                 DB::table('payment_pix')->where('participant_id', '=', $participante->id)->delete();
             }

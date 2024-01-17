@@ -14,9 +14,10 @@ class TermsOfUse extends Controller
 
     public function politica()
     {
+
         $data = [
-            'user' => User::find(1),
-            'config' => $config = DB::table('consulting_environments')->where('id', '=', 1)->first()
+            'user' => getSiteOwnerUser(),
+            'config' => getSiteConfig()
         ];
 
         return view('politica', $data);

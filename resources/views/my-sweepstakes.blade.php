@@ -962,7 +962,7 @@
                                                 <thead>
                                                     <tr class="text-center">
                                                         <th class="text-center" scope="col">#Pedido</th>
-                                                        <th class="text-left" scope="col">Participante</th>
+                                                        <th class="text-left" scope="col">Participant</th>
                                                         <th class="text-center" scope="col">Total Reservas</th>
                                                         <th class="text-center" scope="col">Total Pagas</th>
                                                         <th class="text-center" scope="col">CPF</th>
@@ -1131,7 +1131,7 @@
                                         },
                                         {
                                             data: "name",
-                                            title: "Participante",
+                                            title: "Participant",
                                         },
                                         {
                                             data: "telephone",

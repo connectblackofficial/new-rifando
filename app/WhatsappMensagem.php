@@ -2,14 +2,17 @@
 
 namespace App;
 
-use App\Models\Participante;
+use App\Models\Participant;
+use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class WhatsappMensagem extends Model
 {
+    use ModelSiteOwnerTrait;
     protected $fillable = [
         'titulo',
         'msg',
+        'user_id'
     ];
 
     public function clearBreak()
@@ -17,7 +20,7 @@ class WhatsappMensagem extends Model
         return str_replace("<br />", "", $this->msg);
     }
 
-    public function getMessage(Participante $participante)
+    public function getMessage(Participant $participante)
     {
         $variaveis = [
             'id',
@@ -44,7 +47,7 @@ class WhatsappMensagem extends Model
         return $message;
     }
 
-    public function generateLink(Participante $participante)
+    public function generateLink(Participant $participante)
     {
         $variaveis = [
             'id',
@@ -73,7 +76,7 @@ class WhatsappMensagem extends Model
         return $link;
     }
 
-    public function replaceKey($key, Participante $participante)
+    public function replaceKey($key, Participant $participante)
     {
         switch ($key) {
             case 'id':

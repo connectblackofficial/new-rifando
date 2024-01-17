@@ -64,19 +64,22 @@
                     <div class="card card-primary card-outline">
                         <div class="card-body box-profile">
                             <div class="text-center">
-                                @if ($users->logo)
-                                    <img src="{{ asset('products/' . $users->logo) }}" alt="" width="200">
+                                @if (getSiteConfig()->logo)
+                                    <img src="{{ imageAsset(getSiteConfig()->logo) }}" alt="" width="200">
                                 @endif
                             </div>
 
-                            <h3 class="profile-username text-center"><button class="btn btn-sm btn-success"
-                                    onclick="alteraLogo()">Alterar Logo</button></h3>
+                            <h3 class="profile-username text-center">
+                                <button class="btn btn-sm btn-success"
+                                        onclick="alteraLogo()">Alterar Logo
+                                </button>
+                            </h3>
                             <center>
                                 <p>3 x 1.5 (cm)</p>
                             </center>
 
                             <form class="d-none" action="{{ route('alterarLogo') }}" enctype="multipart/form-data"
-                                method="POST" id="form-logo">
+                                  method="POST" id="form-logo">
                                 @csrf
                                 <input type="file" id="input-logo" name="logo" onchange="submitFoto()">
                             </form>
@@ -92,9 +95,9 @@
                         <div class="card-header p-2">
                             <ul class="nav nav-pills">
                                 <li class="nav-item" style="margin: 3px;"><a class="nav-link active" href="#settings"
-                                        data-toggle="tab">Perfil</a></li>
+                                                                             data-toggle="tab">Perfil</a></li>
                                 <li class="nav-item" style="margin: 3px;"><a class="nav-link" href="#pixel"
-                                        data-toggle="tab">Pixel Facebook</a></li>
+                                                                             data-toggle="tab">Pixel Facebook</a></li>
                             </ul>
                         </div><!-- /.card-header -->
                         <div class="card-body">
@@ -105,53 +108,56 @@
                                         <div class="form-group">
                                             <label>Nome</label>
                                             <input type="text" class="form-control" name="name"
-                                                value="{{ $users->name }}" placeholder="Nome">
+                                                   value="{{ $users->name }}" placeholder="Nome">
                                         </div>
                                         <div class="form-group">
                                             <label>Nome da plataforma</label>
                                             <input type="text" class="form-control" name="platform"
-                                                value="{{ $users->platform }}" placeholder="Plataforma">
+                                                   value="{{ $users->platform }}" placeholder="Plataforma">
                                         </div>
                                         @if (env('ACTIVE_TEMA'))
                                             <div class="form-group">
                                                 <label>Tema</label>
                                                 <select name="tema" class="form-control">
                                                     <option value="light" {{ $users->tema == 'light' ? 'selected' : '' }}>
-                                                        Claro</option>
+                                                        Claro
+                                                    </option>
                                                     <option value="dark" {{ $users->tema == 'dark' ? 'selected' : '' }}>
-                                                        Escuro</option>
+                                                        Escuro
+                                                    </option>
                                                 </select>
                                             </div>
                                         @endif
                                         <div class="form-group">
                                             <label>Telefone</label>
                                             <input type="text" class="form-control" name="telephone"
-                                                value="{{ $users->telephone }}" placeholder="Telefone">
+                                                   value="{{ $users->telephone }}" placeholder="Telefone">
                                         </div>
                                         <div class="form-group">
                                             <label>Grupo Whatsapp</label>
                                             <input type="text" class="form-control" name="group_whats"
-                                                value="{{ $users->group_whats }}" placeholder="">
+                                                   value="{{ $users->group_whats }}" placeholder="">
                                         </div>
                                         <div class="form-group">
                                             <label>E-mail</label>
                                             <input type="email" class="form-control" name="email"
-                                                value="{{ $users->email }}" placeholder="E-mail">
+                                                   value="{{ $users->email }}" placeholder="E-mail">
                                         </div>
                                         <div class="form-group">
                                             <label>Access Token (Mercado Pago)</label>
                                             <input type="text" class="form-control" name="key"
-                                                value="{{ $users->key_pix }}" placeholder="">
+                                                   value="{{ $users->key_pix }}" placeholder="">
                                         </div>
                                         <div class="form-group">
                                             <label>Token (ASSAS)</label>
                                             <input type="text" class="form-control" name="token_asaas"
-                                                value="{{ $users->token_asaas }}" placeholder="">
+                                                   value="{{ $users->token_asaas }}" placeholder="">
                                         </div>
                                         <div class="form-group bg-info rounded p-2">
                                             <strong style="color: #000">IMPORTANTE!</strong>
                                             <br>
-                                            Inserir o link abaixo na aba Webhook no site da Paggue. Ele é o responsável pala
+                                            Inserir o link abaixo na aba Webhook no site da Paggue. Ele é o responsável
+                                            pala
                                             baixa automática.
                                             <br><br>
                                             {{ route('api.notificaoPaggue') }}
@@ -159,27 +165,27 @@
                                         <div class="form-group">
                                             <label>CLIENT KEY (Paggue)</label>
                                             <input type="text" class="form-control" name="paggue_client_key"
-                                                value="{{ $users->paggue_client_key }}" placeholder="">
+                                                   value="{{ $users->paggue_client_key }}" placeholder="">
                                         </div>
                                         <div class="form-group">
                                             <label>CLIENT SECRET (Paggue)</label>
                                             <input type="text" class="form-control" name="paggue_client_secret"
-                                                value="{{ $users->paggue_client_secret }}" placeholder="">
+                                                   value="{{ $users->paggue_client_secret }}" placeholder="">
                                         </div>
                                         <div class="form-group">
                                             <label>Facebook</label>
                                             <input type="text" class="form-control" name="facebook"
-                                                value="{{ $users->facebook }}" placeholder="Facebook">
+                                                   value="{{ $users->facebook }}" placeholder="Facebook">
                                         </div>
                                         <div class="form-group">
                                             <label>Instagram (Somente usuario - sem o @)</label>
                                             <input type="text" class="form-control" name="instagram"
-                                                value="{{ $users->instagram }}" placeholder="instagram">
+                                                   value="{{ $users->instagram }}" placeholder="instagram">
                                         </div>
                                         <div class="form-group">
                                             <label>Senha</label>
                                             <input type="text" class="form-control" name="senha"
-                                                placeholder="Senha">
+                                                   placeholder="Senha">
                                         </div>
                                         <div class="form-group">
                                             <button type="submit" class="btn btn-danger">Alterar</button>
@@ -193,13 +199,14 @@
                                         <div class="form-group">
                                             <label>Verificação do domínio Facebook</label>
                                             <input type="text" class="form-control" name="verify"
-                                                value="{{ $users->verify_domain_fb }}"
-                                                placeholder="Código de verificação do domínio" required>
+                                                   value="{{ $users->verify_domain_fb }}"
+                                                   placeholder="Código de verificação do domínio" required>
                                         </div>
                                         <div class="form-group">
                                             <label>Pixel</label>
 
-                                            <textarea class="form-control" name="pixel" rows="20" style="resize: none;" required>{{ $users->pixel }}</textarea>
+                                            <textarea class="form-control" name="pixel" rows="20" style="resize: none;"
+                                                      required>{{ $users->pixel }}</textarea>
                                         </div>
                                         <div class="form-group">
                                             <button type="submit" class="btn btn-danger">Cadastrar</button>

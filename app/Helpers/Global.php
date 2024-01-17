@@ -1,6 +1,8 @@
 <?php
 
+use App\Environment;
 use App\Exceptions\UserErrorException;
+use App\Models\User;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
 
@@ -50,7 +52,8 @@ function itemRowView($formatFieldsFn, $item, $index)
     }
 
 }
-  function createSlug($string)
+
+function createSlug($string)
 {
 
     $table = array(
@@ -71,6 +74,7 @@ function itemRowView($formatFieldsFn, $item, $index)
     // -- Returns the slug
     return strtolower(strtr($string, $table));
 }
+
 function htmlLabel($txt)
 {
     return ucfirst(strtolower(__($txt)));
@@ -81,8 +85,11 @@ function htmlTitle($txt)
     return ucwords(strtolower(__($txt)));
 }
 
-function getCacheOrCreate($cacheKey, $instance, $callback, $timeInMinutes = 3600)
+function getCacheOrCreate($cacheKey, $instance, $callback, $timeInMinutes = 3600, $forceUpdate = false)
 {
+    if ($forceUpdate) {
+        Cache::delete($cacheKey);
+    }
     if (Cache::has($cacheKey)) {
         return Cache::get($cacheKey);
     } else {
@@ -103,4 +110,37 @@ function parseExceptionMessage(\Exception $e)
     } else {
         return __('an unknown error has occurred.');
     }
+}
+
+function imageAsset($image)
+{
+    return asset('storage/' . $image);
+}
+
+function getSiteOwner()
+{
+    $siteEnv = \Session::get('siteEnv');
+    return $siteEnv['user_id'];
+}
+
+function getSiteConfigId()
+{
+    $siteEnv = \Session::get('siteEnv');
+    return $siteEnv['id'];
+}
+
+function getSiteOwnerUser()
+{
+    return User::whereId(getSiteOwner())->first();
+}
+
+
+function getSiteConfig()
+{
+    return \Session::get('siteEnv');
+}
+
+function getSiteUploadPath()
+{
+    return 'site_' . getSiteOwner();
 }

@@ -1,4 +1,6 @@
 {
-    "/js/app.js": "/js/app.js",
-    "/css/app.css": "/css/app.css"
+    "/assets/css/site.css": "/assets/css/site.css",
+    "/assets/css/admin.css": "/assets/css/admin.css",
+    "/assets/js/admin-bundle.min.js": "/assets/js/admin-bundle.min.js",
+    "/assets/js/site-bundle.min.js": "/assets/js/site-bundle.min.js"
 }

@@ -12,6 +12,7 @@ class Order extends Model
         'key_pix',
         'participant_id',
         'dados',
-        'valor'
+        'valor',
+        'user_id'
     ];
 }

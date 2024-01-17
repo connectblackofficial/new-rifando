@@ -1,20 +1,20 @@
 <?php
 
 
-
 namespace App\Http\Controllers;
 
+use App\Enums\FileUploadTypeEnum;
+use App\Helpers\FileUploadHelper;
+use App\Models\Premio;
+use App\Models\Product;
+use App\Models\Product as ModelsProduct;
+use App\Models\ProductImage;
+use App\Models\Promocao;
+use App\Models\Raffle;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
-use App\Product;
-use App\ProductsDescription;
-use App\CreateProductimage;
-use App\Models\Premio;
-use App\Models\Product as ModelsProduct;
-use App\Promocao;
 use Illuminate\Support\Facades\Redirect;
 
 class ProductAdminController extends Controller
@@ -36,9 +36,10 @@ class ProductAdminController extends Controller
      */
     public function index(Request $request)
     {
-        
-            
+
+
     }
+
     /*public function update(Request $request, $id){
         $products = Product::find(6)
             ->select('products.id', 'products.name', 'products.price', 'products.type_raffles', 'products.winner', 'products.slug', 'products_images.name as image', 'raffles.number as total_number', 'product_description.description as description', 'products.status', 'products.draw_date', 'products.draw_prediction', 'products.visible', 'products.favoritar')
@@ -53,36 +54,33 @@ class ProductAdminController extends Controller
         ]);
         
     }*/
-    public function destroy(Request $request){
-        
+    public function destroy(Request $request)
+    {
+
         $id = $request->input('deleteId');
-        $produto_descricao = DB::table('product_description')
-            ->select('description')
-            ->join('products', 'products.id', '=', 'product_description.product_id')
-            ->where('products.id', '=', $id)
-            ->first();
-        //dd($produto_descricao[0]);
-        //$produto_descricao->delete();
-        
-        $product_delete = Product::find($id);
+
+        $product_delete = Product::getByIdWithSiteCheck($id);
+        if (!isset($product_delete['id'])) {
+            return back()->withErrors(['Produto não encontrado.']);
+        }
 
         $path = 'numbers/' . $product_delete->id . '.json';
-        if(file_exists($path)){
+        if (file_exists($path)) {
             unlink($path);
         }
 
         $name_rifa = $product_delete->name;
-        $product_delete->delete();  
-        return redirect('/meus-sorteios')->with('success', 'Rifa ('.$name_rifa.') excluida com Sucesso');
+        $product_delete->delete();
+        return redirect('/meus-sorteios')->with('success', 'Rifa (' . $name_rifa . ') excluida com Sucesso');
     }
 
 
     public function addProduct(Request $request)
     {
 
-        //dd($request->all());
+        $user = Auth::user();
 
-        $validatedData = $request->validate([
+        $request->validate([
             'name' => 'required|max:255',
             'price' => 'required|max:6',
             'images' => 'required|max:3',
@@ -91,71 +89,49 @@ class ProductAdminController extends Controller
             'minimo' => 'required',
             'maximo' => 'required',
             'expiracao' => 'required|min:0',
-            'gateway' => 'required'
+            'gateway' => 'required|in:mp,asaas,paggue'
         ]);
-
-        // Verificando token do gateway de pagamento
-        $codeKeyPIX = DB::table('consulting_environments')
-            ->select('key_pix', 'token_asaas', 'paggue_client_key', 'paggue_client_secret')
-            ->where('user_id', '=', 1)
-            ->first();
-
-        if($request->gateway == 'mp' && !$codeKeyPIX->key_pix){
+        $siteConfig = getSiteConfig();
+        if ($request->gateway == 'mp' && !$siteConfig->key_pix) {
             return Redirect::back()->withErrors('Para utilizar o gateway de pagamento Mercado Pago é necessário informar o token na sessão "Meu Perfil"');
         }
 
-        if($request->gateway == 'asaas' && !$codeKeyPIX->token_asaas){
+        if ($request->gateway == 'asaas' && !$siteConfig->token_asaas) {
             return Redirect::back()->withErrors('Para utilizar o gateway de pagamento ASAAS é necessário informar o token na sessão "Meu Perfil"');
         }
 
-        if($request->gateway == 'paggue' && (!$codeKeyPIX->paggue_client_key || !$codeKeyPIX->paggue_client_secret)){
+        if ($request->gateway == 'paggue' && (!$siteConfig->paggue_client_key || !$siteConfig->paggue_client_secret)) {
             return Redirect::back()->withErrors('Para utilizar o gateway de pagamento Paggue é necessário informar o CLIENT KEY e CLIENT SECRET na sessão "Meu Perfil"');
         }
 
-        
-        $product = DB::table('products')->insertGetId(
-            [
-                'name' => $request->name,
-                'subname' => $request->subname,
-                'price' => $request->price,
-                'qtd' => $request->numbers,
-                'expiracao' => $request->expiracao,
-                'processado' => true,
-                'status' => 'Ativo',
-                'type_raffles' => 'automatico',
-                'slug' => createSlug($request->name),
-                'user_id' => Auth::user()->id,
-                'visible' => 0,
-                'minimo' => $request->minimo,
-                'maximo' => $request->maximo,
-                'modo_de_jogo' => $request->modo_de_jogo,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-                'gateway' => $request->gateway
-            ]
-        );
 
+        $product = Product::create([
+            'name' => $request->name,
+            'subname' => $request->subname,
+            'price' => $request->price,
+            'qtd' => $request->numbers,
+            'expiracao' => $request->expiracao,
+            'processado' => true,
+            'status' => 'Ativo',
+            'type_raffles' => 'automatico',
+            'slug' => createSlug($request->name),
+            'user_id' => getSiteOwner(),
+            'visible' => 0,
+            'minimo' => $request->minimo,
+            'maximo' => $request->maximo,
+            'modo_de_jogo' => $request->modo_de_jogo,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+            'gateway' => $request->gateway
+        ]);
         // criando as promocoes
-        for($i = 1; $i <= 4; $i++){
-            Promocao::create([
-                'product_id' => $product,
-                'ordem' => $i
-            ]);
-        }
+        $product->createPromos();
 
         // Premios
         $dadosRequest = $request->all();
 
-        for ($i=1; $i <=10 ; $i++) {
-            $auxPremio = 'premio' . $i; 
-            Premio::create([
-                'product_id' => $product,
-                'ordem' => $i,
-                'descricao' => $dadosRequest[$auxPremio],
-                'ganhador' => '',
-                'cota' => ''
-            ]);
-        }
+        $product->createDefaultPremiums($dadosRequest);
+
 
         $files = $request->file('images');
 
@@ -163,100 +139,70 @@ class ProductAdminController extends Controller
             foreach ($files as $key => $images) {
                 $upload_imagename = $key . time() . '.' . $images->getClientOriginalExtension();
                 $upload_url = public_path('/products') . '/' . $upload_imagename;
-
                 $filename = $this->compress_image($_FILES["images"]["tmp_name"][$key], $upload_url, 80);
-
                 DB::table('products_images')->insert(
                     [
                         'name' => $upload_imagename,
-                        'product_id' => $product,
+                        'product_id' => $product->id,
                         'created_at' => Carbon::now(),
-                        'updated_at' => Carbon::now()
+                        'updated_at' => Carbon::now(),
+                        'user_id' => getSiteOwner()
                     ]
                 );
             }
         }
 
-        if(str_starts_with($request->modo_de_jogo, 'fazendinha')){
-            if($request->modo_de_jogo == 'fazendinha-completa'){
-                for ($i = 1; $i <= 25; $i++) {
-                    DB::table('raffles')->insert(
-                        [
-                            'number' => 'g'.$i,
-                            'status' => 'Disponível',
-                            'product_id' => $product,
-                            'created_at' => Carbon::now(),
-                            'updated_at' => Carbon::now()
-                        ]
-                    );
-                }
-            }
-            else if($request->modo_de_jogo == 'fazendinha-meio'){
-                for ($i = 1; $i <= 25; $i++) {
-                    DB::table('raffles')->insert(
-                        [
-                            'number' => 'g'. $i . '-le',
-                            'status' => 'Disponível',
-                            'product_id' => $product,
-                            'created_at' => Carbon::now(),
-                            'updated_at' => Carbon::now()
-                        ]
-                    );
+        if (str_starts_with($request->modo_de_jogo, 'fazendinha')) {
 
-                    DB::table('raffles')->insert(
-                        [
-                            'number' => 'g'. $i . '-ld',
-                            'status' => 'Disponível',
-                            'product_id' => $product,
-                            'created_at' => Carbon::now(),
-                            'updated_at' => Carbon::now()
-                        ]
-                    );
+            if ($request->modo_de_jogo == 'fazendinha-completa') {
+                for ($i = 1; $i <= 25; $i++) {
+                    $number = 'g' . $i;
+                    Raffle::simpleCreate($number, $product->id, $product->user_id);
+                }
+            } else if ($request->modo_de_jogo == 'fazendinha-meio') {
+                for ($i = 1; $i <= 25; $i++) {
+                    $number = 'g' . $i . '-le';
+                    Raffle::simpleCreate($number, $product->id, $product->user_id);
+                    $number = 'g' . $i . '-ld';
+                    Raffle::simpleCreate($number, $product->id, $product->user_id);
                 }
             }
-            
-        }
-        else{
+
+        } else {
             $qtdNumbers = $request->numbers;
 
             $arr = [];
             $qtdZeros = strlen((string)$qtdNumbers);
-            if($request->qtd_zeros != null){
+            if ($request->qtd_zeros != null) {
                 $qtdZeros = $request->qtd_zeros + 1;
             }
 
             for ($x = 0; $x < $qtdNumbers; $x++) {
-                $nbr = str_pad($x, $qtdZeros,  '0', STR_PAD_LEFT);
+                $nbr = str_pad($x, $qtdZeros, '0', STR_PAD_LEFT);
                 array_push($arr, $nbr);
             }
 
-            $rifa = ModelsProduct::find($product);
+            $rifa = ModelsProduct::getByIdWithSiteCheck($product->id);
             $stringNumbers = implode(",", $arr);
             $rifa->numbers = $stringNumbers;
-            $rifa->update();
-            //$rifa->saveNumbers($arr);
-            // $numbers = json_encode($arr);
+            $rifa->save();
 
-            // $arquivo = 'numbers/' . $product . '.json';
-            // $req = fopen($arquivo, 'w') or die('Cant open the file');
-            // fwrite($req, $numbers);
-            // fclose($req);
         }
 
-
-        
 
         DB::table('product_description')->insert(
             [
                 'description' => $request->description,
                 'product_id' => $product,
                 'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now()
+                'updated_at' => Carbon::now(),
+                'user_id' => $product->user_id
             ]
         );
 
         return redirect()->back()->with('success', 'Cadastro da Rifa efetuado com sucesso!');
     }
+
 
     public function alterProduct(Request $request)
     {
@@ -273,7 +219,7 @@ class ProductAdminController extends Controller
 
         if ($request->hasFile('images')) {
 
-            DB::table('products_images')->where('product_id', '=', $request->product_id)->delete();
+            ProductImage::siteOwner()->where('product_id', '=', $request->product_id)->delete();
 
             foreach ($files as $key => $images) {
                 $upload_imagename = $key . time() . '.' . $images->getClientOriginalExtension();
@@ -286,7 +232,8 @@ class ProductAdminController extends Controller
                         'name' => $upload_imagename,
                         'product_id' => $request->product_id,
                         'created_at' => Carbon::now(),
-                        'updated_at' => Carbon::now()
+                        'updated_at' => Carbon::now(),
+                        'user_id' => getSiteOwner()
                     ]
                 );
             }
@@ -297,30 +244,21 @@ class ProductAdminController extends Controller
 
     public function alterarLogo(Request $request)
     {
-        if ($request->hasFile('logo')) {
-            $logo = $request->logo;
+        try {
+            $imageUpload = new FileUploadHelper($request, 'logo', FileUploadTypeEnum::Image);
+            $imageUrl = $imageUpload->upload();
 
-            $upload_imagename = time() . '.' . $logo->getClientOriginalExtension();
-            $upload_url = public_path('/products') . '/' . $upload_imagename;
-            
-            if(move_uploaded_file($_FILES['logo']['tmp_name'], $upload_url)){
-                
-            }
-            else{
-                return redirect()->back()->withErrors('Erro ao atualizar a logo');
-            }
-
-            DB::table('consulting_environments')->where('id', '=', 1)->update([
-                'logo' => $upload_imagename
+            getSiteConfig()->update([
+                'logo' => $imageUrl
             ]);
-
             return redirect()->back()->with('success', 'Logo alterada com sucesso!');
-        }
 
-        
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(parseExceptionMessage($e));
+        }
     }
 
-    public  function compress_image($source_url, $destination_url, $quality)
+    public function compress_image($source_url, $destination_url, $quality)
     {
         $info = getimagesize($source_url);
 
@@ -355,7 +293,7 @@ class ProductAdminController extends Controller
 
         DB::table('products')
             ->where('id', $request->product_id)
-            ->where('user_id', Auth::user()->id)
+            ->where('user_id', getSiteOwner())
             ->update(
                 [
                     'status' => 'Agendado',
@@ -380,7 +318,7 @@ class ProductAdminController extends Controller
 
         DB::table('products')
             ->where('id', $request->product_id)
-            ->where('user_id', Auth::user()->id)
+            ->where('user_id', getSiteOwner())
             ->update(
                 [
                     'draw_prediction' => $newDate
@@ -397,7 +335,7 @@ class ProductAdminController extends Controller
 
             DB::table('products')
                 ->where('id', $request->product_id)
-                ->where('user_id', Auth::user()->id)
+                ->where('user_id', getSiteOwner())
                 ->update(
                     [
                         'visible' => 1,
@@ -408,7 +346,7 @@ class ProductAdminController extends Controller
 
             DB::table('products')
                 ->where('id', $request->product_id)
-                ->where('user_id', Auth::user()->id)
+                ->where('user_id', getSiteOwner())
                 ->update(
                     [
                         'visible' => 0,
@@ -426,7 +364,7 @@ class ProductAdminController extends Controller
 
             DB::table('products')
                 ->where('id', $request->product_id)
-                ->where('user_id', Auth::user()->id)
+                ->where('user_id', getSiteOwner())
                 ->update(
                     [
                         'favoritar' => 1,
@@ -437,7 +375,7 @@ class ProductAdminController extends Controller
 
             DB::table('products')
                 ->where('id', $request->product_id)
-                ->where('user_id', Auth::user()->id)
+                ->where('user_id', getSiteOwner())
                 ->update(
                     [
                         'favoritar' => 0,
@@ -466,7 +404,7 @@ class ProductAdminController extends Controller
         } else {
             DB::table('products')
                 ->where('id', $request->product_id)
-                ->where('user_id', Auth::user()->id)
+                ->where('user_id', getSiteOwner())
                 ->update(
                     [
                         'status' => 'Finalizado',
@@ -485,7 +423,7 @@ class ProductAdminController extends Controller
 
         DB::table('products')
             ->where('id', $request->product_id)
-            ->where('user_id', Auth::user()->id)
+            ->where('user_id', getSiteOwner())
             ->update(
                 [
                     'type_raffles' => $request->type,
@@ -504,7 +442,7 @@ class ProductAdminController extends Controller
 
         if ($request->hasFile('fotos')) {
             foreach ($request->file('fotos') as $key => $images) {
-                
+
                 $upload_imagename = $key . time() . '.' . $images->getClientOriginalExtension();
                 $upload_url = public_path('/products') . '/' . $upload_imagename;
 
@@ -580,14 +518,36 @@ class ProductAdminController extends Controller
                 'updated_at' => Carbon::now()
             ]
         );
-        
 
-        if(str_starts_with($rifa->modo_de_jogo, 'fazendinha')){
-            if($rifa->modo_de_jogo == 'fazendinha-completa'){
+
+        if (str_starts_with($rifa->modo_de_jogo, 'fazendinha')) {
+            if ($rifa->modo_de_jogo == 'fazendinha-completa') {
                 for ($i = 1; $i <= 25; $i++) {
                     DB::table('raffles')->insert(
                         [
-                            'number' => 'g'.$i,
+                            'number' => 'g' . $i,
+                            'status' => 'Disponível',
+                            'product_id' => $product,
+                            'created_at' => Carbon::now(),
+                            'updated_at' => Carbon::now()
+                        ]
+                    );
+                }
+            } else if ($rifa->modo_de_jogo == 'fazendinha-meio') {
+                for ($i = 1; $i <= 25; $i++) {
+                    DB::table('raffles')->insert(
+                        [
+                            'number' => 'g' . $i . '-le',
+                            'status' => 'Disponível',
+                            'product_id' => $product,
+                            'created_at' => Carbon::now(),
+                            'updated_at' => Carbon::now()
+                        ]
+                    );
+
+                    DB::table('raffles')->insert(
+                        [
+                            'number' => 'g' . $i . '-ld',
                             'status' => 'Disponível',
                             'product_id' => $product,
                             'created_at' => Carbon::now(),
@@ -596,42 +556,18 @@ class ProductAdminController extends Controller
                     );
                 }
             }
-            else if($rifa->modo_de_jogo == 'fazendinha-meio'){
-                for ($i = 1; $i <= 25; $i++) {
-                    DB::table('raffles')->insert(
-                        [
-                            'number' => 'g'. $i . '-le',
-                            'status' => 'Disponível',
-                            'product_id' => $product,
-                            'created_at' => Carbon::now(),
-                            'updated_at' => Carbon::now()
-                        ]
-                    );
 
-                    DB::table('raffles')->insert(
-                        [
-                            'number' => 'g'. $i . '-ld',
-                            'status' => 'Disponível',
-                            'product_id' => $product,
-                            'created_at' => Carbon::now(),
-                            'updated_at' => Carbon::now()
-                        ]
-                    );
-                }
-            }
-            
-        }
-        else{
+        } else {
             $qtdNumbers = $rifa->numbers;
 
             $arr = [];
             $qtdZeros = strlen((string)$qtdNumbers);
-            if($rifa->qtd_zeros != null){
+            if ($rifa->qtd_zeros != null) {
                 $qtdZeros = $rifa->qtd_zeros + 1;
             }
 
             for ($x = 0; $x < $qtdNumbers; $x++) {
-                $nbr = str_pad($x, $qtdZeros,  '0', STR_PAD_LEFT);
+                $nbr = str_pad($x, $qtdZeros, '0', STR_PAD_LEFT);
                 array_push($arr, $nbr);
             }
 
@@ -641,8 +577,6 @@ class ProductAdminController extends Controller
             $newRifa->update();
         }
 
-
-        
 
         DB::table('product_description')->insert(
             [
