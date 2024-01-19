@@ -1,0 +1,267 @@
+
+
+#loadingSystem {
+    background: rgba(206, 206, 206, 0.5) url("../../images/loading.gif") no-repeat scroll center center;
+    background-size: 150px 150px;
+    height: 100%;
+    left: 0;
+    overflow: visible;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 9999999;
+}
+
+/* NAVBAR */
+.dashboard-navbar {
+    background-color: #E4E4E4;
+}
+
+.dark-mode .dashboard-navbar {
+    background-color: #212529;
+}
+
+.dashboard-navbar .nav-link {
+    color: #212529;
+}
+
+.dark-mode .dashboard-navbar .nav-link {
+    color: #f4f4f4;
+}
+
+.dashboard-navbar .nav-link:hover {
+    color: #671392;
+}
+
+.dark-mode .dashboard-navbar .nav-link:hover {
+    color: #955ab3;
+}
+
+.dark-mode .main-header {
+    border-bottom: #171a1d;
+}
+
+/* SIDEBAR */
+
+.sidebar {
+    background-color: #212529;
+}
+
+.nav-icon {
+    display: inline-block !important;
+    color: currentColor;
+    fill: currentColor;
+}
+
+/* DASHBOARD */
+
+.content-wrapper {
+    background-color: #F4f4f4;
+}
+
+.dashboard-itens {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+}
+
+.dashboard-item {
+    position: relative;
+    flex: 1 1 0px;
+    background-color: #E4E4E4;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+
+/* DASHBARD HOME */
+
+.dashboard-item.profit .dashboard-item-icon{
+    background-color: #087e8b
+    
+}
+
+.dashboard-item.request .dashboard-item-icon{
+    background-color: #6f9ceb;
+    
+}
+
+.dashboard-item.pending_request .dashboard-item-icon{
+    background-color: #ff5666;
+    
+}
+
+.dashboard-item.pending_entry .dashboard-item-icon{
+    background-color: #fea82f;
+    
+}
+
+.dashboard-item-body {
+    padding: 10px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.5rem;
+}
+
+
+.dashboard-item-stats {
+    position: relative;
+    overflow: hidden;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #212529;
+    cursor: auto;
+}
+
+.dashboard-item-stats i{
+    position: absolute;
+    height: 70px;
+    width: 70px;
+    font-size: 22px;
+    padding: 15px;
+    top: -25px;
+    left: -25px;
+    background-color: rgba(33, 37, 41, 0.2);
+    line-height: 60px;
+    text-align: right;
+    border-radius: 50%;
+    color: #F4F4F4;
+}
+
+.dashboard-item-divisor {
+    width: 75%;
+    border: 1px solid #212529;
+    opacity: 0.1;
+    margin: 1rem;
+}
+
+
+
+dashboard-item-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-item-body p,
+.dashboard-item-stats p {
+    margin-bottom: 0;
+    color: #707479;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+
+}
+
+.dashboard-item-value {
+    font-size: 1.75rem;
+    line-height: 1.75rem;
+    font-weight: 500;
+
+}
+
+.dashboard-item-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: bold; 
+}
+
+.dashboard-item-lone-title {
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    font-weight: bold; 
+}
+
+.dashboard-item-stats > .dashboard-item-title{
+    font-size: 1rem;
+}
+
+
+.dashboard-item-icon {
+    width: 4rem;
+    height: 4rem;
+    min-height: 4rem;
+    min-width: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.dashboard-item-body i {
+    line-height: 0;
+    font-size: 2rem;
+    /* opacity: .2; */
+    color: #F4F4F4;
+}
+
+.dashboard-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-btn {
+    background-color: #9f1de2;
+    box-shadow: 0px 5px 0px 0px #671392;
+    border-radius: 5px;
+    padding: 10px 15px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    margin: 20px;
+    color: #f4f4f4;
+    position: relative;
+    display: inline-block;
+}
+.dashboard-btn:hover {
+    background-color: #b450e8;
+    color: #f4f4f4;
+}
+
+.dashboard-btn:active {
+    transform: translate(0px, 5px);
+    -webkit-transform: translate(0px, 5px);
+    box-shadow: 0px 1px 0px 0px;
+}
+
+.blink {
+    
+    animation: animate 2.5s linear infinite;
+}
+
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .dashboard-itens {
+        flex-direction: column;
+    }
+
+    .dashboard-item {
+        width: 100%;
+        background-color: #E4E4E4;
+    }
+}
+
+@keyframes animate {
+0% {
+    opacity: 0;
+}
+
+50% {
+    opacity: 1;
+}
+
+100% {
+    opacity: 0;
+}
+}

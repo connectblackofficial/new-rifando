@@ -37,50 +37,13 @@
 
     <link href="{{ asset('/css/custom-admin2.css?r'.rand(1111,9999)) }}" rel="stylesheet" >
 
+    <link href="{{ asset('/dist/css/custom.css') }}" rel="stylesheet">
+
     <title><?php echo @$data['social']->name; ?> @if(isset($pgTitle)) - {{$pgTitle}} @endif</title>
 
-    <style>
-        #loadingSystem {
-            background: rgba(206, 206, 206, 0.5) url("../../images/loading.gif") no-repeat scroll center center;
-            background-size: 150px 150px;
-            height: 100%;
-            left: 0;
-            overflow: visible;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 9999999;
-        }
-
-        .nav-icon {
-            display: inline-block !important;
-            color: currentColor;
-            fill: currentColor;
-        }
-
-        .sidebar {
-            background-color: #212529;
-        }
-
-        .dashboard-navbar {
-            background-color: #E4E4E4;
-        }
-        .dashboard-navbar .nav-link {
-            color: #212529;
-        }
-
-        .dashboard-navbar .nav-link:hover {
-            color: #671392;
-        }
-
-        .content-wrapper {
-            background-color: #F4f4f4;
-        }
-
-    </style>
 </head>
 
-<body class="sidebar-mini layout-fixed layout-navbar-fixed" style="height: auto;">
+<body class="sidebar-mini layout-fixed layout-navbar-fixed sidebar-collapse" style="height: auto;">
 
     <div id="loadingSystem" class="d-none"></div>
     <div class="wrapper">
@@ -89,13 +52,18 @@
             <!-- Left navbar links -->
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i
-                            class="fas fa-bars"></i></a>
+                    <a id="sideBtn" class="nav-link" data-widget="pushmenu" href="#" role="button">
+                        <i id="sideBtnIcon" class="fa-solid fa-bars"></i></a>
                 </li>
             </ul>
 
             <!-- Right navbar links -->
             <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link"  href="#" role="button">
+                        <i id="darkbutton" class="fa-regular fa-moon"></i>
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" data-widget="fullscreen" href="#" role="button">
                         <i class="fa-solid fa-expand"></i>
@@ -256,6 +224,7 @@
     <script src="{{ asset('/plugins/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('/dist/js/adminlte.min.js') }}"></script>
+    <script src="{{ asset('/dist/js/custom.js') }}"></script>
     <script src="{{ asset('/plugins/summernote/summernote-bs4.min.js') }}"></script>
     <script src="{{ asset('/plugins/codemirror/codemirror.js') }}"></script>
     <script src="{{ asset('/plugins/codemirror/mode/css/css.js') }}"></script>
@@ -263,6 +232,7 @@
     <script src="{{ asset('/plugins/codemirror/mode/htmlmixed/htmlmixed.js') }}"></script>
     {{-- <script src="{{ asset('/build/js/Layout.js') }}"></script> --}}
     {{-- <script src="{{ asset('/build/js/adminlte.js') }}"></script> --}}
+    <script src="{{ asset('/plugins/jquery/jquery.min.js') }}"></script>
 
     <script src="{{ asset('/plugins/moment/moment.min.js') }}"></script>
     <script src="{{ asset('/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') }}"></script>
