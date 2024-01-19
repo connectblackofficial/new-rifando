@@ -7,7 +7,7 @@ use App\Http\Controllers\ProductAdminController;
 use App\Http\Controllers\MySweepstakesController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\ProductController;
-
+use App\Http\Controllers\Admin\ProductController as ProductAdmController;
 
 Route::get('/clientes/{search?}', [HomeAdminController::class, 'clientes'])->name('clientes');
 Route::get('/clientes/editar/{id}', [HomeAdminController::class, 'editarCliente'])->name('clientes.editar');
@@ -39,7 +39,7 @@ Route::get('participants', [TestController::class, 'index'])->name('test');
 Route::post('favoritar-produto', [ProductAdminController::class, 'favoritarRifa'])->name('favoritarRifa');
 Route::patch('edit-product/{id}', [MySweepstakesController::class, 'updateProduct'])->name('updateProduct');
 Route::post('add-foto-rifa', [ProductAdminController::class, 'addFoto'])->name('addFoto');
-Route::post('/excluir-foto', [MySweepstakesController::class, 'excluirFoto'])->name('excluirFoto');
+Route::post('/product/deletePhoto', [ProductAdmController::class, 'deletePhoto'])->name('excluirFoto');
 Route::get('imprimir-resumo-compra/{id}', [MySweepstakesController::class, 'imprimirResumoCompra'])->name('imprimirResumoCompra');
 
 // WDW
@@ -92,6 +92,10 @@ Route::post('/selecioonar-rifa', [MySweepstakesController::class, 'getRifa'])->n
 Route::post('/buscar-cota-premiada', [MySweepstakesController::class, 'buscarCotaPremiada'])->name('buscarCotaPremiada');
 
 
+
+Route::get('/product/create', [ProductAdmController::class, 'create'])->name('product.create');
+Route::get('/product/{id}', [ProductAdmController::class, 'edit'])->name('product.edit');
+Route::post('/product/{id}', [ProductAdmController::class, 'update'])->name('product.update');
 
 
 Route::get('super-admin/users', [UsersController::class, 'index'])->name('super-admin.users.index');

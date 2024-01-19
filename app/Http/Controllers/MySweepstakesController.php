@@ -382,7 +382,14 @@ class MySweepstakesController extends Controller
             $prduct->saveOrFail();
         }
 
-
+        /*
+         *
+         * 'slug' => [
+                'required',
+                'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', // Regra de regex para validar o formato de slug
+                Rule::unique('tabela')->ignore($currentSlug, 'slug') // 'tabela' deve ser substituída pelo nome da sua tabela
+            ]
+         */
         $rifa = $prduct;
 
         try {
@@ -399,11 +406,9 @@ class MySweepstakesController extends Controller
                     'visible' => $request->visible,
                     'favoritar' => $request->favoritar_rifa,
                     'winner' => $request->cadastrar_ganhador,
-                    'type_raffles' => $request->tipo_reserva,
-                    'draw_date' => $request->data_sorteio,
+                    'draw_date' => date("Y-m-d H:i:s", strtotime($request->data_sorteio)),
                     'maximo' => $request->maximo,
                     'minimo' => $request->minimo,
-                    'draw_prediction' => $request->previsao_sorteio,
                     'qtd_ranking' => $request->qtd_ranking,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now(),

@@ -21,6 +21,13 @@
     <title><?php echo @$data['social']->name; ?> @if(isset($pgTitle))
             - {{$pgTitle}}
         @endif</title>
+    <script>
+        var CDN_URL="<?=cdnAsset()?>";
+        var PRODUCT_EDIT_ROUTE="{{route('product.edit',['id'=>'replace_here'])}}";
+        var PRODUCT_EDIT_ROUTE="{{route('product.edit',['id'=>'replace_here'])}}";
+    </script>
+
+
 
     <style>
 
@@ -190,12 +197,12 @@
 </div>
 <!-- ./wrapper -->
 
-
+@include("layouts.modal-url")
 <script src="{{ cdnAsset('/js/admin-bundle.min.js') }}"></script>
 
 @stack('scripts')
 <script>
-    $(document).ready(function (){
+    $(document).ready(function () {
         initAjaxSetup();
         setUrlsPages();
 

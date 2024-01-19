@@ -58,6 +58,7 @@ mix.sass('resources/cdn/saas/site.scss', 'public/cdn/build').sass('resources/cdn
     `${resourceCdnDirVendor}/others/buttons.html5.min.js`,
     `${resourceCdnDirVendor}/others/buttons.print.min.js`,
     `${nodeDir}/bootstrap_5_0_2/dist/js/bootstrap.bundle.js`,
+    `${resourceCdnDirVendor}/blockUi/jquery.blockUI.js`,
     `${nodeDir}/@popperjs/core/dist/umd/popper.min.js`,
     `${nodeDir}/sweetalert2/dist/sweetalert2.all.js`,
     `${resourceCdnDir}/js/functions-admin.js`,

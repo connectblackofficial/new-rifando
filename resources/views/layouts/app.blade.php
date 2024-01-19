@@ -26,7 +26,7 @@
 
     <?php echo @$data['social']->pixel; ?>
     <script>
-        var user_phone="<?=getSiteOwnerUser()->telephone?>"
+        var user_phone = "<?= getSiteOwnerUser()->telephone ?>"
     </script>
 
     <script src="{{cdnAsset("js/site-header-bundle.min.js")}}"></script>
@@ -198,7 +198,6 @@ $subDomain = explode('.', request()->getHost());
         </div>
     </div>
 </div>
-
 
 <script>
     document.getElementById('telephone').addEventListener('input', function (e) {

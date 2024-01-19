@@ -25,6 +25,7 @@ class SiteProductUpdateRequest extends FormRequest
     {
         $rules = (new SiteProductStoreRequest())->rules();
         $rules['images'] = 'nullable|max:3';
+        unset($rules['numbers']);
         return $rules;
     }
 }

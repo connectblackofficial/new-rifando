@@ -2,6 +2,7 @@
 
 namespace App\Enums;
 
+use App\Traits\EnumTrait;
 use BenSampo\Enum\Enum;
 
 /**
@@ -11,6 +12,7 @@ use BenSampo\Enum\Enum;
  */
 final class ActiveInactiveAsStringEnum extends Enum
 {
+    use EnumTrait;
     const Active =   'Ativo';
     const Inactive =   'Inativo';
 

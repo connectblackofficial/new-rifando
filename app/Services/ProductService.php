@@ -2,14 +2,18 @@
 
 namespace App\Services;
 
+use App\CompraAutomatica;
 use App\Enums\FileUploadTypeEnum;
 use App\Enums\PaymentGatewayEnum;
 use App\Environment;
 use App\Exceptions\UserErrorException;
 use App\Helpers\FileUploadHelper;
 use App\Models\Product;
+use App\Models\ProductDescription;
 use App\Models\ProductImage;
+use App\Models\Promocao;
 use App\Models\Raffle;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ProductService
@@ -139,9 +143,133 @@ class ProductService
         }
         return implode(",", $arr);
     }
-    public function update()
+
+    public function update(Product $product, $request)
     {
+        if ($request->favoritar_rifa && $product->favoritar == 1) {
+            $product->favoritar = 0;
+            $product->saveOrFail();
+        }
+        $updated = $product->update(
+            [
+                'name' => $request->name,
+                'subname' => $request->subname,
+                'price' => $request->price,
+                'status' => $request->status,
+                'expiracao' => $request->expiracao,
+                'parcial' => $request->parcial,
+                'slug' => $request->slug,
+                'user_id' => getSiteOwnerId(),
+                'visible' => $request->visible,
+                'favoritar' => $request->favoritar_rifa,
+                'winner' => $request->cadastrar_ganhador,
+                'draw_date' => date("Y-m-d H:i:s", strtotime($request->data_sorteio)),
+                'maximo' => $request->maximo,
+                'minimo' => $request->minimo,
+                'qtd_ranking' => $request->qtd_ranking,
+                'ganho_afiliado' => $request->ganho_afiliado,
+                'gateway' => $request->gateway,
+                'tipo_reserva' => $request->tipo_reserva
+            ]
+        );
+        if (!$updated) {
+            throw new UserErrorException("Falha ao atualizar o produto");
+        }
+
+        $productDesc = $product->descriptions()->first();
+        if (isset($productDesc['id'])) {
+            $productDesc->description = $request->description;
+            $productDesc->saveOrFail();
+        }
+        $this->updateOrCreatePromos($product, $request->numPromocao, $request->valPromocao);
+        $this->updateAutoBuy($product, $request);
+        $this->updatePremium($product, $request);
+    }
+
+    public function updateOrCreatePromos(Product $product, array $numPromocao, array $valPromocao)
+    {
+        if ($product->promocoes()->count() === 0) {
+            $product->createPromos();
+        } else {
+            // atualizando promocao
+
+            for ($i = 1; $i <= 4; $i++) {
+                $qtdNumeros = $numPromocao[$i];
+                if ($qtdNumeros <= 0) {
+                    continue;
+                }
+                $desconto = floatval($valPromocao[$i]);
+                if ($desconto <= 0) {
+                    continue;
+                }
+                $total = $qtdNumeros * $product->price;
+                if (($total * $desconto) > 0) {
+                    $valorComDesconto = $total - ($total * $desconto / 100);
+                } else {
+                    $valorComDesconto = $total;
+                }
+                $promo = Promocao::where('product_id', '=', $product['id'])->where('ordem', '=', $i)->first();
+                if (isset($promo['id'])) {
+                    $promo->qtdNumeros = $numPromocao[$i];
+                    $promo->desconto = $desconto;
+                    $promo->valor = $valorComDesconto;
+                    $promo->user_id = $product['user_id'];
+                    $promo->saveOrFail();
+                }
+
+            }
+        }
+    }
+
+    public function updateAutoBuy(Product $product, Request $request)
+    {
+        foreach ($request->compra as $key => $qtd) {
+            $autoBuy = CompraAutomatica::siteOwner()->whereProductId($product->id)->whereId($key)->first();
+            if (isset($autoBuy['id'])) {
+                $autoBuy->qtd = $qtd;
+                $autoBuy->popular = false;
+                $autoBuy->saveOrFail();
+            }
+        }
+        if (!empty($request->popularCheck) && $request->popularCheck > 0) {
+            $autoBuy = CompraAutomatica::siteOwner()->whereProductId($product->id)->whereId($request->popularCheck)->first();
+            if (isset($autoBuy['id'])) {
+                $autoBuy->popular = true;
+                $autoBuy->saveOrFail();
+            }
+        }
+        // Atualizando mais popular
+
 
     }
 
+    public function updatePremium(Product $product, Request $request)
+    {
+        foreach ($product->premios() as $premio) {
+            $descPremio = $request->descPremio;
+            if (isset($descPremio[$premio->ordem])) {
+                $premio->descricao = $descPremio[$premio->ordem];
+                $premio->saveOrFail();
+            }
+        }
+
+    }
+
+    public function destroyProduct($productId)
+    {
+
+        $product_delete = Product::getByIdWithSiteCheck($productId);
+        if (!isset($product_delete['id'])) {
+            throw  UserErrorException::productNotFound();
+        }
+
+        $path = 'numbers/' . $product_delete->id . '.json';
+        if (file_exists($path)) {
+            unlink($path);
+        }
+        if (!$product_delete->delete()) {
+            throw  UserErrorException::deleteFailed();
+        }
+
+    }
 }

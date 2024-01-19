@@ -31,6 +31,8 @@
                     </ul>
                 </div>
             @endif
+                <button class="mr-2 mb-2 btn btn-success" type="button" style="margin-top: 30px;" onclick="return loadUrlModal('Editar Rifa', 'https://new-rifando.10mb.com.br/product/79', true)">
+                    Salvar <i class="os-icon os-icon-grid-18"></i></button>
             {{-- START TABELA MEUS SORTEIOS --}}
             <div class="container mt-3" style="max-width:100%;min-height:100%;">
                 <div class="table-wrapper ">
@@ -93,9 +95,10 @@
                                                     Ações
                                                 </button>
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item" style="cursor: pointer"
-                                                       data-bs-toggle="modal"
-                                                       data-bs-target="#modal_editar_rifa{{ $product->id }}"><i
+                                                    <?php
+
+                                                        ?>
+                                                    <a class="dropdown-item" style="cursor: pointer" onclick="return productEdit(<?=$product->id ?>) "><i
                                                                 class="bi bi-pencil-square"></i>&nbsp;Editar</a>
                                                     <a class="dropdown-item"
                                                        href="#deleteEmployeeModal{{ $product->id }}"
@@ -265,135 +268,13 @@
                         </div>
 
                         <script>
-                            function formatarMoeda() {
-                                var elemento = document.getElementById('price');
-                                var valor = elemento.value;
 
-
-                                valor = valor + '';
-                                valor = parseInt(valor.replace(/[\D]+/g, ''));
-                                valor = valor + '';
-                                valor = valor.replace(/([0-9]{2})$/g, ",$1");
-
-                                if (valor.length > 6) {
-                                    valor = valor.replace(/([0-9]{3}),([0-9]{2}$)/g, ".$1,$2");
-                                }
-
-                                elemento.value = valor;
-                                if (valor == 'NaN') elemento.value = '';
-
-                            }
                         </script>
                         <!-- Modal Editar Rifa -->
                         @foreach ($rifas as $key => $product)
                             <div id="modal_editar_rifa{{ $product->id }}" class="modal fade">
                                 <div class="modal-dialog modal-lg">
-                                    <form action="{{ route('update', ['id' => $product->id]) }}" method="POST"
-                                          enctype="multipart/form-data">
-                                        <div class="modal-content">
-                                            @method('PUT')
-                                            {{ csrf_field() }}
 
-                                            <div class="modal-body">
-
-                                                <div class="container mt-3">
-                                                    <button type="button" class="close" data-bs-dismiss="modal"
-                                                            aria-label="Close">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
-
-                                                    <h2>Editar Rifas</h2>
-
-                                                    <div class="row">
-                                                        <div class="col-12">
-                                                            <nav>
-                                                                <ul class="nav nav-tabs" id="myTab" role="tablist"
-                                                                    style="font-size: 12px;">
-                                                                    <li class="nav-item">
-                                                                        <a class="nav-link active" id="geral-tab"
-                                                                           data-toggle="tab"
-                                                                           href="#geral{{ $product->id }}"
-                                                                           role="tab" aria-controls="geral"
-                                                                           aria-selected="true">Geral</a>
-                                                                    </li>
-                                                                    <li class="nav-item">
-                                                                        <a class="nav-link" id="premios-tab"
-                                                                           data-toggle="tab"
-                                                                           href="#premios{{ $product->id }}"
-                                                                           role="tab" aria-controls="premios"
-                                                                           aria-selected="true">Prêmios</a>
-                                                                    </li>
-                                                                    <li class="nav-item">
-                                                                        <a class="nav-link" id="ajustes-tab"
-                                                                           data-toggle="tab"
-                                                                           href="#ajustes{{ $product->id }}"
-                                                                           role="tab" aria-controls="ajustes"
-                                                                           aria-selected="false">Ajustes</a>
-                                                                    </li>
-                                                                    <li class="nav-item">
-                                                                        <a class="nav-link" id="promocao-tab"
-                                                                           data-toggle="tab"
-                                                                           href="#promocao{{ $product->id }}"
-                                                                           role="tab" aria-controls="promocao"
-                                                                           aria-selected="false">Promoção</a>
-                                                                    </li>
-                                                                    <li class="nav-item">
-                                                                        <a class="nav-link" id="fotos-tab"
-                                                                           data-toggle="tab"
-                                                                           href="#fotos{{ $product->id }}"
-                                                                           role="tab" aria-controls="fotos"
-                                                                           aria-selected="false">Fotos</a>
-                                                                    </li>
-                                                                </ul>
-                                                            </nav>
-
-                                                            <div class="tab-content" id="myTabContent">
-                                                                <div class="tab-pane fade show active"
-                                                                     id="geral{{ $product->id }}" role="tabpanel"
-                                                                     aria-labelledby="geral-tab">
-                                                                    @include("product.general-tab-form")
-                                                                </div>
-
-                                                                <div class="tab-pane fade show"
-                                                                     id="premios{{ $product->id }}" role="tabpanel"
-                                                                     aria-labelledby="geral-tab">
-                                                                    <div class="row">
-                                                                        @include("product.premium-tab-form")
-                                                                    </div>
-                                                                </div>
-
-                                                                <div class="tab-pane fade"
-                                                                     id="ajustes{{ $product->id }}" role="tabpanel"
-                                                                     aria-labelledby="ajustes-tab">
-                                                                    @include("product.ajustes-tab-form")
-                                                                </div>
-
-
-                                                                <div class="tab-pane fade"
-                                                                     id="promocao{{ $product->id }}" role="tabpanel"
-                                                                     aria-labelledby="promocao-tab">
-                                                                    @include("product.promo-tab-form")
-
-                                                                </div>
-
-                                                                <div class="tab-pane fade" id="fotos{{ $product->id }}"
-                                                                     role="tabpanel" aria-labelledby="promocao-tab">
-
-
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <input type="button" class="btn btn-default" data-bs-dismiss="modal"
-                                                       value="Cancelar">
-                                                <input type="submit" class="btn btn-success" value="Salvar">
-                                            </div>
-                                        </div>
-                                    </form>
                                 </div>
                             </div>
                         @endforeach

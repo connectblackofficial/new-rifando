@@ -8,8 +8,10 @@ use App\Helpers\FileUploadHelper;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Symfony\Component\Process\Process;
 
 class Controller extends BaseController
@@ -132,5 +134,28 @@ class Controller extends BaseController
         }
     }
 
-
+    public function processAjaxResponse(Request $request, array $rules, $callback)
+    {
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            $res = $validator->errors()->getMessages();
+            $return["error"] = true;
+            $return["error_message"] = $res;
+            return response()->json($return);
+        } else {
+            try {
+                if ($callback() === true) {
+                    $return["success"] = true;
+                    $return["sucess_message"] = "Operação realizada com sucesso.";
+                    return response()->json($return);
+                } else {
+                    throw new UserErrorException("Ocorreu um erro desconhecido.");
+                }
+            } catch (\Exception $e) {
+                $return["error"] = true;
+                $return["error_message"] = ['id' => parseExceptionMessage($e)];
+                return response()->json($return);
+            }
+        }
+    }
 }

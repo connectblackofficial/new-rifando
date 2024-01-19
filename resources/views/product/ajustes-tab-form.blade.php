@@ -5,7 +5,7 @@ $baseLang = 'product';
 <div class="row mt-3">
     <div class="col-5">
         <div class="form-group">
-            <?= selectField('status', \App\Enums\ProductStatusEnum::getValues(), $product, ['base-lang' => $baseLang]) ?>
+            <?= selectField('status', \App\Enums\ProductStatusEnum::getValuesAsSelect(), $product, ['base-lang' => $baseLang]) ?>
         </div>
     </div>
     <div class="col-12 col-md-7">
@@ -51,7 +51,8 @@ $baseLang = 'product';
 <div class="row mt-3">
     <div class="col">
         <div class="form-group">
-            <?= selectField('tipo_reserva', \App\Enums\ReservationTypeEnum::getValues(), $product) ?>
+
+            <?= selectField('tipo_reserva', \App\Enums\ReservationTypeEnum::getValuesAsSelect(), $product) ?>
         </div>
     </div>
 </div>
@@ -67,7 +68,7 @@ $baseLang = 'product';
             if (isset($product['id'])) {
                 $selectData['disabled'] = true;
             }
-            echo selectField('rifa_numero', \App\Enums\ReservationTypeEnum::getValues(), $product, $selectData);
+            echo selectField('rifa_numero', \App\Enums\GameModeEnum::getValuesAsSelect(), $product, $selectData);
             ?>
 
         </div>

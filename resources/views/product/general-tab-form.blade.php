@@ -12,7 +12,7 @@ $baseLang = 'product';
     </div>
 
     <div class="col-md-6">
-        <?= inputField('price', 'text', $product) ?>
+        <?= inputField('price', 'numeric', $product) ?>
     </div>
     <div class="col-md-12">
         <?= inputField('subname', 'text', $product) ?>
@@ -42,8 +42,11 @@ $baseLang = 'product';
 </div>
 
 <div class="row mt-4">
-    <div class="col-md-12">
-        <?= selectField('gateway', \App\Enums\PaymentGatewayEnum::getValues(), $product) ?>
+    <div class="col-md-6">
+        <?= selectField('gateway', \App\Enums\PaymentGatewayEnum::getValuesAsSelect(), $product) ?>
+    </div>
+    <div class="col-6">
+        <?= inputField('ganho_afiliado', 'number', $product) ?>
     </div>
 </div>
 
@@ -56,9 +59,9 @@ $baseLang = 'product';
         } else {
             $textAreaDesc = "description";
             $val="";
-
         }
         ?>
         <?= inputField('description', 'textarea', ['description' => $val], ['class' => 'summernote', 'id' => $textAreaDesc, 'required' => true, 'base-lang' => $baseLang]) ?>
+
     </div>
 </div>

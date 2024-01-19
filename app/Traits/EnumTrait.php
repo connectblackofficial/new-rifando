@@ -8,4 +8,13 @@ trait EnumTrait
     {
         return 'in:' . implode(",", self::getValues());
     }
+
+    public static function getValuesAsSelect(): array
+    {
+        $values = [];
+        foreach (self::getValues() as $v) {
+            $values[$v] = $v;
+        }
+        return $values;
+    }
 }

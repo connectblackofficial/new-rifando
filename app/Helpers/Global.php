@@ -161,10 +161,10 @@ function cdnImageAsset($asset)
     return cdnAsset('images/' . $asset);
 }
 
-function cdnAsset($asset)
+function cdnAsset($asset="")
 {
-    $file = 'cdn/' . $asset;
-    if (isLocalEnv()) {
+    $file = 'cdn/' . ltrim($asset, '/');;
+    if (isLocalEnv() && $asset != "/" && !empty($asset)) {
         $file = $file . "?r=" . rand(1111111111, 99999999);
     }
     return asset($file);

@@ -31,4 +31,14 @@ class UserErrorException extends Exception
         return new self("Ocorreu um erro durante o upload.");
 
     }
+    public static function productNotFound()
+    {
+        return new self("Produto não encontrado;");
+
+    }
+    public static function deleteFailed()
+    {
+        return new self("Ocorreu um erro ao deletar o registro.");
+
+    }
 }
