@@ -23,18 +23,53 @@ function getCrudData($crudName, $viewName, $routeGroup)
 
 }
 
-function selectField($name, $options, $currentData = [])
+function selectField($name, $options, $currentData = [], $attrs = [])
 {
-    return view('crud.fields.select', ['name' => $name, 'options' => $options, 'currentData' => $currentData])->render();
+    return view('crud.fields.select', ['attrs' => $attrs, 'name' => $name, 'options' => $options, 'currentData' => $currentData])->render();
 }
 
-function inputField($name, $type, $currentData = [])
+function parseInputsAttr($name, $attrs)
+{
+    if (isset($attrs['class'])) {
+        $attrs['class'] = " form-control " . $attrs['class'];
+    } else {
+        $attrs['class'] = " form-control";
+    }
+    if (!isset($attrs['name'])) {
+        $attrs['name'] = $name;
+    }
+    if (!isset($attrs['id'])) {
+        $attrs['id'] = $name;
+    }
+    $htmlAttr = "";
+    foreach ($attrs as $attrName => $attrValue) {
+        $htmlAttr .= " " . $attrName . '="' . $attrValue . '"';
+    }
+    return $htmlAttr;
+}
+
+function getInputLabelLang($name, $attrs)
+{
+    if (isset($attrs['base-lang']) && !empty($attrs['base-lang'])) {
+        $index_lang = $attrs['base-lang'] . '_' . $name;
+        return htmlLabel($index_lang);
+    }
+    return htmlLabel($name);
+
+}
+
+function getYesNoArr()
+{
+    return ['0' => 'no', '1' => 'yes'];
+}
+
+function inputField($name, $type, $currentData = [], $attrs = [])
 {
     $fieldValue = "";
     if (isset($currentData[$name])) {
         $fieldValue = $currentData[$name];
     }
-    return view('crud.fields.input', ['fieldValue' => $fieldValue, 'name' => $name, 'type' => $type, 'currentData' => $currentData])->render();
+    return view('crud.fields.input', ['attrs' => $attrs, 'fieldValue' => $fieldValue, 'name' => $name, 'type' => $type, 'currentData' => $currentData])->render();
 }
 
 function itemRowView($formatFieldsFn, $item, $index)
@@ -112,12 +147,35 @@ function parseExceptionMessage(\Exception $e)
     }
 }
 
+function isLocalEnv()
+{
+    if (env("APP_ENV") == 'local') {
+        return true;
+    }
+    return false;
+}
+
+function cdnImageAsset($asset)
+{
+
+    return cdnAsset('images/' . $asset);
+}
+
+function cdnAsset($asset)
+{
+    $file = 'cdn/' . $asset;
+    if (isLocalEnv()) {
+        $file = $file . "?r=" . rand(1111111111, 99999999);
+    }
+    return asset($file);
+}
+
 function imageAsset($image)
 {
     return asset('storage/' . $image);
 }
 
-function getSiteOwner()
+function getSiteOwnerId()
 {
     $siteEnv = \Session::get('siteEnv');
     return $siteEnv['user_id'];
@@ -129,12 +187,19 @@ function getSiteConfigId()
     return $siteEnv['id'];
 }
 
+/**
+ * @return User
+ */
 function getSiteOwnerUser()
 {
-    return User::whereId(getSiteOwner())->first();
+    return \Session::get('siteOwnerEnv');
+
 }
 
 
+/**
+ * @return Environment
+ */
 function getSiteConfig()
 {
     return \Session::get('siteEnv');
@@ -142,5 +207,10 @@ function getSiteConfig()
 
 function getSiteUploadPath()
 {
-    return 'site_' . getSiteOwner();
+    return 'site_' . getSiteOwnerId();
+}
+
+function convertToArray($data)
+{
+    return json_decode(json_encode($data), true);
 }

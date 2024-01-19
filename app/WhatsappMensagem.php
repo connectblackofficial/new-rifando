@@ -86,7 +86,7 @@ class WhatsappMensagem extends Model
                 return $participante->name;
                 break;
             case 'valor':
-                return $participante->rifa()->price;
+                return $participante->firstProduct()->price;
                 break;
             case 'total':
                 return number_format($participante->valor, 2, ",", ".");
@@ -102,7 +102,7 @@ class WhatsappMensagem extends Model
                 return $cotas;
                 break;
             case 'sorteio':
-                return $participante->rifa()->name;
+                return $participante->firstProduct()->name;
                 break;
             case 'link': // TODO
                 return route('pagarReserva', $participante->id);

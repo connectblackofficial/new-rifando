@@ -11,35 +11,56 @@ const mix = require('laravel-mix');
  |
  */
 //dist/js/bootstrap.bundle.min.js
-let pluginsDir = "public/plugins";
-let vendorDir = "public/vendor";
-mix.sass('resources/assets/sass/site.scss', 'public/assets/css').sass('resources/assets/sass/admin.scss', 'public/assets/css').combine([
-    `${pluginsDir}/jquery/jquery.min.js`,
-    `${pluginsDir}/bootstrap/js/bootstrap.bundle.min.js`,
-    `public/dist/js/adminlte.min.js`,
-    `${pluginsDir}/summernote/summernote-bs4.min.js`,
-    `${pluginsDir}/codemirror/codemirror.js`,
-    `${pluginsDir}/codemirror/mode/css/css.js`,
-    `${pluginsDir}/codemirror/mode/xml/xml.js`,
-    `${pluginsDir}/codemirror/mode/htmlmixed/htmlmixed.js`,
-    `${pluginsDir}/moment/moment.min.js`,
-    `${pluginsDir}/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js`,
-    `${vendorDir}/jquery.dataTables.min.js`,
-    `${vendorDir}/dataTables.buttons.min.js`,
-    `${vendorDir}/jszip.min.js`,
-    `${vendorDir}/pdfmake.min.js`,
-    `${vendorDir}/vfs_fonts.js`,
-    `${vendorDir}/buttons.html5.min.js`,
-    `${vendorDir}/buttons.print.min.js`,
-    `${vendorDir}/popper.min.js`,
-    `${vendorDir}/sweetalert2.js`,
-    `public/js/functions-admin.js`,
-], `public/assets/js/admin-bundle.min.js`).combine([
-    `${vendorDir}/jquery/jquery-3.7.0.min.js`,
-    `${vendorDir}/bootstrap-5.0.2/dist/js/bootstrap.bundle.js`,
-    `${pluginsDir}/bootstrap/js/bootstrap.bundle.min.js`,
-    `${vendorDir}/anime.min.js`,
-    `${vendorDir}/fotorama-4.6.4/fotorama.js`,
-    `public/js/site-functions.js`,
-    `public/sw.js`
-], `public/assets/js/site-bundle.min.js`)
+let resourceCdnDir = "resources/cdn";
+let resourceCdnDirVendor = `${resourceCdnDir}/vendor`
+let publicCdnDir = "public/cdn";
+let nodeDir = "node_modules";
+
+let sitesScriptsHeader = [
+    `${resourceCdnDirVendor}/jquery/jquery-3.7.0.min.js`,
+    `${nodeDir}/bootstrap_5_0_2/dist/js/bootstrap.bundle.js`,
+    `${nodeDir}/bootstrap_4_6_1/dist/js/bootstrap.bundle.js`,
+];
+/*
+    `${resourceCdnDirVendor}/jquery/jquery-3.7.0.min.js`,
+    `${nodeDir}/bootstrap_5_0_2/dist/js/bootstrap.bundle.js`,
+    `${nodeDir}/bootstrap_4_6_1/dist/js/bootstrap.bundle.js`,
+    `${resourceCdnDirVendor}/others/anime.min.js`,
+    `${resourceCdnDirVendor}/fotorama-4.6.4/fotorama.js`,
+    `${resourceCdnDir}/js/sw.js`,
+    `${resourceCdnDir}/js/site-functions.js`
+ */
+let siteScriptsFooter = [
+    `${resourceCdnDirVendor}/others/anime.min.js`,
+    `${resourceCdnDirVendor}/fotorama-4.6.4/fotorama.js`,
+    `${resourceCdnDir}/js/sw.js`,
+    `${nodeDir}/sweetalert2/dist/sweetalert2.all.js`,
+    `${resourceCdnDir}/js/site-functions.js`
+];
+
+//resources/assets/cdn/css/admin.scss
+mix.sass('resources/cdn/saas/site.scss', 'public/cdn/build').sass('resources/cdn/saas/admin.scss', 'public/cdn/build').combine([
+    `${resourceCdnDirVendor}/jquery/jquery-3.7.0.min.js`,
+    `${nodeDir}/bootstrap_4_6_1/dist/js/bootstrap.bundle.js`,
+    `${resourceCdnDirVendor}/summernote/summernote-bs4.min.js`,
+    `${resourceCdnDir}/dist/js/adminlte.min.js`,
+    `${resourceCdnDirVendor}/codemirror/codemirror.js`,
+    `${resourceCdnDirVendor}/codemirror/mode/css/css.js`,
+    `${resourceCdnDirVendor}/codemirror/mode/xml/xml.js`,
+    `${resourceCdnDirVendor}/codemirror/mode/htmlmixed/htmlmixed.js`,
+    `${resourceCdnDirVendor}/moment/moment.min.js`,
+    `${resourceCdnDirVendor}/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js`,
+    `${resourceCdnDirVendor}/jquery_dataTables_v1.11.5/js/jquery.dataTables.min.js`,
+    `${resourceCdnDirVendor}/jquery_dataTables_v1.11.5/js/dataTables.buttons.min.js`,
+    `${resourceCdnDirVendor}/others/jszip.min.js`,
+    `${resourceCdnDirVendor}/others/pdfmake.min.js`,
+    `${resourceCdnDirVendor}/others/vfs_fonts.js`,
+    `${resourceCdnDirVendor}/others/buttons.html5.min.js`,
+    `${resourceCdnDirVendor}/others/buttons.print.min.js`,
+    `${nodeDir}/bootstrap_5_0_2/dist/js/bootstrap.bundle.js`,
+    `${nodeDir}/@popperjs/core/dist/umd/popper.min.js`,
+    `${nodeDir}/sweetalert2/dist/sweetalert2.all.js`,
+    `${resourceCdnDir}/js/functions-admin.js`,
+], `${publicCdnDir}/js/admin-bundle.min.js`).combine(sitesScriptsHeader, `${publicCdnDir}/js/site-header-bundle.min.js`).
+combine(sitesScriptsHeader, `${publicCdnDir}/js/site-header-bundle.min.js`).
+combine(siteScriptsFooter, `${publicCdnDir}/js/site-footer-bundle.min.js`).copyDirectory('resources/cdn', 'public/cdn').version();

@@ -27,7 +27,7 @@ class SubdomainMiddleware
             abort(404);
         }
         \Session::put('siteEnv', $siteEnv);
-
+        \Session::put('siteOwnerEnv', $siteEnv->user()->first());
         return $next($request);
     }
 }

@@ -168,14 +168,14 @@
     @section('description', '')
     @section('ogTitle', $product[0]->name)
     @section('ogUrl', url(''))
-    @section('ogImage', url('/products/' . $product[0]->image))
+    @section('ogImage', imageAsset($product[0]->image))
     @section('sidebar')
 
     @section('ogContent')
         {{-- <meta property="og:site_name" content="Nome do site"> --}}
         <meta property="og:title" content="{{ $product[0]->name }}">
         <meta property="og:description" content="{{ $productDescription }}">
-        <meta property="og:image" itemprop="image" content="{{ url('/products/' . $product[0]->image) }}">
+        <meta property="og:image" itemprop="image" content="{{ imageAsset($product[0]->image) }}">
         <meta property="og:type" content="website">
     @endsection
 @stop
@@ -364,7 +364,7 @@
                         @foreach ($productModel->fotos() as $key => $foto)
                             <div class="carousel-item {{ $key === 0 ? 'active' : '' }}" style="margin-top: 30px;"
                                 id="slide-foto-{{ $foto->id }}">
-                                <img src="/products/{{ $foto->name }}"
+                                <img src="{{ imageAsset($foto->name) }}"
                                     style="border-top-right-radius: 20px;border-top-left-radius: 20px;"
                                     class="d-block w-100" alt="...">
                             </div>

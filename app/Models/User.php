@@ -120,7 +120,7 @@ class User extends Authenticatable
 
     public function scopeSiteOwner($query)
     {
-        return $query->where("parent_id", getSiteOwner());
+        return $query->where("parent_id", getSiteOwnerId());
 
     }
 }

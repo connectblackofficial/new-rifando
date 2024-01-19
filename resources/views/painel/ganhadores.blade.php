@@ -45,9 +45,9 @@
                     <tr>
                         <td style="width: 50px;">
                             @if ($ganhador->foto)
-                                <img src="{{ asset($ganhador->foto) }}" width="50">
+                                <img src="{{ imageAsset($ganhador->foto) }}" width="50">
                             @else
-                                <img src="{{ asset('images/sem-foto.jpg') }}" width="50">
+                                <img src="{{ cdnImageAsset('sem-foto.jpg') }}" width="50">
                             @endif
                         </td>
                         <td style="vertical-align: middle">{{ $ganhador->ganhador }}</td>

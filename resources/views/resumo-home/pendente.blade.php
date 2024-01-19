@@ -45,7 +45,7 @@
 
 @section('content')
     @include('compras.modal.detalhes')
-    
+
     <div class="container" style="max-width:100%;min-height:100%;">
         <div class="col-md-12 text-center">
             <h4>Resumo Aguardando Pgto.</h4>
@@ -63,11 +63,13 @@
                 </div>
                 <div class="col-md-1">
                     <label></label>
-                    <button type="submit" class="btn btn-sm btn-success form-control mt-4"><i class="fas fa-search"></i>&nbsp;Buscar</button>
+                    <button type="submit" class="btn btn-sm btn-success form-control mt-4"><i class="fas fa-search"></i>&nbsp;Buscar
+                    </button>
                 </div>
                 <div class="col-md-2">
                     <label></label>
-                    <a href="{{ route('resumo.pendentes') }}" class="btn btn-sm btn-info form-control mt-4">Limpar Busca</a>
+                    <a href="{{ route('resumo.pendentes') }}" class="btn btn-sm btn-info form-control mt-4">Limpar
+                        Busca</a>
                 </div>
             </div>
         </form>
@@ -80,15 +82,21 @@
             </div>
         @endif
 
-
+        <?php
+        /** @var \App\Models\Participant $participante */
+        ?>
         @foreach ($participantes as $participante)
+                <?php
+                /** @var \App\Models\Product $rifa */
+                $rifa = $participante->rifa();
+                ?>
             <div class="row p-1 item-compra reservado">
                 <div class="col-md-1">
-                    <img class="rounded" src="/products/{{ $participante->rifa()->imagem()->name }}" width="80">
+                    <img class="rounded" src="{{$rifa->getDefaultImageUrl()}}" width="80">
                 </div>
                 <div class="col-md-4 d-flex align-items-center">
                     <label>
-                        <span class="bg-success">Rifa:</span> {{ $participante->rifa()->name }} <br>
+                        <span class="bg-success">Rifa:</span> {{ $rifa->name }} <br>
 
                         <span class="bg-success">Participante:</span> {{ $participante->name }}
 
@@ -102,7 +110,7 @@
                 </div>
                 <div class="col-md-3 d-flex align-items-center justify-content-end">
                     <a href="javascript:void(0)" data-id="{{ $participante->id }}" onclick="detalhesParticipante(this)"
-                        class="edit btn btn-info float-right mr-1"><i class="fas fa-info-circle"></i></a>
+                       class="edit btn btn-info float-right mr-1"><i class="fas fa-info-circle"></i></a>
                 </div>
             </div>
         @endforeach

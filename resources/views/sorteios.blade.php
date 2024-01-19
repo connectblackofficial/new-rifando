@@ -1,163 +1,161 @@
 @extends('layouts.app')
 
 @section("scripts-top")
-<script>
+    <script>
 
 
+    </script>
 
-</script>
 
+    <style>
+        @media (max-width: 768px) {
+            .app-main {
+                margin-top: 50px !important;
+            }
+        }
 
-<style>
-    @media (max-width: 768px) {
+        .rifas {
+            min-height: 100vh;
+        }
+
         .app-main {
-            margin-top: 50px !important;
-        }
-    }
-
-    .rifas{
-        min-height: 100vh;
-    }
-
-    .app-main {
-        border-top-right-radius: 20px;
-        border-top-left-radius: 20px;
-        max-width: 600px;
-        margin-top: 40px;
-        margin-bottom: 50px;
-        border-bottom-right-radius: 20px;
-        border-bottom-left-radius: 20px;
-    }
-
-    .app-main a {
-        text-decoration: none;
-    }
-
-    .app-main a:hover {
-        text-decoration: none;
-    }
-
-    .app-title {
-        display: flex;
-        align-items: self-end;
-        padding-bottom: 10px;
-    }
-
-    .app-title h1 {
-        color: rgba(0, 0, 0, .9);
-        padding-right: 5px;
-        font-weight: 600;
-        font-size: 1.3em;
-        margin: 0;
-        padding-top: 10px;
-    }
-
-    .app-title .app-title-desc {
-        color: rgba(0, 0, 0, .5);
-        padding-top: 6px;
-        font-size: .9em;
-    }
-
-
-    /* *************************************************************** */
-    /* Card Rifa em Destaque */
-    /* *************************************************************** */
-    .rifas {
-        background: #e4e4e4;
-        border-top-right-radius: 20px;
-        border-top-left-radius: 20px;
-        position: absolute;
-        border-bottom-right-radius: 20px;
-        border-bottom-left-radius: 20px;
-    }
-
-    .rifa-dark {
-        background-color: #383838;
-    }
-
-    .card-rifa-destaque .img-rifa-destaque img {
-        width: 100%;
-        height: 290px;
-        border-top-right-radius: 20px;
-        border-top-left-radius: 20px;
-    }
-
-    .card-rifa-destaque {
-        border-top-right-radius: 20px;
-        border-top-left-radius: 20px;
-        padding-bottom: 10px;
-        background: #fff;
-        margin-bottom: 10px;
-        border-bottom-right-radius: 20px;
-        border-bottom-left-radius: 20px;
-    }
-
-    .title-rifa-destaque {
-        padding-top: 5px;
-        padding-left: 10px;
-    }
-
-    .title-rifa-destaque h1 {
-        color: #202020;
-        -webkit-line-clamp: 2 !important;
-        margin-bottom: 1px;
-        font-weight: 500;
-        font-size: 1em;
-    }
-
-    .title-rifa-destaque p {
-        color: rgba(0, 0, 0, .7);
-        font-size: .75em;
-        max-width: 96%;
-        margin: 0;
-    }
-
-    /* *************************************************************** */
-
-
-    /* *************************************************************** */
-    /* Card Rifa Normal */
-    /* *************************************************************** */
-    .card-rifa img {
-        width: 100px;
-        height: 100px;
-        border-radius: 10px;
-    }
-
-    .card-rifa {
-        background: #fff;
-        padding: 5px;
-        margin-bottom: 10px;
-        border-radius: 10px;
-        display: flex
-    }
-
-    .title-rifa {
-        margin-left: 15px;
-        width: 100%;
-    }
-
-    .blink {
-        margin-top: 5px;
-        animation: animate 1.5s linear infinite;
-    }
-
-
-
-    @keyframes animate {
-        0% {
-            opacity: 0;
+            border-top-right-radius: 20px;
+            border-top-left-radius: 20px;
+            max-width: 600px;
+            margin-top: 40px;
+            margin-bottom: 50px;
+            border-bottom-right-radius: 20px;
+            border-bottom-left-radius: 20px;
         }
 
-        50% {
-            opacity: 0.7;
+        .app-main a {
+            text-decoration: none;
         }
 
-        100% {
-            opacity: 0;
+        .app-main a:hover {
+            text-decoration: none;
         }
-    }
-</style>
+
+        .app-title {
+            display: flex;
+            align-items: self-end;
+            padding-bottom: 10px;
+        }
+
+        .app-title h1 {
+            color: rgba(0, 0, 0, .9);
+            padding-right: 5px;
+            font-weight: 600;
+            font-size: 1.3em;
+            margin: 0;
+            padding-top: 10px;
+        }
+
+        .app-title .app-title-desc {
+            color: rgba(0, 0, 0, .5);
+            padding-top: 6px;
+            font-size: .9em;
+        }
+
+
+        /* *************************************************************** */
+        /* Card Rifa em Destaque */
+        /* *************************************************************** */
+        .rifas {
+            background: #e4e4e4;
+            border-top-right-radius: 20px;
+            border-top-left-radius: 20px;
+            position: absolute;
+            border-bottom-right-radius: 20px;
+            border-bottom-left-radius: 20px;
+        }
+
+        .rifa-dark {
+            background-color: #383838;
+        }
+
+        .card-rifa-destaque .img-rifa-destaque img {
+            width: 100%;
+            height: 290px;
+            border-top-right-radius: 20px;
+            border-top-left-radius: 20px;
+        }
+
+        .card-rifa-destaque {
+            border-top-right-radius: 20px;
+            border-top-left-radius: 20px;
+            padding-bottom: 10px;
+            background: #fff;
+            margin-bottom: 10px;
+            border-bottom-right-radius: 20px;
+            border-bottom-left-radius: 20px;
+        }
+
+        .title-rifa-destaque {
+            padding-top: 5px;
+            padding-left: 10px;
+        }
+
+        .title-rifa-destaque h1 {
+            color: #202020;
+            -webkit-line-clamp: 2 !important;
+            margin-bottom: 1px;
+            font-weight: 500;
+            font-size: 1em;
+        }
+
+        .title-rifa-destaque p {
+            color: rgba(0, 0, 0, .7);
+            font-size: .75em;
+            max-width: 96%;
+            margin: 0;
+        }
+
+        /* *************************************************************** */
+
+
+        /* *************************************************************** */
+        /* Card Rifa Normal */
+        /* *************************************************************** */
+        .card-rifa img {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+        }
+
+        .card-rifa {
+            background: #fff;
+            padding: 5px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            display: flex
+        }
+
+        .title-rifa {
+            margin-left: 15px;
+            width: 100%;
+        }
+
+        .blink {
+            margin-top: 5px;
+            animation: animate 1.5s linear infinite;
+        }
+
+
+        @keyframes animate {
+            0% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+    </style>
 
 @endsection
 @section('content')
@@ -262,27 +260,21 @@
 
                 <div class="d-flex justify-content-center mb-4">
                     <span class="badge bg-info justify-content-center" id="btn-ativos" onclick="showAtivos(this)"
-                        style="cursor: pointer;width: 100px; height: 40px; display: flex; align-items: center; text-align: center !important">Ativos</span>
+                          style="cursor: pointer;width: 100px; height: 40px; display: flex; align-items: center; text-align: center !important">Ativos</span>
                     <span class="badge bg-secondary justify-content-center ml-2" id="btn-concluidos"
-                        onclick="showConcluidos(this)"
-                        style=" cursor: pointer;width: 100px; height: 40px; display: flex; align-items: center; text-align: center !important">Concluídos</span>
+                          onclick="showConcluidos(this)"
+                          style=" cursor: pointer;width: 100px; height: 40px; display: flex; align-items: center; text-align: center !important">Concluídos</span>
                 </div>
-
 
 
                 {{-- Outras Rifas --}}
                 @foreach ($products->where('favoritar', '=', 0) as $product)
-                    <?php
-                        $imagem=$product->imagem();
-                        if(!isset($imagem['id'])){
-                            continue;
-                        }
-                        ?>
+
                     <a href="{{ route('product', ['slug' => $product->slug]) }}"
-                        class="sorteio sorteio-{{ strtolower($product->status) }} {{ $product->status == 'Finalizado' ? 'd-none' : '' }}">
+                       class="sorteio sorteio-{{ strtolower($product->status) }} {{ $product->status == 'Finalizado' ? 'd-none' : '' }}">
                         <div class="card-rifa {{ $config->tema }}">
                             <div class="img-rifa">
-                                <img src="/products/{{ $product->imagem()->name }}" alt="" srcset="">
+                                <img src="{{$product->getDefaultImageUrl()}}" alt="" srcset="">
                             </div>
                             <div class="title-rifa title-rifa-destaque {{ $config->tema }}">
 

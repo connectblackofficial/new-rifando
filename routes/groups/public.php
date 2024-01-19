@@ -7,6 +7,11 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RegulationController;
 use App\Http\Controllers\TermsOfUse;
 use Illuminate\Support\Facades\Route;
+
+Route::get('home', function () {
+    return redirect(route("home"));
+})->name('homeRedirect');
+
 Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
 Route::post('login', 'Auth\LoginController@login');
 Route::post('logout', 'Auth\LoginController@logout')->name('logout');

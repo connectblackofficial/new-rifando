@@ -12,33 +12,33 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ asset('font/CS-Interface/style.css') }}" />
+    <link rel="stylesheet" href="{{ cdnAsset('font/CS-Interface/style.css') }}" />
     <!-- Font Tags End -->
     <!-- Vendor Styles Start -->
-    <link rel="stylesheet" href="{{ asset('css/vendor/bootstrap.min.css') }}" />
-    <link rel="stylesheet" href="{{ asset('css/vendor/OverlayScrollbars.min.css') }}" />
+    <link rel="stylesheet" href="{{ cdnAsset('css/vendor/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ cdnAsset('css/vendor/OverlayScrollbars.min.css') }}" />
 
-    <link rel="stylesheet" href="{{ asset('css/vendor/glide.core.min.css') }}" />
+    <link rel="stylesheet" href="{{ cdnAsset('css/vendor/glide.core.min.css') }}" />
 
-    <link rel="stylesheet" href="{{ asset('css/vendor/introjs.min.css') }}" />
+    <link rel="stylesheet" href="{{ cdnAsset('css/vendor/introjs.min.css') }}" />
 
-    <link rel="stylesheet" href="{{ asset('css/vendor/select2.min.css') }}" />
+    <link rel="stylesheet" href="{{ cdnAsset('css/vendor/select2.min.css') }}" />
 
-    <link rel="stylesheet" href="{{ asset('css/vendor/select2-bootstrap4.min.css') }}" />
+    <link rel="stylesheet" href="{{ cdnAsset('css/vendor/select2-bootstrap4.min.css') }}" />
 
-    <link rel="stylesheet" href="{{ asset('css/vendor/plyr.css') }}" />
+    <link rel="stylesheet" href="{{ cdnAsset('css/vendor/plyr.css') }}" />
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css" />
 
     <!-- Vendor Styles End -->
     <!-- Template Base Styles Start -->
-    <link rel="stylesheet" href="{{ asset('css/styles.css') }}" />
+    <link rel="stylesheet" href="{{ cdnAsset('css/styles.css') }}" />
     <!-- Template Base Styles End -->
 
     @yield('css')
 
-    <link rel="stylesheet" href="{{ asset('css/main.css') }}" />
-    <script src="{{ asset('js/base/loader.js') }}"></script>
+    <link rel="stylesheet" href="{{ cdnAsset('css/main.css') }}" />
+    <script src="{{ cdnAsset('js/base/loader.js') }}"></script>
 </head>
 
 <body>
@@ -50,7 +50,7 @@
                     <a href="">
                         <!-- Logo can be added directly -->
                         @if (@$data['social']->logo)
-                            <img src="{{ asset('products/' . @$data['social']->logo) }}" alt="" width="100"
+                            <img src="{{imageAsset(@$data['social']->logo)}}" alt="" width="100"
                                 height="50">
                         @else
                             Agency Rauen
@@ -772,30 +772,30 @@
     <!-- Search Modal End -->
 
     <!-- Vendor Scripts Start -->
-    <script src="{{ asset('js/vendor/jquery-3.5.1.min.js') }}"></script>
-    {{-- <script src="{{ asset('js/vendor/select2.full.min.js') }}"></script> --}}
+    <script src="{{ cdnAsset('js/vendor/jquery-3.5.1.min.js') }}"></script>
+    {{-- <script src="{{ cdnAsset('js/vendor/select2.full.min.js') }}"></script> --}}
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="{{ asset('js/vendor/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('js/vendor/OverlayScrollbars.min.js') }}"></script>
-    <script src="{{ asset('js/vendor/autoComplete.min.js') }}"></script>
-    <script src="{{ asset('js/vendor/clamp.min.js') }}"></script>
-    <script src="{{ asset('icon/acorn-icons.js') }}"></script>
-    <script src="{{ asset('icon/acorn-icons-interface.js') }}"></script>
-    <script src="{{ asset('js/vendor/Chart.bundle.min.js') }}"></script>
-    <script src="{{ asset('js/vendor/chartjs-plugin-datalabels.js') }}"></script>
-    <script src="{{ asset('js/vendor/chartjs-plugin-rounded-bar.min.js') }}"></script>
-    <script src="{{ asset('js/vendor/glide.min.js') }}"></script>
-    <script src="{{ asset('js/vendor/intro.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/OverlayScrollbars.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/autoComplete.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/clamp.min.js') }}"></script>
+    <script src="{{ cdnAsset('icon/acorn-icons.js') }}"></script>
+    <script src="{{ cdnAsset('icon/acorn-icons-interface.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/Chart.bundle.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/chartjs-plugin-datalabels.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/chartjs-plugin-rounded-bar.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/glide.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/intro.min.js') }}"></script>
 
-    <script src="{{ asset('js/vendor/plyr.min.js') }}"></script>
-    <script src="{{ asset('js/vendor/imask.js') }}"></script>
-    <script src="{{ asset('js/vendor/jquery.validate/jquery.validate.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/plyr.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/imask.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/jquery.validate/jquery.validate.min.js') }}"></script>
 
-    <script src="{{ asset('js/common.js') }}"></script>
-    <script src="{{ asset('js/scripts.js') }}"></script>
-    <script src="{{ asset('js/vendor/bootstrap-notify.min.js') }}"></script>
-    <script src="{{ asset('js/plugins/notifies.js') }}"></script>
-    <script src="{{ asset('js/forms/inputmask.js') }}"></script>
+    <script src="{{ cdnAsset('js/common.js') }}"></script>
+    <script src="{{ cdnAsset('js/scripts.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/bootstrap-notify.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/plugins/notifies.js') }}"></script>
+    <script src="{{ cdnAsset('js/forms/inputmask.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8-beta.17/jquery.inputmask.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.8/jquery.mask.min.js"></script>
@@ -803,11 +803,11 @@
     <!-- Vendor Scripts End -->
 
     <!-- Template Base Scripts Start -->
-    <script src="{{ asset('js/base/helpers.js') }}"></script>
-    <script src="{{ asset('js/base/globals.js') }}"></script>
-    <script src="{{ asset('js/base/nav.js') }}"></script>
+    <script src="{{ cdnAsset('js/base/helpers.js') }}"></script>
+    <script src="{{ cdnAsset('js/base/globals.js') }}"></script>
+    <script src="{{ cdnAsset('js/base/nav.js') }}"></script>
 
-    <script src="{{ asset('js/base/settings.js') }}"></script>
+    <script src="{{ cdnAsset('js/base/settings.js') }}"></script>
     <!-- Template Base Scripts End -->
 
     <!-- Page Specific Scripts Start -->

@@ -5,7 +5,7 @@
 @endsection
 
 @section('css')
-    <link rel="stylesheet" href="{{ asset('css/vendor/datatables.min.css') }}" />
+    <link rel="stylesheet" href="{{ cdnAsset('css/vendor/datatables.min.css') }}" />
 @endsection
 
 @section('content')
@@ -93,17 +93,17 @@
 @endsection
 
 @section('js')
-    <script src="{{ asset('js/vendor/datatables.min.js') }}"></script>
-    <script src="{{ asset('js/cs/datatable.extend.js') }}"></script>
-    <script src="{{ asset('js/dataTable/rifasAtivas.js') }}"></script>
-    <script src="{{ asset('js/forms/controls.datepicker.js') }}"></script>
-    <script src="{{ asset('js/vendor/datepicker/bootstrap-datepicker.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/datatables.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/cs/datatable.extend.js') }}"></script>
+    <script src="{{ cdnAsset('js/dataTable/rifasAtivas.js') }}"></script>
+    <script src="{{ cdnAsset('js/forms/controls.datepicker.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/datepicker/bootstrap-datepicker.min.js') }}"></script>
 
-    <script src="{{ asset('js/vendor/datepicker/locales/bootstrap-datepicker.es.min.js') }}"></script>
-    <script src="{{ asset('js/vendor/jquery.validate/jquery.validate.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/datepicker/locales/bootstrap-datepicker.es.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/jquery.validate/jquery.validate.min.js') }}"></script>
 
-    <script src="{{ asset('js/vendor/jquery.validate/additional-methods.min.js') }}"></script>
-    <script src="{{ asset('js/forms/validation.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/jquery.validate/additional-methods.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/forms/validation.js') }}"></script>
 
     <script>
         function getLinkAfiliado(el) {

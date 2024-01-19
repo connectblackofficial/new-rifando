@@ -139,7 +139,6 @@
     }
 
 
-
     @keyframes animate {
         0% {
             opacity: 0;
@@ -207,7 +206,7 @@
                     <a href="{{ route('product', ['slug' => $product->slug]) }}">
                         <div class="card-rifa-destaque">
                             <div class="img-rifa-destaque">
-                                <img src="/products/{{ $product->imagem()->name }}" alt="" srcset="">
+                                <img src="{{$product->getDefaultImageUrl()}}" alt="" srcset="">
                             </div>
                             <div class="title-rifa-destaque">
                                 <h1>{{ $product->name }}</h1>
@@ -223,7 +222,7 @@
                     <a href="{{ route('product', ['slug' => $product->slug]) }}">
                         <div class="card-rifa">
                             <div class="img-rifa">
-                                <img src="/products/{{ $product->imagem()->name }}" alt="" srcset="">
+                                <img src="{{$product->getDefaultImageUrl()}}" alt="" srcset="">
                             </div>
                             <div class="title-rifa title-rifa-destaque">
                                 <h1>{{ $product->name }}</h1>
@@ -303,20 +302,26 @@
                     <div class="ganhadores">
 
                         @foreach ($ganhadores as $ganhador)
-                            <div class="ganhador" onclick="verRifa('{{ route('product', ['slug' => $ganhador->rifa()->slug]) }}')">
+                                <?php
+                                /** @var \App\Models\Product $ganhadorRifa */
+                                $ganhadorRifa = $ganhador->rifa();
+                                ?>
+                            <div class="ganhador"
+                                 onclick="verRifa('{{ route('product', ['slug' => $ganhadorRifa->slug]) }}')">
                                 <div class="ganhador-foto">
-                                    <img src="images/sem-foto.jpg" class="" alt="{{ $product->name }}"
-                                        style="min-height: 50px;max-height: 20px;border-radius:10px;">
+                                    <img src="<?=cdnImageAsset('sem-foto.jpg')?>" class="" alt="{{ $ganhadorRifa->name }}"
+                                         style="min-height: 50px;max-height: 20px;border-radius:10px;">
                                 </div>
                                 <div class="ganhador-desc">
                                     <h3>{{ $ganhador->ganhador }}</h3>
                                     <p>
-                                        Ganhou <strong>{{ $ganhador->descricao }}</strong> cota {{ $ganhador->cota }} <br>
-                                        <strong>Sorteio: </strong> {{ date('d/m/Y', strtotime($ganhador->rifa()->draw_prediction)) }}
+                                        Ganhou <strong>{{ $ganhador->descricao }}</strong> cota {{ $ganhador->cota }}
+                                        <br>
+                                        <strong>Sorteio: </strong> {{ date('d/m/Y', strtotime($ganhadorRifa->draw_prediction)) }}
                                     </p>
                                 </div>
                                 <div class="ganhador-rifa">
-                                    <img src="/products/{{ $ganhador->rifa()->imagem()->name }}">
+                                    <img src="{{ $ganhadorRifa->getDefaultImageUrl()}}">
                                 </div>
                             </div>
                         @endforeach

@@ -66,7 +66,7 @@ class AfiliadoController extends Controller
             'email' => $request->email,
             'password' => $request->password,
             'afiliado' => true,
-            'parent_id' => getSiteOwner()
+            'parent_id' => getSiteOwnerId()
         ];
 
         if (Auth::attempt($credentials)) {
@@ -101,7 +101,7 @@ class AfiliadoController extends Controller
             'cpf' => $request->cpf,
             'pix' => $request->pix,
             'afiliado' => true,
-            'parent_id' => getSiteOwner()
+            'parent_id' => getSiteOwnerId()
         ]);
 
         Auth::login($user);
@@ -127,7 +127,7 @@ class AfiliadoController extends Controller
             ->join('participant', 'participant.id', '=', 'ganhos_afiliados.participante_id')
             ->where('afiliado_id', '=', Auth::user()->id)
             ->where('participant.pagos', '>', 0)
-            ->where("participant.user_id", getSiteOwner())
+            ->where("participant.user_id", getSiteOwnerId())
             ->get();
 
         $data = [
@@ -147,7 +147,7 @@ class AfiliadoController extends Controller
             'product_id' => $idRifa,
             'afiliado_id' => Auth::user()->id,
             'token' => uniqid(),
-            'user_id' => getSiteOwner()
+            'user_id' => getSiteOwnerId()
         ]);
 
         return back()->with(['message' => 'Afiliado com sucesso!']);
@@ -165,7 +165,7 @@ class AfiliadoController extends Controller
 
             $solicitacao = SolicitacaoAfiliado::create([
                 'afiliado_id' => $afiliadoId,
-                'user_id' => getSiteOwner()
+                'user_id' => getSiteOwnerId()
             ]);
 
             GanhosAfiliado::siteOwner()->where('afiliado_id', '=', $afiliadoId)->update([

@@ -2,11 +2,14 @@
 
 namespace App\Enums;
 
+use App\Traits\EnumTrait;
 use BenSampo\Enum\Enum;
 
 final class FileUploadTypeEnum extends Enum
 {
-    const Document =   'document';
-    const Image =   'image';
+    use EnumTrait;
+
+    const Document = 'document';
+    const Image = 'image';
 
 }

@@ -4,56 +4,49 @@ namespace App\Helpers;
 
 use App\Enums\FileUploadTypeEnum;
 use App\Exceptions\UserErrorException;
-use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
 
 class FileUploadHelper
 {
-    private $request;
-    private $name;
+    private $uploadedFile;
     private $type;
 
-    function __construct(Request $request, $name, $type)
+    function __construct(UploadedFile $uploadedFile, $type)
     {
-        $this->request = $request;
-        $this->name = $name;
+        $this->uploadedFile = $uploadedFile;
         $this->type = $type;
+
         if (!in_array($type, FileUploadTypeEnum::getValues())) {
             throw new UserErrorException("Tipo inválido");
         }
-
     }
 
+    function isImage()
+    {
+        if (!$this->uploadedFile->isValid()) {
+            return false;
+        }
+
+        $imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/svg+xml'];
+        return in_array($this->uploadedFile->getMimeType(), $imageMimeTypes);
+    }
 
     public function upload()
     {
-        $name = $this->name;
-
-        if ($this->request->hasFile($name)) {
-            if ($this->type == FileUploadTypeEnum::Document) {
-                $rules = [
-                    $name => 'required|file|mimes:pdf,doc,docx|max:2048'
-                ];
-                $uploadPath = getSiteUploadPath() . '/images';
-            } else {
-                $rules = [
-                    $name => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
-                ];
-                $uploadPath = getSiteUploadPath() . '/documents';
-            }
-
-            $validator = Validator::make($this->request->all(), $rules);
-            if ($validator->fails()) {
-                throw new UserErrorException($validator->messages()->first());
-            } else {
-                $path = $this->request->file($name)->store($uploadPath, 'public');
-                if ($path === false) {
-                    throw new UserErrorException("Ocorreu um erro ao realizar o upload.");
-                }
-                return $path;
-            }
+        if ($this->type == FileUploadTypeEnum::Document) {
+            $uploadPath = getSiteUploadPath() . '/documents';
         } else {
-            throw new UserErrorException("Arquivo vazio.");
+            $uploadPath = getSiteUploadPath() . '/images';
         }
+        $isValid = $this->isImage();
+        if (!$isValid) {
+            throw new UserErrorException("Imagem inválida.");
+        }
+        $path = $this->uploadedFile->store($uploadPath, 'public');
+        if ($path === false) {
+            throw new UserErrorException("Ocorreu um erro ao realizar o upload.");
+        }
+        return $path;
     }
 }

@@ -78,7 +78,7 @@ class LiberarReservasExpiradas extends Command
         // Liberando reservas para o novo modelo
         $participantes = Participant::where('reservados', '>', 0)->get();
         foreach ($participantes as $participante) {
-            $rifa = $participante->rifa();
+            $rifa = $participante->firstProduct();
 
             $criacao = date('Y-m-d H:i:s', strtotime($participante->created_at));
             $minutosExpiracao = $rifa->expiracao;

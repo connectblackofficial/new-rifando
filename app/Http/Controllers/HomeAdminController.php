@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Participant;
 use App\Models\Product;
 use App\WhatsappMensagem;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class HomeAdminController extends Controller
@@ -28,7 +29,7 @@ class HomeAdminController extends Controller
 
         if (WhatsappMensagem::siteOwner()->count() == 0) {
             for ($i = 0; $i < 6; $i++) {
-                WhatsappMensagem::create(['user_id' => getSiteOwner()]);
+                WhatsappMensagem::create(['user_id' => getSiteOwnerId()]);
             }
         }
 
@@ -64,7 +65,7 @@ class HomeAdminController extends Controller
             }
         }
 
-        Environment::where("id", getSiteConfigId())->update([
+        getSiteConfig()->update([
             'token_api_wpp' => $request->token_api_wpp
         ]);
 
@@ -74,7 +75,13 @@ class HomeAdminController extends Controller
     public function clientes(Request $request)
     {
         if ($request->search) {
-            $clientes = Customer::siteOwner()->where('nome', 'like', '%' . $request->search . '%')->get();
+            $search = $request->search;
+            $clientes = Customer::siteOwner()->where(function (Builder $query) use($search){
+                $query->orWhere('nome', 'like', '%' .$search. '%');
+                $query->orWhere('telephone', 'like', '%' .$search. '%');
+                $query->orWhere('cpf', 'like', '%' .$search. '%');
+                $query->orWhere('email	', 'like', '%' .$search. '%');
+            })->get();
         } else {
             $clientes = Customer::siteOwner()->get();
         }

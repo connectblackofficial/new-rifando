@@ -1,5 +1,3 @@
-<!-- Stored in resources/views/layouts/master.blade.php -->
-
 <html lang="pt-br">
 
 <head>
@@ -19,7 +17,7 @@
     @yield('scripts-top')
 
     <!-- Bootstrap CSS -->
-    <link href="{{asset("assets/css/site.css")}}" rel="stylesheet">
+    <link href="{{cdnAsset("build/site.css")}}" rel="stylesheet">
 
 
     <title><?php echo @$data['social']->name; ?> @yield('title')</title>
@@ -31,10 +29,10 @@
         var user_phone="<?=getSiteOwnerUser()->telephone?>"
     </script>
 
-
+    <script src="{{cdnAsset("js/site-header-bundle.min.js")}}"></script>
 </head>
 
-<body>
+<body id="{{Route::currentRouteName()}}">
 @section('sidebar')
 @show
 
@@ -94,7 +92,7 @@ $subDomain = explode('.', request()->getHost());
                 <div class="container container-600 h-100 d-flex align-items-center justify-content-between">
                     <a href="/">
                         @if (@$data['social']->logo)
-                            <img src="{{ asset('products/' . @$data['social']->logo) }}" alt=""
+                            <img src="{{imageAsset(@$data['social']->logo)}}" alt=""
                                  class="app-brand img-fluid">
                         @else
                             Agency Rauen
@@ -218,8 +216,7 @@ $subDomain = explode('.', request()->getHost());
         el.classList.toggle("d-none");
     }
 </script>
-
-<script src="{{asset("assets/js/site-bundle.min.js")}}"></script>
+<script src="{{cdnAsset("js/site-footer-bundle.min.js")}}"></script>
 <script>
     $(function () {
         $('[data-toggle="tooltip"]').tooltip();

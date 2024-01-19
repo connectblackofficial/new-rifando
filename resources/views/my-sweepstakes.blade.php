@@ -87,7 +87,7 @@
                                 <tbody>
                                     <tr>
                                         <td style="width: 50px;" class="text-center"><img style="border-radius: 5px;"
-                                                src="/products/{{ $product->imagem() ? $product->imagem()->name : '' }}"
+                                                src="{{$product->getDefaultImageUrl()}}"
                                                 width="50" alt=""></td>
                                         <td>{{ $product->status }}</td>
                                         <td>{{ $product->name }}</td>
@@ -833,7 +833,7 @@
                                                                             @foreach ($product->fotos() as $key => $foto)
                                                                                 <div class="col-md-4 text-center"
                                                                                     id="foto-{{ $foto->id }}">
-                                                                                    <img src="/products/{{ $foto->name }}"
+                                                                                    <img src="{{ imageAsset($foto->name) }}"
                                                                                         width="200"
                                                                                         style="border-radius: 10px;">
                                                                                     @if ($key >= 0)
@@ -1536,7 +1536,7 @@
                         <div class="modal-content" style="border: none;">
                             <div class="modal-header" style="background-color: #fff;">
                                 <h5 class="modal-title" id="exampleModalLabel" style="color: #000;"><img
-                                        src="{{ asset('images/treofeu.png') }}" alt=""> Top Compradores</h5>
+                                        src="{{ cdnImageAsset('treofeu.png') }}" alt=""> Top Compradores</h5>
                                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
                                     style="color: #000;">
                                     <span aria-hidden="true">&times;</span>

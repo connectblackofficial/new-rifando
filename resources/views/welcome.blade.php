@@ -1,252 +1,8 @@
 @extends('layouts.app')
-@section("scripts-top")
-    <script type="text/javascript" src="sw.js"></script>
-    <style>
-        body {
-            background: #000 !important;
-        }
-        @media only screen and (-webkit-min-device-pixel-ratio: 1) {
 
-            ::i-block-chrome,
-            .app-main {
-                margin-top: 100px !important;
-            }
-        }
-
-        .app-main {
-            border-top-right-radius: 20px;
-            border-top-left-radius: 20px;
-            max-width: 600px;
-            margin-top: 40px;
-            margin-bottom: 50px;
-            border-bottom-right-radius: 20px;
-            border-bottom-left-radius: 20px;
-        }
-
-        .app-main a {
-            text-decoration: none;
-        }
-
-        .app-main a:hover {
-            text-decoration: none;
-        }
-
-        .app-title {
-            display: flex;
-            align-items: self-end;
-            padding-bottom: 10px;
-        }
-
-        .app-title h1 {
-            color: rgba(0, 0, 0, .9);
-            padding-right: 5px;
-            font-weight: 600;
-            font-size: 1.3em;
-            margin: 0;
-            padding-top: 10px;
-        }
-
-        .app-title .app-title-desc {
-            color: rgba(0, 0, 0, .5);
-            padding-top: 6px;
-            font-size: .9em;
-        }
-
-
-        /* *************************************************************** */
-        /* Card Rifa em Destaque */
-        /* *************************************************************** */
-        .rifas {
-            background: #e4e4e4;
-            border-top-right-radius: 20px;
-            border-top-left-radius: 20px;
-            position: absolute;
-            border-bottom-right-radius: 20px;
-            border-bottom-left-radius: 20px;
-            min-height: 100vh;
-        }
-
-        .rifa-dark {
-            background-color: #383838;
-        }
-
-        .card-rifa-destaque .img-rifa-destaque img {
-            width: 100%;
-            height: 290px;
-            border-top-right-radius: 20px;
-            border-top-left-radius: 20px;
-        }
-
-        .card-rifa-destaque {
-            border-top-right-radius: 20px;
-            border-top-left-radius: 20px;
-            padding-bottom: 10px;
-            background: #fff;
-            margin-bottom: 10px;
-            border-bottom-right-radius: 20px;
-            border-bottom-left-radius: 20px;
-        }
-
-        .title-rifa-destaque {
-            padding-top: 5px;
-            padding-left: 10px;
-        }
-
-        .title-rifa-destaque h1 {
-            color: #202020;
-            -webkit-line-clamp: 2 !important;
-            margin-bottom: 1px;
-            font-weight: 700;
-            font-size: 19px;
-            letter-spacing: -.2px;
-        }
-
-        .title-rifa-destaque p {
-            color: rgba(0, 0, 0, .7);
-            font-size: .75em;
-            max-width: 96%;
-            margin: 0;
-        }
-
-        /* *************************************************************** */
-
-
-        /* *************************************************************** */
-        /* Card Rifa Normal */
-        /* *************************************************************** */
-        .card-rifa img {
-            width: 300px;
-            border-radius: 10px;
-        }
-
-        .card-rifa {
-            background: #fff;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            display: flex
-        }
-
-        .title-rifa {
-            margin-left: 15px;
-            width: 100%;
-        }
-
-        .blink {
-            margin-top: 5px;
-            animation: animate 1.5s linear infinite;
-        }
-
-
-        @keyframes animate {
-            0% {
-                opacity: 0;
-            }
-
-            50% {
-                opacity: 0.7;
-            }
-
-            100% {
-                opacity: 0;
-            }
-        }
-    </style>
-
-@endsection
 @section('content')
-    <style>
-        .duvida {
-            background-color: #ffffff5e;
-            border-radius: 10px;
-            height: 60px;
-            align-items: center;
-            justify-content: center;
-            margin-top: 7px;
-            cursor: pointer;
-        }
-
-        .icone-duvidas {
-            width: 50px;
-            justify-content: center;
-            align-items: center;
-            background-color: #b9b9b9;
-            height: 35px;
-            border-radius: 10px;
-            text-align: center;
-            font-size: 20px;
-        }
-
-        .text-duvidas {
-            display: flex !important;
-            flex-direction: column;
-            justify-content: center
-        }
-
-        .f-15 {
-            font-size: 15px;
-        }
-
-        .f-12 {
-            font-size: 12px;
-        }
-
-        .data-sorteio {
-            /* float: right; */
-            padding-right: 10px;
-            font-weight: thin;
-            text-align: center;
-            /* margin-top: 10px; */
-            color: #000;
-        }
-
-        .rifas.dark {
-            background: #383838;
-        }
-
-        .app-title.dark h1 {
-            color: #fff;
-        }
-
-        .app-title-desc.dark {
-            color: #fff;
-        }
-
-        .card-rifa-destaque.dark {
-            background: #222222;
-        }
-
-        .title-rifa-destaque.dark h1 {
-            color: #fff;
-        }
-
-        .title-rifa-destaque.dark p {
-            color: #fff;
-        }
-
-        .card-rifa.dark {
-            background: #222222;
-        }
-
-        .text-duvidas.dark h6 {
-            color: #fff;
-        }
-
-        .text-duvidas.dark p {
-            color: #fff !important;
-        }
-
-        .data-sorteio.dark {
-            color: #fff !important;
-        }
-
-        .app-title.dark {
-            color: #fff;
-        }
-    </style>
-
-    <!-- <img src="https://storage.googleapis.com/portal-da-promo/L01_banner_promocaokibon-tudoviraverao-20211638483979877.jpg" class="rounded-md"> -->
-    <img src="https://eemkt.svicente.com.br/wp-content/themes/svicente/img/renovasuacasa/banner2-desktop.webp"
+    <!-- <img src="<?= cdnImageAsset('bg-2.jpg') ?>" class="rounded-md"> -->
+    <img src="<?=cdnImageAsset('banner2-desktop.webp')?>"
          class="rounded-md" style="filter: hue-rotate(15deg);">
 
 
@@ -255,7 +11,7 @@
             <div class="d-flex" style="column-gap: 15px; background: #ffffff9c; border-radius: 10px; padding: 10px;">
                 <div class="step"
                      style="width: 70px;height: 70px;background: #0000000d;border-radius: 50px;font-size: 25px;text-align: center;padding: 10px;">
-                    <img src="https://cdn.icon-icons.com/icons2/989/PNG/512/Ribbon_Purple_icon-icons.com_75198.png">
+                    <img src="<?=cdnImageAsset('Ribbon_Purple_icon-icons.com_75198.png')?>">
                 </div>
                 <div style="display: grid; align-content: center;">
                     <p style="margin-bottom: 0; font-weight: 700;">Escolha o sorteio</p>
@@ -267,7 +23,7 @@
             <div class="d-flex" style="column-gap: 15px; background: #ffffff9c; border-radius: 10px; padding: 10px;">
                 <div class="step"
                      style="width: 70px;height: 70px;background: #0000000d;border-radius: 50px;font-size: 25px;text-align: center;padding: 10px;">
-                    <img src="https://cdn.icon-icons.com/icons2/989/PNG/512/Ribbon_Purple_icon-icons.com_75198.png">
+                    <img src="<?=cdnImageAsset('Ribbon_Purple_icon-icons.com_75198.png')?>">
                 </div>
                 <div style="display: grid; align-content: center;">
                     <p style="margin-bottom: 0; font-weight: 700;">Compre seus números</p>
@@ -279,7 +35,7 @@
             <div class="d-flex" style="column-gap: 15px; background: #ffffff9c; border-radius: 10px; padding: 10px;">
                 <div class="step"
                      style="width: 70px;height: 70px;background: #0000000d;border-radius: 50px;font-size: 25px;text-align: center;padding: 10px;">
-                    <img src="https://t4.ftcdn.net/jpg/05/42/44/99/360_F_542449981_MUnHerAwhqwrIsi1TTkTjSJgt1M8ZpxX.png">
+                    <img src="<?=cdnImageAsset('ftcdn_icon1.png')?>">
                 </div>
                 <div style="display: grid; align-content: center;">
                     <p style="margin-bottom: 0; font-weight: 700;">Pague o QR Code</p>
@@ -291,7 +47,7 @@
             <div class="d-flex" style="column-gap: 15px; background: #ffffff9c; border-radius: 10px; padding: 10px;">
                 <div class="step"
                      style="width: 70px;height: 70px;background: #0000000d;border-radius: 50px;font-size: 25px;text-align: center;padding: 10px;">
-                    <img src="https://coisasderh.com.br/wp-content/uploads/2023/02/Certificate-NOV-830x1024.webp"
+                    <img src="<?=cdnImageAsset('Certificate-NOV-830x1024.webp')?>"
                          style="position: relative; top: -8px;"></div>
                 <div style="display: grid; align-content: center;">
                     <p style="margin-bottom: 0; font-weight: 700;">100% de confiança!</p>
@@ -307,17 +63,12 @@
 
     <div class="row">
         @foreach ($products as $product)
-                <?php
-                $imagen = $product->imagem();
-                if (!isset($imagen['name'])) {
-                    continue;
-                }
-                ?>
+
             <div class="col-md-6 col-12">
                 <a href="{{ route('product', ['slug' => $product->slug]) }}">
                     <div class="card-rifa {{ $config->tema }}">
                         <div class="img-rifa">
-                            <img src="/products/{{ $product->imagem()->name }}" alt="" srcset="">
+                            <img src="{{$product->getDefaultImageUrl()}}" alt="" srcset="">
                         </div>
                         <div class="title-rifa title-rifa-destaque {{ $config->tema }}">
 
@@ -366,59 +117,7 @@
         </div>
 
         <style>
-            .ganhador {
-                display: flex !important;
-                margin-bottom: 10px;
-                background: #fff;
-                padding: 5px;
-                border-radius: 10px;
-                cursor: pointer;
-            }
 
-            .ganhador-foto img {
-                width: 52px;
-                height: 52px;
-                border: 2px solid #63ac49;
-                margin-top: 10px;
-            }
-
-            .ganhador-desc {
-                margin-left: 5px;
-                width: 80%;
-            }
-
-            .ganhador-desc h3 {
-                font-size: 1.1em;
-            }
-
-            .ganhador p {
-                font-size: .85em;
-                margin-bottom: 0;
-                opacity: .85;
-            }
-
-            .ganhador-rifa {
-                float: right;
-            }
-
-            .ganhador-rifa img {
-                height: 40px;
-                width: 40px;
-                border-radius: 50rem;
-                margin-top: 5px;
-            }
-
-            .ganhadores a {
-                text-decoration: none !important;
-            }
-
-            .ganhador.dark {
-                background: #222222;
-            }
-
-            .ganhador-desc.dark {
-                color: #fff !important;
-            }
         </style>
 
         <div class="ganhadores">
@@ -428,7 +127,7 @@
                 <div class="ganhador {{ $config->tema }}"
                      onclick="verRifa('{{ route('product', ['slug' => $winner->slug]) }}')">
                     <div class="ganhador-foto">
-                        <img src="images/sem-foto.jpg" class="" alt="{{ $winner->name }}"
+                        <img src="<?=cdnImageAsset('sem-foto.jpg')?>" class="" alt="{{ $winner->name }}"
                              style="min-height: 50px;max-height: 20px;border-radius:10px;">
                     </div>
                     <div class="ganhador-desc {{ $config->tema }}">
@@ -439,20 +138,24 @@
                         </p>
                     </div>
                     <div class="ganhador-rifa">
-                        <img src="/products/{{ $winner->imagem()->name }}">
+                        <img src="{{ $winner->getDefaultImageUrl() }}">
                     </div>
                 </div>
             @endforeach
 
             @foreach ($ganhadores as $ganhador)
+                    <?php
+                    /** @var \App\Models\Product $rifaGanhador */
+                    $rifaGanhador = $ganhador->rifa();
+                    ?>
                 <div class="ganhador {{ $config->tema }}"
-                     onclick="verRifa('{{ route('product', ['slug' => $ganhador->rifa()->slug]) }}')">
+                     onclick="verRifa('{{ route('product', ['slug' => $rifaGanhador->slug]) }}')">
                     <div class="ganhador-foto">
                         @if ($ganhador->foto)
-                            <img src="{{ asset($ganhador->foto) }}" class="" alt=""
+                            <img src="{{ imageAsset($ganhador->foto) }}" class="" alt=""
                                  style="min-height: 50px;max-height: 20px;border-radius:10px;">
                         @else
-                            <img src="images/sem-foto.jpg" class="" alt=""
+                            <img src="<?=cdnImageAsset('sem-foto.jpg')?>" class="" alt=""
                                  style="min-height: 50px;max-height: 20px;border-radius:10px;">
                         @endif
 
@@ -464,11 +167,11 @@
                                     class="badge bg-success p-1"
                                     style="border-radius: 5px;">{{ $ganhador->cota }}</span> <br>
                             <strong>Sorteio: </strong>
-                            {{ date('d/m/Y', strtotime($ganhador->rifa()->draw_date)) }}
+                            {{ date('d/m/Y', strtotime($rifaGanhador->draw_date)) }}
                         </p>
                     </div>
                     <div class="ganhador-rifa">
-                        <img src="/products/{{ $ganhador->rifa()->imagem()->name }}">
+                        <img src="{{ $rifaGanhador->getDefaultImageUrl()}}">
                     </div>
                 </div>
             @endforeach

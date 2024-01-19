@@ -94,7 +94,7 @@
     @foreach ($productModel->numbers() as $numero)
         @if ($numero->groupSide() == 'le')
             <div class="grupo-fazendinha col-3"
-                style="background-image: url('{{ asset('images/bixos/' . $numero->onlyGroup() . '.png') }}'); background-size: 100%;background-repeat: no-repeat">
+                style="background-image: url('{{ cdnImageAsset('bixos/' . $numero->onlyGroup() . '.png') }}'); background-size: 100%;background-repeat: no-repeat">
                 {{-- Numero LE --}}
                 @if ($numero->statusFormated() == 'disponivel')
                     <div class="le" data-grupo="{{ $numero->grupoFazendinha() }}"

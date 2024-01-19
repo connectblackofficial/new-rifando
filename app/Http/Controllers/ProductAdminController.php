@@ -4,13 +4,17 @@
 namespace App\Http\Controllers;
 
 use App\Enums\FileUploadTypeEnum;
+use App\Exceptions\UserErrorException;
 use App\Helpers\FileUploadHelper;
+use App\Http\Requests\SiteProductStoreRequest;
 use App\Models\Premio;
 use App\Models\Product;
 use App\Models\Product as ModelsProduct;
+use App\Models\ProductDescription;
 use App\Models\ProductImage;
 use App\Models\Promocao;
 use App\Models\Raffle;
+use App\Services\ProductService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -75,187 +79,48 @@ class ProductAdminController extends Controller
     }
 
 
-    public function addProduct(Request $request)
+    public function addProduct(SiteProductStoreRequest $request)
     {
 
-        $user = Auth::user();
-
-        $request->validate([
-            'name' => 'required|max:255',
-            'price' => 'required|max:6',
-            'images' => 'required|max:3',
-            'numbers' => 'required|min:1|max:7',
-            'description' => env('REQUIRED_DESCRIPTION') ? 'required|max:50000' : '',
-            'minimo' => 'required',
-            'maximo' => 'required',
-            'expiracao' => 'required|min:0',
-            'gateway' => 'required|in:mp,asaas,paggue'
-        ]);
-        $siteConfig = getSiteConfig();
-        if ($request->gateway == 'mp' && !$siteConfig->key_pix) {
-            return Redirect::back()->withErrors('Para utilizar o gateway de pagamento Mercado Pago é necessário informar o token na sessão "Meu Perfil"');
-        }
-
-        if ($request->gateway == 'asaas' && !$siteConfig->token_asaas) {
-            return Redirect::back()->withErrors('Para utilizar o gateway de pagamento ASAAS é necessário informar o token na sessão "Meu Perfil"');
-        }
-
-        if ($request->gateway == 'paggue' && (!$siteConfig->paggue_client_key || !$siteConfig->paggue_client_secret)) {
-            return Redirect::back()->withErrors('Para utilizar o gateway de pagamento Paggue é necessário informar o CLIENT KEY e CLIENT SECRET na sessão "Meu Perfil"');
-        }
-
-
-        $product = Product::create([
-            'name' => $request->name,
-            'subname' => $request->subname,
-            'price' => $request->price,
-            'qtd' => $request->numbers,
-            'expiracao' => $request->expiracao,
-            'processado' => true,
-            'status' => 'Ativo',
-            'type_raffles' => 'automatico',
-            'slug' => createSlug($request->name),
-            'user_id' => getSiteOwner(),
-            'visible' => 0,
-            'minimo' => $request->minimo,
-            'maximo' => $request->maximo,
-            'modo_de_jogo' => $request->modo_de_jogo,
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
-            'gateway' => $request->gateway
-        ]);
-        // criando as promocoes
-        $product->createPromos();
-
-        // Premios
-        $dadosRequest = $request->all();
-
-        $product->createDefaultPremiums($dadosRequest);
-
-
-        $files = $request->file('images');
-
-        if ($request->hasFile('images')) {
-            foreach ($files as $key => $images) {
-                $upload_imagename = $key . time() . '.' . $images->getClientOriginalExtension();
-                $upload_url = public_path('/products') . '/' . $upload_imagename;
-                $filename = $this->compress_image($_FILES["images"]["tmp_name"][$key], $upload_url, 80);
-                DB::table('products_images')->insert(
-                    [
-                        'name' => $upload_imagename,
-                        'product_id' => $product->id,
-                        'created_at' => Carbon::now(),
-                        'updated_at' => Carbon::now(),
-                        'user_id' => getSiteOwner()
-                    ]
-                );
-            }
-        }
-
-        if (str_starts_with($request->modo_de_jogo, 'fazendinha')) {
-
-            if ($request->modo_de_jogo == 'fazendinha-completa') {
-                for ($i = 1; $i <= 25; $i++) {
-                    $number = 'g' . $i;
-                    Raffle::simpleCreate($number, $product->id, $product->user_id);
-                }
-            } else if ($request->modo_de_jogo == 'fazendinha-meio') {
-                for ($i = 1; $i <= 25; $i++) {
-                    $number = 'g' . $i . '-le';
-                    Raffle::simpleCreate($number, $product->id, $product->user_id);
-                    $number = 'g' . $i . '-ld';
-                    Raffle::simpleCreate($number, $product->id, $product->user_id);
-                }
-            }
-
-        } else {
-            $qtdNumbers = $request->numbers;
-
-            $arr = [];
-            $qtdZeros = strlen((string)$qtdNumbers);
-            if ($request->qtd_zeros != null) {
-                $qtdZeros = $request->qtd_zeros + 1;
-            }
-
-            for ($x = 0; $x < $qtdNumbers; $x++) {
-                $nbr = str_pad($x, $qtdZeros, '0', STR_PAD_LEFT);
-                array_push($arr, $nbr);
-            }
-
-            $rifa = ModelsProduct::getByIdWithSiteCheck($product->id);
-            $stringNumbers = implode(",", $arr);
-            $rifa->numbers = $stringNumbers;
-            $rifa->save();
-
-        }
-
-
-        DB::table('product_description')->insert(
-            [
-                'description' => $request->description,
-                'product_id' => $product,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-                'user_id' => $product->user_id
-            ]
-        );
-
-        return redirect()->back()->with('success', 'Cadastro da Rifa efetuado com sucesso!');
+        $storeProduct = function () use ($request) {
+            $productService = new ProductService();
+            $productService->processAddProduct($request);
+            return redirect()->back()->with('success', 'Cadastro da Rifa efetuado com sucesso!');
+        };
+        return $this->catchAndRedirect($storeProduct);
     }
-
 
     public function alterProduct(Request $request)
     {
-
-        $validatedData = $request->validate([
-            //'name' => 'required|max:255',
-            //'price' => 'required|max:6',
+        $request->validate([
             'images' => 'required',
-            //'numbers' => 'required|min:1|max:5',
-            //'description' => 'required|max:5000',
         ]);
+        $storeProduct = function () use ($request) {
+            $product = Product::getByIdWithSiteCheckOrFail($request->product_id);
+            $productService = new ProductService();
+            $productService->processImages($product, $request);
+            return redirect()->back()->with('success', 'Cadastro efetuado com sucesso!');
+        };
+        return $this->catchAndRedirect($storeProduct);
 
-        $files = $request->file('images');
-
-        if ($request->hasFile('images')) {
-
-            ProductImage::siteOwner()->where('product_id', '=', $request->product_id)->delete();
-
-            foreach ($files as $key => $images) {
-                $upload_imagename = $key . time() . '.' . $images->getClientOriginalExtension();
-                $upload_url = public_path('/products') . '/' . $upload_imagename;
-
-                $filename = $this->compress_image($_FILES["images"]["tmp_name"][$key], $upload_url, 80);
-
-                DB::table('products_images')->insert(
-                    [
-                        'name' => $upload_imagename,
-                        'product_id' => $request->product_id,
-                        'created_at' => Carbon::now(),
-                        'updated_at' => Carbon::now(),
-                        'user_id' => getSiteOwner()
-                    ]
-                );
-            }
-        }
-
-        return redirect()->back()->with('success', 'Cadastro efetuado com sucesso!');
     }
+
 
     public function alterarLogo(Request $request)
     {
-        try {
-            $imageUpload = new FileUploadHelper($request, 'logo', FileUploadTypeEnum::Image);
+        $imageUpload = function () use ($request) {
+            if (!$request->hasFile('logo')) {
+                throw  UserErrorException::emptyImage();
+            }
+            $imageUpload = new FileUploadHelper($request->file('logo'), FileUploadTypeEnum::Image);
             $imageUrl = $imageUpload->upload();
-
             getSiteConfig()->update([
                 'logo' => $imageUrl
             ]);
             return redirect()->back()->with('success', 'Logo alterada com sucesso!');
+        };
 
-        } catch (\Exception $e) {
-            return redirect()->back()->withErrors(parseExceptionMessage($e));
-        }
+        return $this->catchAndRedirect($imageUpload);
     }
 
     public function compress_image($source_url, $destination_url, $quality)
@@ -293,7 +158,7 @@ class ProductAdminController extends Controller
 
         DB::table('products')
             ->where('id', $request->product_id)
-            ->where('user_id', getSiteOwner())
+            ->where('user_id', getSiteOwnerId())
             ->update(
                 [
                     'status' => 'Agendado',
@@ -318,7 +183,7 @@ class ProductAdminController extends Controller
 
         DB::table('products')
             ->where('id', $request->product_id)
-            ->where('user_id', getSiteOwner())
+            ->where('user_id', getSiteOwnerId())
             ->update(
                 [
                     'draw_prediction' => $newDate
@@ -335,7 +200,7 @@ class ProductAdminController extends Controller
 
             DB::table('products')
                 ->where('id', $request->product_id)
-                ->where('user_id', getSiteOwner())
+                ->where('user_id', getSiteOwnerId())
                 ->update(
                     [
                         'visible' => 1,
@@ -346,7 +211,7 @@ class ProductAdminController extends Controller
 
             DB::table('products')
                 ->where('id', $request->product_id)
-                ->where('user_id', getSiteOwner())
+                ->where('user_id', getSiteOwnerId())
                 ->update(
                     [
                         'visible' => 0,
@@ -364,7 +229,7 @@ class ProductAdminController extends Controller
 
             DB::table('products')
                 ->where('id', $request->product_id)
-                ->where('user_id', getSiteOwner())
+                ->where('user_id', getSiteOwnerId())
                 ->update(
                     [
                         'favoritar' => 1,
@@ -375,7 +240,7 @@ class ProductAdminController extends Controller
 
             DB::table('products')
                 ->where('id', $request->product_id)
-                ->where('user_id', getSiteOwner())
+                ->where('user_id', getSiteOwnerId())
                 ->update(
                     [
                         'favoritar' => 0,
@@ -404,7 +269,7 @@ class ProductAdminController extends Controller
         } else {
             DB::table('products')
                 ->where('id', $request->product_id)
-                ->where('user_id', getSiteOwner())
+                ->where('user_id', getSiteOwnerId())
                 ->update(
                     [
                         'status' => 'Finalizado',
@@ -423,7 +288,7 @@ class ProductAdminController extends Controller
 
         DB::table('products')
             ->where('id', $request->product_id)
-            ->where('user_id', getSiteOwner())
+            ->where('user_id', getSiteOwnerId())
             ->update(
                 [
                     'type_raffles' => $request->type,
@@ -435,36 +300,23 @@ class ProductAdminController extends Controller
 
     public function addFoto(Request $request)
     {
-        // $request->validate([
-        //     'fotos' => 'required|mimes:png,jpeg,jpg'
-        // ]);
-
-
-        if ($request->hasFile('fotos')) {
-            foreach ($request->file('fotos') as $key => $images) {
-
-                $upload_imagename = $key . time() . '.' . $images->getClientOriginalExtension();
-                $upload_url = public_path('/products') . '/' . $upload_imagename;
-
-                $filename = $this->compress_image($_FILES["fotos"]["tmp_name"][$key], $upload_url, 80);
-
-                DB::table('products_images')->insert(
-                    [
-                        'name' => $upload_imagename,
-                        'product_id' => $request->idRifa,
-                        'created_at' => Carbon::now(),
-                        'updated_at' => Carbon::now()
-                    ]
-                );
+        $changeLogo = function () use ($request) {
+            $product = Product::getByIdWithSiteCheckOrFail($request->idRifa);
+            if ($request->hasFile('fotos')) {
+                $productService = new ProductService();
+                $productService->processImages($product, $request, 'fotos');
+            } else {
+                throw UserErrorException::emptyImage();
             }
-        }
+            return redirect()->back()->with('success', 'Foto(s) adicionadas com sucesso!');
+        };
+        return $this->catchAndRedirect($changeLogo);
 
-        return redirect()->back()->with('success', 'Foto(s) adicionadas com sucesso!');
     }
 
     public function duplicar(Request $request)
     {
-        $rifa = ModelsProduct::find($request->product);
+        $rifa = ModelsProduct::getByIdWithSiteCheck($request->product);
 
         $product = DB::table('products')->insertGetId(
             [
@@ -571,7 +423,7 @@ class ProductAdminController extends Controller
                 array_push($arr, $nbr);
             }
 
-            $newRifa = ModelsProduct::find($product);
+            $newRifa = ModelsProduct::getByIdWithSiteCheck($product);
             $stringNumbers = implode(",", $arr);
             $newRifa->numbers = $stringNumbers;
             $newRifa->update();

@@ -1,0 +1,6 @@
+{
+    "/public/assets/css/site.css": "/public/assets/css/site.css",
+    "/public/cdn/css/admin.css": "/public/cdn/css/admin.css",
+    "/public/cdn/js/admin-bundle.min.js": "/public/cdn/js/admin-bundle.min.js",
+    "/public/cdn/js/site-bundle.min.js": "/public/cdn/js/site-bundle.min.js"
+}

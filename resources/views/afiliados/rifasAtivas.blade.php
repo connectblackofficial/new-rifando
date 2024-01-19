@@ -5,7 +5,7 @@
 @endsection
 
 @section('css')
-    <link rel="stylesheet" href="{{ asset('css/vendor/datatables.min.css') }}" />
+    <link rel="stylesheet" href="{{ cdnAsset('css/vendor/datatables.min.css') }}"/>
 @endsection
 
 @section('content')
@@ -20,7 +20,7 @@
         <div class="row">
             <div class="col-sm-12 col-md-5 col-lg-3 col-xxl-2 mb-1">
                 <div class="d-inline-block float-md-start me-1 mb-1 search-input-container w-100 shadow bg-foreground">
-                    <input class="form-control datatable-search" placeholder="Buscar" data-datatable="#datatableRows" />
+                    <input class="form-control datatable-search" placeholder="Buscar" data-datatable="#datatableRows"/>
                     <span class="search-magnifier-icon">
                         <i data-acorn-icon="search"></i>
                     </span>
@@ -33,11 +33,11 @@
             <div class="col-sm-12 col-md-7 col-lg-9 col-xxl-10 text-end mb-1">
                 <div class="d-inline-block">
                     <div class="dropdown-as-select d-inline-block datatable-length" data-datatable="#datatableRows"
-                        data-childSelector="span">
+                         data-childSelector="span">
                         <button class="btn p-0 shadow" type="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                            aria-expanded="false" data-bs-offset="0,3">
+                                aria-expanded="false" data-bs-offset="0,3">
                             <span class="btn btn-foreground-alternate dropdown-toggle" data-bs-toggle="tooltip"
-                                data-bs-placement="top" data-bs-delay="0" title="Item Count">
+                                  data-bs-placement="top" data-bs-delay="0" title="Item Count">
                                 10 Items
                             </span>
                         </button>
@@ -53,43 +53,45 @@
         <div class="data-table-responsive-wrapper text-center">
             <table id="datatableRows" class="data-table nowrap hover">
                 <thead>
-                    <tr>
-                        <th class="text-muted text-small text-uppercase">#</th>
-                        <th class="text-muted text-small text-uppercase">MINIATURA</th>
-                        <th class="text-muted text-small text-uppercase">RIFA</th>
-                        <th class="text-muted text-small text-uppercase">SORTEIO</th>
-                        <th class="text-muted text-small text-uppercase">VALOR DA COTA</th>
-                        <th class="text-muted text-small text-uppercase">% AFILIADO</th>
-                        <th class="text-muted text-small text-uppercase">AÇÕES</th>
-                    </tr>
+                <tr>
+                    <th class="text-muted text-small text-uppercase">#</th>
+                    <th class="text-muted text-small text-uppercase">MINIATURA</th>
+                    <th class="text-muted text-small text-uppercase">RIFA</th>
+                    <th class="text-muted text-small text-uppercase">SORTEIO</th>
+                    <th class="text-muted text-small text-uppercase">VALOR DA COTA</th>
+                    <th class="text-muted text-small text-uppercase">% AFILIADO</th>
+                    <th class="text-muted text-small text-uppercase">AÇÕES</th>
+                </tr>
                 </thead>
                 <tbody>
-                    @foreach ($rifas as $rifa)
-                        <tr>
-                            <td>{{ $rifa->id }}</td>
-                            <td style="width: 50px;" class="text-center">
-                                <img style="border-radius: 5px;"
-                                    src="/products/{{ $rifa->imagem() ? $rifa->imagem()->name : '' }}" width="50"
-                                    alt="">
-                                @if ($rifa->checkAfiliado)
-                                    <label class="badge bg-success">&nbsp;</label>
-                                @else
-                                    <label class="badge bg-secondary">&nbsp;</label>
-                                @endif
-                            </td>
-                            <td>{{ $rifa->name }}</td>
-                            <td>{{ $rifa->status }}</td>
-                            <td>{{ $rifa->price }}</td>
-                            <td>{{ $rifa->ganho_afiliado . '%' }}</td>
-                            <td>
-                                <a class="btn btn-sm btn-primary {{ $rifa->checkAfiliado ? 'disabled btn-outline-primary' : '' }}"
-                                    href="{{ route('afiliado.afiliarSe', $rifa->id) }}">Afiliar-se</a>
-                                <button class="btn btn-sm btn-info {{ !$rifa->checkAfiliado ? 'disabled btn-outline-info' : '' }}" data-url="{{ route('product', $rifa->slug) }}"
+                @foreach ($rifas as $rifa)
+                    <tr>
+                        <td>{{ $rifa->id }}</td>
+                        <td style="width: 50px;" class="text-center">
+                            <img style="border-radius: 5px;"
+                                 src="{{ $rifa->getDefaultImageUrl()}}" width="50"
+                                 alt="">
+                            @if ($rifa->checkAfiliado)
+                                <label class="badge bg-success">&nbsp;</label>
+                            @else
+                                <label class="badge bg-secondary">&nbsp;</label>
+                            @endif
+                        </td>
+                        <td>{{ $rifa->name }}</td>
+                        <td>{{ $rifa->status }}</td>
+                        <td>{{ $rifa->price }}</td>
+                        <td>{{ $rifa->ganho_afiliado . '%' }}</td>
+                        <td>
+                            <a class="btn btn-sm btn-primary {{ $rifa->checkAfiliado ? 'disabled btn-outline-primary' : '' }}"
+                               href="{{ route('afiliado.afiliarSe', $rifa->id) }}">Afiliar-se</a>
+                            <button class="btn btn-sm btn-info {{ !$rifa->checkAfiliado ? 'disabled btn-outline-info' : '' }}"
+                                    data-url="{{ route('product', $rifa->slug) }}"
                                     data-token="{{ $rifa->getAfiliadoToken }}"
-                                    onclick="getLinkAfiliado(this)">Link</button>
-                            </td>
-                        </tr>
-                    @endforeach
+                                    onclick="getLinkAfiliado(this)">Link
+                            </button>
+                        </td>
+                    </tr>
+                @endforeach
                 </tbody>
             </table>
         </div>
@@ -98,42 +100,19 @@
 @endsection
 
 @section('js')
-    <script src="{{ asset('js/vendor/datatables.min.js') }}"></script>
-    <script src="{{ asset('js/cs/datatable.extend.js') }}"></script>
-    <script src="{{ asset('js/dataTable/rifasAtivas.js') }}"></script>
-    <script src="{{ asset('js/forms/controls.datepicker.js') }}"></script>
-    <script src="{{ asset('js/vendor/datepicker/bootstrap-datepicker.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/datatables.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/cs/datatable.extend.js') }}"></script>
+    <script src="{{ cdnAsset('js/dataTable/rifasAtivas.js') }}"></script>
+    <script src="{{ cdnAsset('js/forms/controls.datepicker.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/datepicker/bootstrap-datepicker.min.js') }}"></script>
 
-    <script src="{{ asset('js/vendor/datepicker/locales/bootstrap-datepicker.es.min.js') }}"></script>
-    <script src="{{ asset('js/vendor/jquery.validate/jquery.validate.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/datepicker/locales/bootstrap-datepicker.es.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/jquery.validate/jquery.validate.min.js') }}"></script>
 
-    <script src="{{ asset('js/vendor/jquery.validate/additional-methods.min.js') }}"></script>
-    <script src="{{ asset('js/forms/validation.js') }}"></script>
+    <script src="{{ cdnAsset('js/vendor/jquery.validate/additional-methods.min.js') }}"></script>
+    <script src="{{ cdnAsset('js/forms/validation.js') }}"></script>
 
     <script>
-        function getLinkAfiliado(el) {
-            var url = el.dataset.url;
-            var token = el.dataset.token;
-            var link = `${url}/${token}`;
-
-            $('#link-afiliado').val(link);
-            $('#link-facebook').attr('href', `https://www.facebook.com/sharer/sharer.php?u=${link}`);
-            $('#link-telegram').attr('href', `https://telegram.me/share/url?url=${link}`)
-            $('#link-wpp').attr('href', `https://api.whatsapp.com/send?text=${link}`)
-            $('#link-twitter').attr('href', `https://twitter.com/intent/tweet?text=Vc%20pode%20ser%20o%20Próximo%20Ganhador%20${link}`)
-            $('#modal-link').modal('show');
-        }
-
-        function copiarLink() {
-            var copyText = document.getElementById("link-afiliado");
-            copyText.select();
-            copyText.setSelectionRange(0, 99999);
-            document.execCommand("copy");
-
-            alert("Link copiado com sucesso.");
-
-        }
-
         function closeModal() {
             $('#modal-link').modal('hide')
         }

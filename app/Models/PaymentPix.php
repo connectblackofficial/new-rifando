@@ -15,8 +15,10 @@ class PaymentPix extends Model
         'key_pix', 'participant_id', 'user_id', 'status'
     ];
 
-    public function participante()
+    /** @return Participant */
+    public function participante(): Participant
     {
-        return $this->hasOne(Participant::class, 'id', 'participant_id')->where('user_id', getSiteOwner())->first();
+        return $this->hasOne(Participant::class, 'id', 'participant_id')->where('user_id', getSiteOwnerId())->first();
     }
+
 }

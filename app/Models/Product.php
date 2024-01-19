@@ -7,6 +7,7 @@ use App\CompraAutomatica;
 use App\Environment;
 use App\RifaAfiliado;
 use App\Traits\ModelSiteOwnerTrait;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -45,34 +46,23 @@ class Product extends Model
             $numbersRifa = explode(",", $this->numbers);
             return $numbersRifa;
         } else {
-            return $this->hasMany(Raffle::class, 'product_id', 'id')->where('user_id', getSiteOwner())->get();
+            return $this->hasMany(Raffle::class, 'product_id', 'id')->where('user_id', getSiteOwnerId())->get();
         }
     }
 
     public function confirmPayment($participanteId)
     {
-        if ($this->modo_de_jogo == 'numeros') {
-            $participante = Participant::getByIdWithSiteCheck($participanteId);
+        $participante = Participant::siteOwner()->whereId($participanteId)->firstOrFail();
+        $participante->confirmPayment();
+    }
 
-            $numbersParticipante = $participante->numbers();
-
-            $participante->update([
-                'reservados' => 0,
-                'pagos' => count($numbersParticipante)
-            ]);
-        } else {
-            $participante = Participant::getByIdWithSiteCheck($participanteId);
-            $numbersParticipante = $participante->numbers();
-
-            $participante->update([
-                'reservados' => 0,
-                'pagos' => count($numbersParticipante)
-            ]);
-
-            Raffle::siteOwner()->where('participant_id', '=', $participanteId)->update(['status' => 'Pago']);
+    public function hasImages()
+    {
+        $image = $this->imagem();
+        if (isset($image['id'])) {
+            return true;
         }
-
-        $this->mensagemWPPRecebido($participanteId);
+        return false;
     }
 
     public function mensagemWPPRecebido($participanteID)
@@ -322,6 +312,15 @@ class Product extends Model
         return Premio::whereProductId($this->id)->winners()->count();
     }
 
+    public function createProductImage($imageName)
+    {
+        return ProductImage::create([
+            'name' => $imageName,
+            'product_id' => $this->id,
+            'user_id' => $this->user_id
+        ]);
+    }
+
     public function createPromos()
     {
         for ($i = 1; $i <= 4; $i++) {
@@ -461,5 +460,22 @@ class Product extends Model
     public function descriptions()
     {
         return $this->hasMany(ProductDescription::class);
+    }
+
+    public function createOrUpdateDescription($description)
+    {
+        $attr = ['user_id' => $this->user_id, 'product_id' => $this->id];
+        return ProductDescription::updateOrCreate($attr, ['description' => $description]);
+    }
+
+    public function getDefaultImageUrl()
+    {
+        $imagem = $this->imagem();
+        if (isset($imagem['name'])) {
+            return imageAsset($imagem['name']);
+        }else{
+            return url('images/sem-foto.jpg');
+        }
+
     }
 }

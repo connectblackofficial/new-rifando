@@ -22,6 +22,9 @@
   "dependencies": {
     "@popperjs/core": "^2.9.2",
     "bootstrap": "^5.0.2",
+    "bootstrap_4_6_1": "npm:bootstrap@^4.6.1",
+    "bootstrap_5_0_2": "npm:bootstrap@^5.0.2",
+    "bootstrap-icons": "^1.8.1",
     "sweetalert2": "^11.10.3"
   }
 }

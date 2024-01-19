@@ -54,7 +54,7 @@
 
                     <div class="form-group d-flex d-none" id="div-customer">
                         <div>
-                            <img src="{{ asset('images/default-user.jpg') }}"
+                            <img src="{{ cdnImageAsset('default-user.jpg') }}"
                                 style="width: 70px; height: 70px;border-radius: 10px;">
                         </div>
 
@@ -303,7 +303,7 @@
         <div class="modal-content" style="border: none;">
             <div class="modal-header" style="background-color: #fff;">
                 <h5 class="modal-title" id="exampleModalLabel" style="color: #000;"><img
-                        src="{{ asset('images/treofeu.png') }}" alt=""> Top Compradores</h5>
+                        src="{{ cdnImageAsset('treofeu.png') }}" alt=""> Top Compradores</h5>
                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
                     style="color: #000;">
                     <span aria-hidden="true">&times;</span>

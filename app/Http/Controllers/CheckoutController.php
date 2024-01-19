@@ -7,23 +7,21 @@ use App\Models\Participant;
 use App\Models\PaymentPix;
 use App\Models\Premio;
 use App\Models\Product;
+use App\Models\Raffle;
+use App\Services\PaymentService;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use MercadoPago\Payment;
+use MercadoPago\SDK;
 
 class CheckoutController extends Controller
 {
     public function index(Request $request)
     {
-        //dd("AQUI");
-        $telephoneConsulting = DB::table('products')
-            ->select('users.telephone')
-            ->join('users', 'users.id', '=', 'products.user_id')
-            ->where('products.id', '=', $request->productID)
-            ->first();
-
+        $userOwner = getSiteOwnerUser();
         return view('checkout', [
             'participant' => $request->participant,
             'cpf' => $request->cpf,
@@ -37,7 +35,7 @@ class CheckoutController extends Controller
             'PIX' => $request->PIX,
             'codePIX' => $request->codePIX,
             'imagePIX' => $request->imagePIX,
-            'telephoneConsulting' => $telephoneConsulting,
+            'telephoneConsulting' => $userOwner,
             'countRaffles' => $request->countRaffles,
             'priceUnic' => $request->priceUnic,
         ]);
@@ -46,15 +44,8 @@ class CheckoutController extends Controller
     public function checkoutManualy(Request $request)
     {
 
-        $telephoneConsulting = DB::table('products')
-            ->select('users.telephone')
-            ->join('users', 'users.id', '=', 'products.user_id')
-            ->where('products.id', '=', $request->productID)
-            ->where('products.user_id', '=', getSiteOwner())
-            ->first();
-
-        $numbers = DB::table('raffles')->select('number')->where("user_id", getSiteOwner())->where('participant_id', '=', $request->participant_id)->get();
-
+        $userOwner = getSiteOwnerUser();
+        $numbers = Raffle::siteOwner()->whereParticipantId($request->participant_id)->get();
         //Validando se existe essa reserva
         $participante = Participant::getByIdWithSiteCheck($request->participant_id);
         if (!isset($participante['id'])) {
@@ -104,7 +95,7 @@ class CheckoutController extends Controller
             'PIX' => $request->PIX,
             'codePIX' => $request->codePIX,
             'imagePIX' => $request->imagePIX,
-            'telephoneConsulting' => $telephoneConsulting,
+            'telephoneConsulting' => $userOwner,
             'countRaffles' => $request->countRaffles,
             'priceUnic' => $request->priceUnic,
             'codePIX' => $request->codePIX,
@@ -132,9 +123,9 @@ class CheckoutController extends Controller
             $secretKey = $codeKeyPIX->key_pix;
         }
 
-        \MercadoPago\SDK::setAccessToken($secretKey);
+        SDK::setAccessToken($secretKey);
 
-        $payment = new \MercadoPago\Payment();
+        $payment = new Payment();
 
         //$payment = new MercadoPago\Payment();
         $payment->transaction_amount = 0.11;
@@ -173,32 +164,19 @@ class CheckoutController extends Controller
         $realPixID = (isset($cleanID[0])) ? $cleanID[0] : NULL;
         $realProductID = (isset($cleanID[1])) ? (int)$cleanID[1] : NULL;
 
-        $codeKeyPIX = DB::table('consulting_environments')
-            ->select('key_pix', 'token_asaas')
-            ->where('user_id', '=', getSiteOwner())
-            ->first();
+        $codeKeyPIX = getSiteConfig();
 
-        $PayRaffleNumber = DB::table('payment_pix')
-            ->select('participant_id', 'full_pix', 'status')
+        $PayRaffleNumber = PaymentPix::select(['participant_id', 'full_pix', 'status'])
+            ->siteOwner()
             ->where('key_pix', $realPixID)->first();
-
-        // if($PayRaffleNumber->status == 'Aprovado'){
-        //     $participante = Participant::find($PayRaffleNumber->participant_id);
-
-        //     $response = [
-        //         'status' => TRUE,
-        //         'cotas' => view('layouts.cotas-checkout', ['participante' => $participante])->render()
-        //     ];
-
-        //     return json_encode($response);
-        // }
 
         if ($PayRaffleNumber) {
             if ($PayRaffleNumber->full_pix == 'gratis') {
-                $participante = Participant::find($PayRaffleNumber->participant_id);
-                $rifa = $participante->rifa();
-
-                $rifa->confirmPayment($participante->id);
+                $participante = Participant::getByIdWithSiteCheck($PayRaffleNumber->participant_id);
+                if (!isset($participante['id'])) {
+                    abort(404);
+                }
+                $participante->confirmPayment();
 
                 $cotasHTML = view('layouts.cotas-checkout', ['participante' => $participante])->render();
 
@@ -226,28 +204,25 @@ class CheckoutController extends Controller
             $resp = json_decode($req->getBody()->getContents());
 
             if ($resp->status == 'RECEIVED' || $resp->status == 'CONFIRMED') {
-                $ApprovedPayment = DB::table('payment_pix')
-                    ->where('key_pix', $realPixID)
+                PaymentPix::where('key_pix', $realPixID)->siteOwner()
                     ->update(['status' => 'Aprovado']);
 
-                $PayRaffleNumber = DB::table('payment_pix')
-                    ->select('participant_id')
+                $PayRaffleNumber = PaymentPix::select('participant_id')
+                    ->siteOwner()
                     ->where('key_pix', $realPixID)->get();
 
-                $participante = Participant::find($PayRaffleNumber[0]->participant_id);
-                $rifa = $participante->rifa();
+                $participante = Participant::getByIdWithSiteCheck($PayRaffleNumber[0]->participant_id);
+                $rifa = $participante->firstProduct();
 
                 $rifa->confirmPayment($participante->id);
 
                 $cotasHTML = view('layouts.cotas-checkout', ['participante' => $participante])->render();
 
-                foreach ($PayRaffleNumber as $keyNumbers => $valNumbers) :
+                foreach ($PayRaffleNumber as $keyNumbers => $valNumbers) {
                     CheckoutController::savePayedRaffles($valNumbers->participant_id, $realProductID);
+                }
 
-                    $participante = Participant::find($valNumbers->participant_id);
 
-
-                endforeach;
                 $response = [
                     'status' => TRUE,
                     'cotas' => $cotasHTML
@@ -262,9 +237,9 @@ class CheckoutController extends Controller
 
             array_pop($cleanID);
             $hash = implode('-', $cleanID);
-            $paymentPix = DB::table('payment_pix')->where('key_pix', '=', $hash)->first();
-            $participante = Participant::find($paymentPix->participant_id);
-            $rifa = $participante->rifa();
+            $paymentPix = PaymentPix::siteOwner()->where('key_pix', '=', $hash)->first();
+            $participante = Participant::getByIdWithSiteCheck($paymentPix->participant_id);
+            $rifa = $participante->firstProduct();
 
 
             if ($paymentPix->status == 'Aprovado') {
@@ -286,33 +261,28 @@ class CheckoutController extends Controller
                 $secretKey = $codeKeyPIX->key_pix;
             }
 
-            \MercadoPago\SDK::setAccessToken($secretKey);
+            SDK::setAccessToken($secretKey);
 
-            $payment = new \MercadoPago\Payment();
+            $payment = new Payment();
 
-            $payment = \MercadoPago\Payment::find_by_id($realPixID);
+            $payment = Payment::find_by_id($realPixID);
             $payment->capture = true;
             $payment->update();
 
 
             if ($payment->status == "approved" && $payment->status_detail == "accredited") {
-
-
-                $ApprovedPayment = DB::table('payment_pix')
-                    ->where('key_pix', $realPixID)
+                $pixPayment = PaymentPix::siteOwner()->where('key_pix', $realPixID)->firstOrFail();
+                $paymentService = new PaymentService();
+                $paymentService->confirmPixPayment($pixPayment);
+                PaymentPix::siteOwner()->where('key_pix', $realPixID)
                     ->update(['status' => 'Aprovado']);
 
-                $PayRaffleNumber = DB::table('payment_pix')
-                    ->select('participant_id')
+                $PayRaffleNumber = PaymentPix::siteOwner()->select('participant_id')
                     ->where('key_pix', $realPixID)->get();
 
-                $participante = Participant::find($PayRaffleNumber[0]->participant_id);
-                $rifa = $participante->rifa();
+                $participante = Participant::getByIdWithSiteCheck($PayRaffleNumber[0]->participant_id);
+                $rifa = $participante->firstProduct();
                 $rifa->confirmPayment($participante->id);
-
-                // foreach ($PayRaffleNumber as $keyNumbers => $valNumbers) :
-                //     CheckoutController::savePayedRaffles($valNumbers->participant_id, $realProductID);
-                // endforeach;
 
                 $response = [
                     'status' => TRUE,
@@ -326,20 +296,19 @@ class CheckoutController extends Controller
 
     public function savePayedRaffles($participantID, $productID)
     {
-        $getRaffles = DB::table('participant')
-            ->select('product_id', 'raffles_id')
+        $getRaffles = Participant::select(['product_id', 'raffles_id'])
+            ->siteOwner()
             ->where('id', $participantID)
             ->where('product_id', $productID)
             ->get();
-        foreach ($getRaffles as $keyRaffle => $valRaffle) :
-            CheckoutController::updatePayedRifflesByID($valRaffle->raffles_id, $valRaffle->product_id);
-        endforeach;
+        foreach ($getRaffles as $keyRaffle => $valRaffle) {
+            $this->updatePayedRifflesByID($valRaffle->raffles_id, $valRaffle->product_id);
+        }
     }
 
     public function updatePayedRifflesByID($id, $productID)
     {
-        $updateRaffle = DB::table('raffles')
-            ->where('id', $id)
+        Raffle::siteOwner()->where('id', $id)
             ->where('product_id', $productID)
             ->update([
                 'status' => 'Pago'
@@ -355,14 +324,11 @@ class CheckoutController extends Controller
                 $telInfo = $cleandID[0];
                 $productID = $cleandID[1];
 
-                $product = DB::table('products')
-                    ->select('products.id', 'products.name', 'consulting_environments.key_pix', 'products.price', 'products.draw_date')
-                    ->join('consulting_environments', 'consulting_environments.user_id', '=', 'products.user_id')
-                    ->where('products.id', '=', $productID)
-                    ->first();
-
-                $participantDetail = DB::table('participant')
-                    ->select('*')
+                $product = Product::getByIdWithSiteCheck($productID);
+                if (!isset($product['id'])) {
+                    abort(404);
+                }
+                $participantDetail = Participant::siteOwner()
                     ->where('participant.product_id', '=', $productID)
                     ->where('participant.telephone', '=', $telInfo)
                     ->first();
@@ -453,11 +419,11 @@ class CheckoutController extends Controller
 
     public function minhasReservas(Request $request)
     {
-        $participante = Participant::where('telephone', '=', $request->telephone)->orderBy('created_at', 'desc')->get();
+        $participante = Participant::siteOwner()->where('telephone', '=', $request->telephone)->orderBy('created_at', 'desc')->get();
         $rifas = [];
 
         foreach ($participante as $reserva) {
-            $rifa = $reserva->rifa();
+            $rifa = $reserva->firstProduct();
             $rifas[$rifa->id] = $rifa->name;
         }
 
@@ -476,48 +442,10 @@ class CheckoutController extends Controller
     public function consultingReservation(Request $request)
     {
         $resultRaffles = [];
-        $product = DB::table('products')
-            ->select('products.id', 'products.name', 'consulting_environments.key_pix', 'products.price', 'products.draw_date')
-            ->join('consulting_environments', 'consulting_environments.user_id', '=', 'products.user_id')
-            ->where('products.id', '=', $request->productID)
-            ->first();
-
-        $participantDetail = DB::table('participant')
-            ->select('*')
-            ->where('participant.product_id', '=', $request->productID)
-            ->where('participant.telephone', '=', $request->telephone)
-            ->first();
-
-        $participant = DB::table('participant')
-            ->select('*')
-            ->join('raffles', 'raffles.id', 'participant.raffles_id')
-            ->where('participant.product_id', '=', $request->productID)
-            ->where('participant.telephone', '=', $request->telephone)
-            ->where('raffles.status', '=', 'Pago')
-            ->get();
-
-        $orderParticipants = DB::table('order')
-            ->select('order.id', 'order.key_pix', 'payment_pix.full_pix', 'payment_pix.status')
-            ->join('payment_pix', 'payment_pix.key_pix', 'order.key_pix')
-            ->join('participant', 'participant.id', 'payment_pix.participant_id')
-            ->join('raffles', 'raffles.id', 'participant.raffles_id')
-            ->where('participant.product_id', '=', $request->productID)
-            ->where('participant.telephone', '=', $request->telephone)
-            ->where('raffles.status', '=', 'Reservado')
-            ->groupBy('order.id')
-            ->get();
-
-        $orderPayedParticipants = DB::table('order')
-            ->select('order.id', 'order.key_pix', 'payment_pix.full_pix', 'payment_pix.status')
-            ->join('payment_pix', 'payment_pix.key_pix', 'order.key_pix')
-            ->join('participant', 'participant.id', 'payment_pix.participant_id')
-            ->join('raffles', 'raffles.id', 'participant.raffles_id')
-            ->where('participant.product_id', '=', $request->productID)
-            ->where('participant.telephone', '=', $request->telephone)
-            ->where('raffles.status', '=', 'Pago')
-            ->groupBy('order.id')
-            ->get();
-
+        $product = Product::getByIdWithSiteCheck($request->productID);
+        if (!isset($product['id'])) {
+            abort(404);
+        }
         $participantReserveds = DB::table('participant')
             ->select('participant.id as user', 'raffles.*', 'payment_pix.*')
             ->join('raffles', 'raffles.id', 'participant.raffles_id')
@@ -525,15 +453,6 @@ class CheckoutController extends Controller
             ->where('participant.product_id', '=', $request->productID)
             ->where('participant.telephone', '=', $request->telephone)
             ->where('raffles.status', '=', 'Reservado')
-            ->get();
-
-        $participantPayed = DB::table('participant')
-            ->select('participant.id as user', 'raffles.*', 'payment_pix.*')
-            ->join('raffles', 'raffles.id', 'participant.raffles_id')
-            ->join('payment_pix', 'payment_pix.participant_id', 'participant.id')
-            ->where('participant.product_id', '=', $request->productID)
-            ->where('participant.telephone', '=', $request->telephone)
-            ->where('raffles.status', '=', 'Pago')
             ->get();
 
         if (!empty($participantReserveds)) {
@@ -558,7 +477,7 @@ class CheckoutController extends Controller
         $rifas = [];
 
         foreach ($participante as $reserva) {
-            $rifa = $reserva->rifa();
+            $rifa = $reserva->firstProduct();
             $rifas[$rifa->id] = $rifa->name;
         }
 
@@ -572,20 +491,6 @@ class CheckoutController extends Controller
 
         return view('minhas-reservas', $data);
 
-        // $userData = [
-        //     'product' => $product,
-        //     'participantDetail' => $participantDetail,
-        //     'resultRafflesALLs' => $participant,
-        //     'orderParticipants' => $orderParticipants,
-        //     'participantReserveds' => $participantReserveds,
-        //     'orderPayedParticipants' => $orderPayedParticipants,
-        //     'participantPayed' => $participantPayed,
-        //     'priceReserveds' => @$resultPricePIX,
-        //     'numberReserveds' => @$numbers,
-        //     'telephone' => @$telephoneConsulting,
-        //     'priceBR' => @$convertPriceBR
-        // ];
-        // return view('consulting-reservation', $userData);
     }
 
     public function consultingReservationTelephone(Request $request, $productID, $telephone)
@@ -597,18 +502,14 @@ class CheckoutController extends Controller
         $substr2 = substr($telephone, 7);
         $resultTelephone = $ddd . $substr1 . $substr2;
 
-        $product = DB::table('products')
-            ->select('products.id', 'products.name', 'consulting_environments.key_pix', 'products.price', 'products.draw_date')
-            ->join('consulting_environments', 'consulting_environments.user_id', '=', 'products.user_id')
-            ->where('products.id', '=', $productID)
-            ->first();
+        $product = Product::getByIdWithSiteCheck($productID);
+        if (!isset($product['id'])) {
+            abort(404);
+        }
 
-
-        $participantDetail = DB::table('participant')
-            ->select('*')
+        $participantDetail = Participant::siteOwner()
             ->where('participant.product_id', '=', $productID)
-            ->where('participant.telephone', '=', $resultTelephone)
-            ->first();
+            ->where('participant.telephone', '=', $resultTelephone)->first();
 
         $participant = DB::table('participant')
             ->select('*')
@@ -685,7 +586,10 @@ class CheckoutController extends Controller
 
     public function consultingReservationManualy(Request $request)
     {
-
+        Product::getByIdWithSiteCheck($request->productID);
+        if (!isset($product['id'])) {
+            abort(404);
+        }
         //METODO consultingReservationTelephone E consultingReservation SÃO IGUAIS SEMPRE DEIXAR OS DOIS PARECIDOS
 
         $product = DB::table('products')
@@ -768,7 +672,10 @@ class CheckoutController extends Controller
 
     public function consultingReservationTelephoneManualy(Request $request, $productID, $telephone)
     {
-
+        Product::getByIdWithSiteCheck($productID);
+        if (!isset($product['id'])) {
+            abort(404);
+        }
         $substr = substr($telephone, 0, 2);
         $ddd = '(' . $substr . ')';
         $substr1 = ' ' . substr($telephone, 2, 5) . '-';
@@ -869,8 +776,7 @@ class CheckoutController extends Controller
         //VER UMA FORMA PARA MELHORAR ISSO HOJE SE ALGUEM ALTERAR O PARTICIPANTID NA URL VAI LATERAR A LINHA DO BANCO COM OS DADOS ERRADOS
         foreach ($participantsID as $participantID) {
             PaymentPix::updateOrCreate([
-                //Add unique field combo to match here
-                //For example, perhaps you only want one entry per user:
+                'user_id' => getSiteOwnerId(),
                 'participant_id' => $participantID,
             ], [
                 'key_pix' => $request->key_pix,
@@ -883,10 +789,7 @@ class CheckoutController extends Controller
 
     public function paymentCredit(Request $request)
     {
-        $codeKeyPIX = DB::table('consulting_environments')
-            ->select('key_pix')
-            ->where('user_id', '=', getSiteOwner())
-            ->first();
+        $codeKeyPIX = getSiteConfig();
 
         if (env('APP_ENV') == 'local') {
             $secretKey = 'TEST-330207199077363-081623-283cea3525fa71a8e4d1afa279bf8e8c-197295574';
@@ -894,9 +797,9 @@ class CheckoutController extends Controller
             $secretKey = $codeKeyPIX->key_pix;
         }
 
-        \MercadoPago\SDK::setAccessToken($secretKey);
+        SDK::setAccessToken($secretKey);
 
-        $payment = new \MercadoPago\Payment();
+        $payment = new Payment();
         $payment->transaction_amount = (float)$request[0]['transaction_amount'];
         $payment->token = $request[0]['token'];
         //$payment->description = $request[0]['description'];
@@ -924,64 +827,11 @@ class CheckoutController extends Controller
 
             //FAZ A ALTERACAO NA RESERVA PARA PAGO
             DB::table('payment_pix')
+                ->where("user_id", getSiteOwnerId())
                 ->where('key_pix', $request[1])
                 ->update(['status' => 'Concluída']);
 
-            $updatingRaffles = DB::table('payment_pix')
-                ->join('participant', 'participant.id', '=', 'payment_pix.participant_id')
-                ->join('raffles', 'raffles.id', '=', 'participant.raffles_id')
-                ->where('payment_pix.key_pix', $request[1])
-                ->update(
-                    [
-                        'raffles.status' => 'Pago',
-                        'raffles.updated_at' => Carbon::now()
-                    ]
-                );
 
-            $participantEmail = DB::table('payment_pix')
-                ->select('participant.name', 'participant.email', 'participant.telephone', 'raffles.*', 'products.name as product', 'products.id as productID', 'products.ebook')
-                ->join('participant', 'participant.id', '=', 'payment_pix.participant_id')
-                ->join('raffles', 'raffles.id', '=', 'participant.raffles_id')
-                ->join('products', 'products.id', '=', 'participant.product_id')
-                ->where('payment_pix.key_pix', $request[1])
-                ->get();
-
-            $rafflesNumber = [];
-
-            foreach ($participantEmail as $raffle) {
-                array_push($rafflesNumber, $raffle->number);
-            }
-
-            $raffleImplode = implode(',', $rafflesNumber);
-
-            $consultingEnvironment = DB::table('consulting_environments')
-                ->first();
-
-            $dddTelephone = substr($participantEmail[0]->telephone, 1, 2);
-            $n1Telephone = substr($participantEmail[0]->telephone, 5, 5);
-            $n2Telephone = substr($participantEmail[0]->telephone, 11, 4);
-
-            $dados = array(
-                'name' => $participantEmail[0]->name,
-                'email' => $participantEmail[0]->email,
-                'product' => $participantEmail[0]->product,
-                'productID' => $participantEmail[0]->productID,
-                'url' => url('/products/' . $participantEmail[0]->ebook),
-                'raffles' => $raffleImplode,
-                'environment' => $consultingEnvironment->name,
-                'instagram' => $consultingEnvironment->instagram,
-                'facebook' => $consultingEnvironment->instagram,
-                'searchMyRaffles' => url('reserva/' . $participantEmail[0]->productID . '/' . $dddTelephone . $n1Telephone . $n2Telephone)
-            );
-
-            $emailUser = $participantEmail[0]->email;
-            $environment = $consultingEnvironment->name;
-
-            Mail::send('mails.payment', ['dados' => $dados], function ($message) use ($emailUser, $environment) {
-                $message->from('contato@gosolution.com.br', $environment);
-                $message->to($emailUser);
-                $message->subject('Ação entre amigos');
-            });
         }
 
         return redirect(url('checkout-manualy?status=') . $response_fields['status']);
@@ -989,7 +839,7 @@ class CheckoutController extends Controller
 
     public function pagarReserva($id)
     {
-        $participante = Participant::find($id);
+        $participante = Participant::getByIdWithSiteCheck($id);
 
         $dados = json_decode($participante->order()->dados, true);
 
@@ -998,7 +848,7 @@ class CheckoutController extends Controller
 
     public function getCustomer(Request $request)
     {
-        $customer = Customer::where('telephone', '=', $request->phone)->first();
+        $customer = Customer::siteOwner()->where('telephone', '=', $request->phone)->first();
 
         $response['customer'] = $customer;
 

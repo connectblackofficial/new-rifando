@@ -1,6 +1,7 @@
 {
-    "/assets/css/site.css": "/assets/css/site.css",
-    "/assets/css/admin.css": "/assets/css/admin.css",
-    "/assets/js/admin-bundle.min.js": "/assets/js/admin-bundle.min.js",
-    "/assets/js/site-bundle.min.js": "/assets/js/site-bundle.min.js"
+    "/cdn/build/site.css": "/cdn/build/site.css?id=f59d3ccf37fe153fc9b3",
+    "/cdn/build/admin.css": "/cdn/build/admin.css?id=2de808039a08beaad93e",
+    "/cdn/js/admin-bundle.min.js": "/cdn/js/admin-bundle.min.js?id=740c3c50a328427a1de3",
+    "/cdn/js/site-header-bundle.min.js": "/cdn/js/site-header-bundle.min.js?id=2c5c0a92e7bccf24ce5c",
+    "/cdn/js/site-footer-bundle.min.js": "/cdn/js/site-footer-bundle.min.js?id=be37d036f7cfbcf65a26"
 }

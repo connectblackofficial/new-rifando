@@ -155,7 +155,7 @@
                 @if ($situacao == $participante->situacao())
                     <div class="row p-1 item-compra {{ $participante->qtdPagos() > 0 ? 'pago' : 'reservado' }}">
                         <div class="col-md-1">
-                            <img class="rounded" src="/products/{{ $rifa->imagem()->name }}" width="80">
+                            <img class="rounded" src="{{ $rifa->getDefaultImageUrl()}}" width="80">
                         </div>
                         <div class="col-md-4 d-flex align-items-center">
                             <label>
@@ -181,7 +181,7 @@
             @else
                 <div class="row p-1 item-compra {{ $participante->pagos > 0 ? 'pago' : 'reservado' }}">
                     <div class="col-md-1">
-                        <img class="rounded" src="/products/{{ $rifa->imagem()->name }}" width="80">
+                        <img class="rounded" src="{{ $rifa->getDefaultImageUrl()}}" width="80">
                     </div>
                     <div class="col-md-4 d-flex align-items-center">
                         <label>

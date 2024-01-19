@@ -6,12 +6,18 @@ trait ModelSiteOwnerTrait
 {
     public function scopeSiteOwner($query)
     {
-        return $query->where("user_id", getSiteOwner());
+        return $query->where("user_id", getSiteOwnerId());
 
     }
 
     public static function getByIdWithSiteCheck($id)
     {
         return self::siteOwner()->whereId($id)->first();
+    }
+
+    public static function getByIdWithSiteCheckOrFail($id)
+    {
+
+        return self::siteOwner()->whereId($id)->firstOrFail();
     }
 }

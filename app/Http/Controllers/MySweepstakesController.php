@@ -3,8 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\CompraAutomatica;
+use App\Enums\FileUploadTypeEnum;
+use App\Enums\ReservationTypeEnum;
 use App\Environment;
+use App\Exceptions\UserErrorException;
 use App\GanhosAfiliado;
+use App\Helpers\FileUploadHelper;
+use App\Http\Requests\SiteProductStoreRequest;
+use App\Http\Requests\SiteProductUpdateRequest;
 use App\Models\Order;
 use App\Models\Participant;
 use App\Models\PaymentPix;
@@ -52,7 +58,7 @@ class MySweepstakesController extends Controller
             ->join('products_images', 'products.id', 'products_images.product_id')
             ->join('product_description', 'products.id', 'product_description.product_id')
             ->join('raffles', 'products.id', 'raffles.product_id', 'raffles.id')
-            ->where('products.user_id', '=', getSiteOwner())
+            ->where('products.user_id', '=', getSiteOwnerId())
             ->groupBy('products.id')
             ->orderBy('products.id', 'DESC')
             ->get();
@@ -101,7 +107,6 @@ class MySweepstakesController extends Controller
         $rafflesNumbers = Raffle::siteOwner()
             ->select(['id', 'number', 'status', 'product_id'])
             ->where('raffles.product_id', $productID)
-            ->where('raffles.user_id', getSiteOwner())
             ->orderBy('raffles.created_at', 'DESC');
 
         foreach ($rafflesNumbers as $cKeyRaffle => $cValRaffle) :
@@ -176,7 +181,7 @@ class MySweepstakesController extends Controller
         if (!isset($participante['id'])) {
             return back()->withErrors(["Participant não encontrado."]);
         }
-        $rifa = $participante->rifa();
+        $rifa = $participante->firstProduct();
 
         $rifa->confirmPayment($participante->id);
 
@@ -192,24 +197,14 @@ class MySweepstakesController extends Controller
     public function reservarNumeros(Request $request)
     {
         $participante = Participant::find($request->participante);
-        $rifa = $participante->rifa();
+        $rifa = $participante->firstProduct();
 
         if ($rifa->modo_de_jogo == 'numeros') {
             $numbersParticipante = $participante->numbers();
-            // $rifaNumbers = $rifa->numbers();
-
-            // foreach ($numbersParticipante as $number) {
-            //     $number->status = 'Reservado';
-            //     $rifaNumbers[$number->key]['status'] = 'Reservado';
-            // }
-
             $participante->update([
-                // 'numbers' => json_encode($numbersParticipante),
                 'reservados' => count($numbersParticipante),
                 'pagos' => 0
             ]);
-
-            // $participante->rifa()->saveNumbers($rifaNumbers);
         } else {
             Raffle::where('participant_id', '=', $request->participante)->update([
                 'status' => 'Reservado',
@@ -228,7 +223,7 @@ class MySweepstakesController extends Controller
     public function releaseReservedRafflesNumbers(Request $request)
     {
         $participante = Participant::find($request->release_reservervations);
-        $rifa = $participante->rifa();
+        $rifa = $participante->firstProduct();
 
         if ($rifa->modo_de_jogo == 'numeros') {
             $numbersParticipante = $participante->numbers();
@@ -236,12 +231,6 @@ class MySweepstakesController extends Controller
 
             foreach ($numbersParticipante as $number) {
                 array_push($rifaNumbers, $number);
-                // $rifaNumbers[$number->key] = [
-                //     'key' => $number->key,
-                //     'number' => $number->number,
-                //     'status' => $number->status,
-                //     'participant_id' => $number->participant_id
-                // ];
             }
 
             sort($rifaNumbers);
@@ -257,20 +246,6 @@ class MySweepstakesController extends Controller
 
         $message = "Voce removeu todas as reserva(s), todos os números estão disponíveis novamente";
         return back()->with('success', $message);
-
-
-        // $count = 0;
-        // $cleanNumbers = ($request->release_reservervations !== NULL) ? json_decode(base64_decode(urldecode($request->release_reservervations))) : [];
-        // foreach($cleanNumbers as $kNumbers => $valNumbers):
-        //     if(MySweepstakesController::updateReservationsToAvailable($valNumbers->id)){
-        //         $count++;
-        //     }
-        // endforeach;
-
-        // if($count > 0){
-        //     $message = "Voce removeu ".$count." reserva(s), todos os números estão disponíveis novamente";
-        //     return back()->with('success', $message);
-        // }
 
     }
 
@@ -399,43 +374,19 @@ class MySweepstakesController extends Controller
 
     public function update(Request $request, $id)
     {
-
-        $validatedData = $request->validate([
-            'slug' => 'required',
-        ], [
-            'required' => 'O campo :attribute é obrigatório'
-        ], [
-            'slug' => 'URL Amigavel'
-        ]);
+        $prduct = Product::getByIdWithSiteCheckOrFail($id);
 
         // retirando outras rifas de favoritos
-        if ($request->favoritar_rifa) {
-            Product::where('favoritar', '=', 1)->update([
-                'favoritar' => 0
-            ]);
+        if ($request->favoritar_rifa && $prduct->favoritar == 1) {
+            $prduct->favoritar = 0;
+            $prduct->saveOrFail();
         }
 
-        // Verificando se alterou a qtd de 0 para atualizar
-        $rifa = ModelsProduct::find($id);
-        // if ($rifa->qtd_zeros != $request->qtd_zeros) {
-        //     $numbersRifa = $rifa->numbers();
-        //     foreach ($numbersRifa as $value) {
-        //         $number = intval($value['number']); // retira os 0 convertendo para inteiro
-        //         $number = strval($number);          // converte novamente para string
-        //         for ($i = 0; $i < $request->qtd_zeros; $i++) {
-        //             $number = str_pad($number, $request->qtd_zeros + 1, '0', STR_PAD_LEFT);
-        //             // $number = '0' . $number;
-        //         }
 
-        //         $key = $value['key'];
-        //         $numbersRifa[$key]['number'] = $number;
-        //     }
-        //     $rifa->saveNumbers($numbersRifa);
-        // }
-
+        $rifa = $prduct;
 
         try {
-            $rifa_edit = Product::find($id)->update(
+            $rifa->update(
                 [
                     'name' => $request->name,
                     'subname' => $request->subname,
@@ -444,10 +395,7 @@ class MySweepstakesController extends Controller
                     'expiracao' => $request->expiracao,
                     'parcial' => $request->parcial,
                     'slug' => $request->slug,
-                    //'draw_date' => $request->data,
-                    //'type_raffles' => 'automatico',
-                    //'slug' => $this->createSlug($request->name),
-                    'user_id' => Auth::user()->id,
+                    'user_id' => getSiteOwnerId(),
                     'visible' => $request->visible,
                     'favoritar' => $request->favoritar_rifa,
                     'winner' => $request->cadastrar_ganhador,
@@ -460,8 +408,6 @@ class MySweepstakesController extends Controller
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now(),
                     'ganho_afiliado' => intval($request->ganho_afiliado),
-                    // 'qtd_zeros' => $request->qtd_zeros,
-                    // 'modo_de_jogo' => $request->rifa_numero,
                     'gateway' => $request->gateway
                 ]
             );
@@ -480,12 +426,7 @@ class MySweepstakesController extends Controller
         //criando promo para rifa qe ainda nao tem
         $prod = ModelsProduct::getByIdWithSiteCheck($id);
         if ($prod->promocoes()->count() === 0) {
-            for ($i = 1; $i <= 4; $i++) {
-                Promocao::create([
-                    'product_id' => $prod->id,
-                    'ordem' => $i
-                ]);
-            }
+            $prod->createPromos();
         } else {
             // atualizando promocao
             for ($i = 1; $i <= 4; $i++) {
@@ -493,7 +434,6 @@ class MySweepstakesController extends Controller
                 $desconto = floatval($request->valPromocao[$i]);
                 $total = $qtdNumeros * str_replace(",", ".", $prod->price);
                 $valorComDesconto = $total - ($total * $desconto / 100);
-
 
                 Promocao::where('product_id', '=', $id)->where('ordem', '=', $i)->update([
                     'qtdNumeros' => $request->numPromocao[$i],
@@ -512,15 +452,17 @@ class MySweepstakesController extends Controller
 
 
         // Atualizando compras auto
+        dd($request->compra);
         foreach ($request->compra as $key => $qtd) {
-            CompraAutomatica::find($key)->update([
+
+            CompraAutomatica::siteOwner()->whereId($key)->update([
                 'qtd' => $qtd,
                 'popular' => false
             ]);
         }
 
         // Atualizando mais popular
-        CompraAutomatica::find($request->popularCheck)->update([
+        CompraAutomatica::siteOwner()->whereId($request->popularCheck)->update([
             'popular' => true
         ]);
 
@@ -949,7 +891,7 @@ class MySweepstakesController extends Controller
 
     public function resumoPDF($id)
     {
-        $participante = Participant::find($id);
+        $participante = Participant::getByIdWithSiteCheck($id);
         $config = getSiteConfig();
 
         $data = [
@@ -982,7 +924,7 @@ class MySweepstakesController extends Controller
     public function excluirFoto(Request $request)
     {
         try {
-            ProductImage::find($request->id)->delete();
+            ProductImage::getByIdWithSiteCheck($request->id)->delete();
 
             $response['message'] = 'Imagem excluida com sucesso!';
             $response['success'] = true;
@@ -998,7 +940,7 @@ class MySweepstakesController extends Controller
 
     public function compras($idRifa, Request $request)
     {
-        $rifa = ModelsProduct::find($idRifa);
+        $rifa = ModelsProduct::getByIdWithSiteCheck($idRifa);
 
         $data = [
             'rifa' => $rifa,
@@ -1012,7 +954,7 @@ class MySweepstakesController extends Controller
 
     public function comprasBusca($idRifa, Request $request)
     {
-        $rifa = ModelsProduct::find($idRifa);
+        $rifa = ModelsProduct::getByIdWithSiteCheck($idRifa);
         $participantes = $rifa->participantes();
 
         if ($request->cota) {
@@ -1056,7 +998,7 @@ class MySweepstakesController extends Controller
     {
         DB::beginTransaction();
         try {
-            $rifa = ModelsProduct::find($request->id);
+            $rifa = ModelsProduct::getByIdWithSiteCheck($request->id);
 
             if ($rifa->modo_de_jogo == 'numeros') {
                 foreach ($rifa->participantes()->where('reservados', '>', 0) as $participante) {
@@ -1071,11 +1013,11 @@ class MySweepstakesController extends Controller
 
                     sort($rifaNumbers);
                     $rifa->saveNumbers($rifaNumbers);
-                    Participant::find($participante->id)->delete();
+                    Participant::getByIdWithSiteCheck($participante->id)->delete();
                 }
             } else {
                 foreach ($rifa->participantesReservados() as $numero) {
-                    Participant::find($numero->participant_id)->delete();
+                    Participant::getByIdWithSiteCheck($numero->participant_id)->delete();
                     Raffle::where('status', '=', 'Reservado')->where('participant_id', '=', $numero->participante_id)->update([
                         'status' => 'Disponível',
                         'participant_id' => null
@@ -1099,7 +1041,7 @@ class MySweepstakesController extends Controller
 
     public function randomNumbers(Request $request)
     {
-        $rifa = ModelsProduct::find($request->id);
+        $rifa = ModelsProduct::getByIdWithSiteCheck($request->id);
         if ($request->qtd > $rifa->qtdNumerosDisponiveis()) {
             $response['error'] = 'A rifa só tem ' . $rifa->qtdNumerosDisponiveis() . ' números disponíveis';
             return $response;
@@ -1112,7 +1054,7 @@ class MySweepstakesController extends Controller
 
     public function criarCompra(Request $request)
     {
-        $rifa = ModelsProduct::find($request->idRifa);
+        $rifa = ModelsProduct::getByIdWithSiteCheck($request->idRifa);
 
         DB::beginTransaction();
         try {
@@ -1167,7 +1109,7 @@ class MySweepstakesController extends Controller
                 } else if ($request->status == 'Pendente') {
                     $codeKeyPIX = DB::table('consulting_environments')
                         ->select('key_pix')
-                        ->where('user_id', '=', getSiteOwner())
+                        ->where('user_id', '=', getSiteOwnerId())
                         ->first();
 
                     $resultPricePIX = number_format($totalCompra, 2, ".", ",");
@@ -1308,7 +1250,7 @@ class MySweepstakesController extends Controller
 
     public function detalhesCompra(Request $request)
     {
-        $participante = Participant::find($request->id);
+        $participante = Participant::getByIdWithSiteCheck($request->id);
         $msgs = WhatsappMensagem::where('titulo', '!=', '')->where('msg', '!=', '')->get();
         $config = getSiteConfig();
 
@@ -1334,25 +1276,25 @@ class MySweepstakesController extends Controller
         return view('painel.ganhadores', $data);
     }
 
+
     public function addFotoGanhador(Request $request)
     {
-        try {
-            $ganhador = Premio::find($request->idGanhador);
-            $path = 'ganhadores';
-
-            $upload_imagename = time() . '.' . $request->foto->getClientOriginalExtension();
-            $upload_url = public_path('/products') . '/' . $upload_imagename;
-
-            $filename = $this->compress_image($_FILES["foto"]["tmp_name"], $upload_url, 80);
-
-            $ganhador->update([
-                'foto' => 'products/' . $upload_imagename,
-            ]);
-
+        $uploadImg = function () use ($request) {
+            $ganhador = Premio::getByIdWithSiteCheck($request->idGanhador);
+            if (!isset($ganhador['id'])) {
+                throw new \Exception("Ganhador não encontrado.");
+            }
+            if (!$request->hasFile('foto')) {
+                throw  UserErrorException::emptyImage();
+            }
+            $imageUpload = new FileUploadHelper($request->file('foto'), FileUploadTypeEnum::Image);
+            $imageUrl = $imageUpload->upload();
+            $ganhador->foto = $imageUrl;
+            $ganhador->saveOrFail();
             return back()->with('success', 'Foto alterada com sucesso!');
-        } catch (\Throwable $th) {
-            //throw $th;
-        }
+        };
+        return $this->catchAndRedirect($uploadImg);
+
     }
 
     public function compress_image($source_url, $destination_url, $quality)
@@ -1379,7 +1321,7 @@ class MySweepstakesController extends Controller
     public function tutoriais()
     {
         $data = [
-            'videos' => Video::all()
+            'videos' => Video::siteOwner()->get()
         ];
 
         return view('tutorial', $data);
@@ -1388,7 +1330,7 @@ class MySweepstakesController extends Controller
     public function cadastroVideos()
     {
         $data = [
-            'videos' => Video::all()
+            'videos' => Video::siteOwner()->get()
         ];
 
         return view('dev.cadastroVideos', $data);
@@ -1403,14 +1345,14 @@ class MySweepstakesController extends Controller
 
     public function excluirVideo($id)
     {
-        Video::find($id)->delete();
+        Video::getByIdWithSiteCheck($id)->delete();
 
         return back();
     }
 
     public function resumoRifa($id)
     {
-        $rifa = ModelsProduct::find($id);
+        $rifa = ModelsProduct::getByIdWithSiteCheck($id);
         $config = getSiteConfig();
 
         $data = [
@@ -1423,7 +1365,7 @@ class MySweepstakesController extends Controller
 
     public function imprimirResumoCompra($id)
     {
-        $participante = Participant::find($id);
+        $participante = Participant::getByIdWithSiteCheck($id);
         $data = [
             'participante' => $participante
         ];
@@ -1497,7 +1439,7 @@ class MySweepstakesController extends Controller
 
     public function resumoRanking()
     {
-        $rifas = ModelsProduct::all();
+        $rifas = ModelsProduct::siteOwner()->get();
 
         $data = [
             'rifas' => $rifas,
@@ -1509,11 +1451,11 @@ class MySweepstakesController extends Controller
 
     public function resumoRankingSelect(Request $request)
     {
-        $rifas = ModelsProduct::all();
+        $rifas = ModelsProduct::siteOwner()->get();
 
         $data = [
             'rifas' => $rifas,
-            'rifaSelected' => ModelsProduct::find($request->rifa)
+            'rifaSelected' => ModelsProduct::getByIdWithSiteCheck($request->rifa)
         ];
 
         return view('resumo-home.ranking', $data);
@@ -1532,7 +1474,7 @@ class MySweepstakesController extends Controller
 
     public function solicitacaoPgto()
     {
-        $solicitacoes = SolicitacaoAfiliado::all();
+        $solicitacoes = SolicitacaoAfiliado::siteOwner()->get();
 
         $data = [
             'solicitacoes' => $solicitacoes
@@ -1545,7 +1487,7 @@ class MySweepstakesController extends Controller
     {
         DB::beginTransaction();
         try {
-            $solicitacao = SolicitacaoAfiliado::find($solicitacaoId);
+            $solicitacao = SolicitacaoAfiliado::getByIdWithSiteCheck($solicitacaoId);
             $solicitacao->update([
                 'pago' => true
             ]);
@@ -1577,8 +1519,8 @@ class MySweepstakesController extends Controller
 
     public function sendMessageAPIWhats(Request $request)
     {
-        $msg = WhatsappMensagem::find($request->msg_id);
-        $participante = Participant::find($request->participante_id);
+        $msg = WhatsappMensagem::getByIdWithSiteCheck($request->msg_id);
+        $participante = Participant::getByIdWithSiteCheck($request->participante_id);
         $apiURL = env('URL_API_CRIAR_WHATS');
         $config = getSiteConfig();
 

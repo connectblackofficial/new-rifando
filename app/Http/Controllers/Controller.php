@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\FileUploadTypeEnum;
+use App\Exceptions\UserErrorException;
+use App\Helpers\FileUploadHelper;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -111,5 +114,23 @@ class Controller extends BaseController
         dd('ok');
     }
 
-    
+    function catchAndRedirect($callback)
+    {
+        try {
+            return $callback();
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(parseExceptionMessage($e));
+        }
+    }
+
+    function catchJsonResponse($callback)
+    {
+        try {
+            return $callback();
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'error', 'msg' => parseExceptionMessage($e)], 404);
+        }
+    }
+
+
 }

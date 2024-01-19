@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class Environment extends Model
@@ -13,5 +15,10 @@ class Environment extends Model
         'paggue_client_secret', 'paggue_client_key', 'token_asaas', 'pixel', 'verify_domain_fb', 'group_whats', 'logo',
         'footer', 'user_id', 'active'
     ];
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'id', 'user_id');
+    }
 
 }

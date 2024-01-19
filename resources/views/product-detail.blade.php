@@ -28,13 +28,9 @@ if (isset($imagens[0])) {
 
 
     @section('content')
-        <script>
-            function infoParticipante(msg) {
-                Swal.fire(msg)
-            }
-        </script>
 
-        <link rel="stylesheet" href="{{ asset('css/product-detail-v2.css') }}">
+
+        <link rel="stylesheet" href="{{ cdnAsset('css/product-detail-v2.css') }}">
 
         @if ($errors->any())
             @foreach ($errors->all() as $error)

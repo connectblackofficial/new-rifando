@@ -1,6 +1,8 @@
 <label class="label d-block"
-       for="<?=$name?>"><?= htmlLabel($name) ?>:</label>
-<select class="form-control" name="<?=$name?>">
+       for="<?=$name?>"><?php echo getInputLabelLang($name, $attrs) ?>:</label>
+
+
+<select name="<?=$name?>" <?= parseInputsAttr($name, $attrs) ?>>
     @foreach($options as $index=>$option)
             <?php
             $selected = '';
@@ -8,6 +10,6 @@
                 $selected = ' selected';
             }
             ?>
-        <option value="<?=$index?>" <?= $selected ?> ><?=htmlLabel($option)?></option>
+        <option value="<?=$index?>" <?= $selected ?> ><?= htmlLabel($option) ?></option>
     @endforeach
 </select>

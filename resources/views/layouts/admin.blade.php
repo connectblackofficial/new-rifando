@@ -12,7 +12,7 @@
     <meta name="googlebot" content="noindex">
 
 
-    <link href="{{ asset('/assets/css/admin.css') }}" rel="stylesheet">
+    <link href="{{ cdnAsset('css/admin.css') }}" rel="stylesheet">
 
 
     <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
@@ -61,15 +61,6 @@
                     </form>
                 </a>
             </li>
-            {{-- <li class="nav-item">
-                <a class="nav-link" data-toggle="dropdown" href="#">
-                    <form name="logout" action="{{ route('logout') }}" method="POST">
-                        {{ csrf_field() }}
-                        <span class="badge badge-warning navbar-badge" onclick="javascript:logout.submit()"
-                            style="font-size: 14px;">SAIR</span>
-                    </form>
-                </a>
-            </li> --}}
         </ul>
     </nav>
     <!-- /.navbar -->
@@ -200,17 +191,15 @@
 <!-- ./wrapper -->
 
 
-<script src="{{ asset('/assets/js/admin-bundle.min.js') }}"></script>
+<script src="{{ cdnAsset('/js/admin-bundle.min.js') }}"></script>
 
 @stack('scripts')
-
 <script>
-    $(function (e) {
+    $(document).ready(function (){
         initAjaxSetup();
         setUrlsPages();
-        initSummerNotes();
-    })
 
+    })
 </script>
 @stack('datetimepicker')
 

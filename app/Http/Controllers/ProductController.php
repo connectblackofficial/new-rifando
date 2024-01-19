@@ -3,21 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\AutoMessage;
-use App\Environment;
+use App\Exceptions\UserErrorException;
 use App\GanhosAfiliado;
+use App\Libs\AsaasLib;
+use App\Libs\MpLib;
+use App\Libs\PaggueLib;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Participant;
 use App\Models\PaymentPix;
 use App\Models\Premio;
 use App\Models\Product;
-use App\Models\Product as ModelsProduct;
 use App\Models\Raffle;
 use App\RifaAfiliado;
+use App\Services\PaymentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use MercadoPago\Payment;
 use MercadoPago\SDK;
@@ -28,9 +30,9 @@ class ProductController extends Controller
     {
         $ganhadores = Premio::siteOwner()->where('descricao', '!=', null)->where('ganhador', '!=', '')->get();
 
-        $products = ModelsProduct::select($this->fieldsRifa)->siteOwner()->isVisible()->orderBy('id', 'desc')->get();
+        $products = Product::siteOwner()->isVisible()->orderBy('id', 'desc')->get();
 
-        $winners = ModelsProduct::select('winner')->siteOwner()->winners()->get();
+        $winners = Product::select('winner')->siteOwner()->winners()->get();
 
         $config = getSiteConfig();
 
@@ -39,7 +41,7 @@ class ProductController extends Controller
             'winners' => $winners,
             'ganhadores' => $ganhadores,
             'user' => getSiteOwnerUser(),
-            'productModel' => ModelsProduct::find(4),
+            'productModel' => Product::getByIdWithSiteCheck(4),
             'config' => $config
         ]);
     }
@@ -48,9 +50,9 @@ class ProductController extends Controller
     {
         $ganhadores = Premio::where('descricao', '!=', null)->where('ganhador', '!=', '')->get();
 
-        $products = ModelsProduct::where('visible', '=', 1)->orderBy('id', 'desc')->get();
+        $products = Product::where('visible', '=', 1)->orderBy('id', 'desc')->get();
 
-        $winners = ModelsProduct::winners()->get();
+        $winners = Product::winners()->get();
 
         $config = getSiteConfig();
 
@@ -59,7 +61,7 @@ class ProductController extends Controller
             'winners' => $winners,
             'ganhadores' => $ganhadores,
             'user' => getSiteOwnerUser(),
-            'productModel' => ModelsProduct::find(4),
+            'productModel' => Product::getByIdWithSiteCheck(4),
             'config' => $config
         ]);
     }
@@ -102,7 +104,7 @@ class ProductController extends Controller
             'productModel' => $productModel,
             'ranking' => $productModel->ranking(),
             'config' => $config,
-            'activePromos'=>$activePromo
+            'activePromos' => $activePromo
         ];
 
 
@@ -113,7 +115,7 @@ class ProductController extends Controller
     {
 
         // Verificando se sorteio ja expirou ou se ja foi vendido todas as cotas para finalizar automatico.
-        $product = ModelsProduct::getByIdWithSiteCheck($productId);
+        $product = Product::getByIdWithSiteCheck($productId);
         if ($product->qtdNumerosDisponiveis() == 0) {
             $product->status = 'Finalizado';
             $product->update();
@@ -244,7 +246,7 @@ class ProductController extends Controller
                 $customer = Customer::create([
                     'nome' => $request->name,
                     'telephone' => $request->telephone,
-                    'user_id' => getSiteOwner()
+                    'user_id' => getSiteOwnerId()
 
                 ]);
             } else {
@@ -252,7 +254,7 @@ class ProductController extends Controller
             }
 
 
-            $prod = ModelsProduct::siteOwner()->whereId($request->productID)->first();
+            $prod = Product::siteOwner()->whereId($request->productID)->first();
 
             // Validando link de afiliado,
             $afiliado = RifaAfiliado::siteOwner()->where('token', '=', $request->tokenAfiliado)->first();
@@ -309,7 +311,7 @@ class ProductController extends Controller
                         ->leftJoin('products', 'products.user_id', 'users.id')
                         ->leftJoin('consulting_environments', 'consulting_environments.user_id', 'users.id')
                         ->where('products.id', '=', $request->productID)
-                        ->where('products.user_id', getSiteOwner())
+                        ->where('products.user_id', getSiteOwnerId())
                         ->first();
 
                     if ($user->type_raffles == 'manual') {
@@ -370,7 +372,6 @@ class ProductController extends Controller
                             foreach ($resutlNumbers as $key => $value) {
                                 $expl = explode("-", $value);
                                 $number = end($expl);
-
 
                                 $participantesPorNumero = Participant::siteOwner()->where('product_id', '=', $request->productID)->where('numbers', 'like', '%' . $number . '%')->get();
 
@@ -438,7 +439,7 @@ class ProductController extends Controller
                         ->select('products.*', 'products_images.name as image')
                         ->join('products_images', 'products.id', 'products_images.product_id')
                         ->where('products.id', '=', $request->productID)
-                        ->where('products.user_id', getSiteOwner())
+                        ->where('products.user_id', getSiteOwnerId())
                         ->first();
 
                     // Validando minimo e maximo de compra da rifa
@@ -494,7 +495,7 @@ class ProductController extends Controller
 
                         $numbers = isset($selecionados) ? json_encode($selecionados) : json_encode($resutlNumbers);
                         $participante = Participant::create([
-                            'user_id' => getSiteOwner(),
+                            'user_id' => getSiteOwnerId(),
                             'customer_id' => $customer->id,
                             'name' => $request->name,
                             'telephone' => $request->telephone,
@@ -503,9 +504,8 @@ class ProductController extends Controller
                             'valor' => $resultPricePIX,
                             'reservados' => count($resutlNumbers),
                             'product_id' => $request->productID,
-                            'numbers' => $numbers,
-                            'created_at' => Carbon::now(),
-                            'updated_at' => Carbon::now()
+                            'numbers' => $numbers
+
                         ]);
 
                         $gateway = $this->gerarPIX($prod, $resultPricePIX, $request->email, $request->name, $participante, $request->cpf, $request->telephone);
@@ -523,6 +523,7 @@ class ProductController extends Controller
                         // $qrCode = $object->point_of_interaction->transaction_data->qr_code_base64;
 
                         $paymentPIX = DB::table('payment_pix')->insert([
+                            'user_id'=>getSiteOwnerId(),
                             'key_pix' => $codePIXID,
                             'full_pix' => $codePIX,
                             'status' => 'Pendente',
@@ -549,6 +550,7 @@ class ProductController extends Controller
                         'key_pix' => $codePIXID,
                         'participant_id' => $participante,
                         'valor' => $price,
+                        'user_id'=>getSiteOwnerId()
                     ]);
 
 
@@ -561,13 +563,15 @@ class ProductController extends Controller
                     $resultPriceUnic = $priceUnicFormat + $percentagePriceUnic + 0.50;
 
                     if ($afiliado != null) {
-                        $part = Participant::find($participante);
+                        $part = Participant::getByIdWithSiteCheck($participante);
                         GanhosAfiliado::create([
                             'product_id' => $prod->id,
                             'participante_id' => $participante,
                             'afiliado_id' => $afiliado->afiliado_id,
                             'valor' => $part->valor * $prod->ganho_afiliado / 100,
-                            'pago' => false
+                            'pago' => false,
+                            'user_id'=>getSiteOwnerId()
+
                         ]);
                     }
 
@@ -621,7 +625,7 @@ class ProductController extends Controller
     {
         $admin = getSiteOwnerUser();
         $config = getSiteConfig();
-        $participante = Participant::find($participanteID);
+        $participante = Participant::getByIdWithSiteCheck($participanteID);
         $msgAdmin = AutoMessage::where('identificador', '=', 'compra-admin')->first();
         $msgCliente = AutoMessage::where('identificador', '=', 'compra-cliente')->first();
         $apiURL = env('URL_API_CRIAR_WHATS');
@@ -674,7 +678,7 @@ class ProductController extends Controller
         }
     }
 
-    public function gerarPIX(ModelsProduct $product, $resultPricePIX, $email, $name, $participante, $cpf, $telefone)
+    public function gerarPIX(Product $product, $resultPricePIX, $email, $name, $participante, $cpf, $telefone)
     {
 
         if ($resultPricePIX == 0) {
@@ -686,169 +690,22 @@ class ProductController extends Controller
         }
 
         $codeKeyPIX = getSiteConfig();
-
+        $productDesc = "Participação da ação " . $product->id . ' - ' . $product->name;
+        $externalReferencee = $participante;
         if ($product->gateway == 'mp') {
-            $idempotency_key = uniqid();
-            $url = 'https://api.mercadopago.com/v1/payments';
-            $resultPricePIX = str_replace(",", "", $resultPricePIX);
-            $payment_data = [
-                "transaction_amount" => floatval($resultPricePIX),
-                "description" => "Participação da ação " . $product->id . ' - ' . $product->name,
-                "payment_method_id" => "pix",
-                "payer" => [
-                    "email" => $email ? $email : "mestredoscript@gmail.com",
-                    "first_name" => $name,
-                    "identification" => [
-                        "type" => "hash",
-                        "number" => date('YmdHis')
-                    ]
 
-                ],
-                "notification_url" => env('APP_NAME') == 'local' ? '' : route('api.notificaoMP'),
-                "external_reference" => $participante,
-            ];
+            $mpLib = new MpLib($codeKeyPIX->key_pix);
 
 
-            $payment_data = json_encode($payment_data);
-
-
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $payment_data);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $codeKeyPIX->key_pix,
-                'Content-Type: application/json',
-                'X-Idempotency-Key: ' . $idempotency_key
-            ]);
-
-            $responsex = curl_exec($ch);
-            $data = json_decode($responsex, true);
-
-
-            curl_close($ch);
-
-            $codePIXID = $data['id'];
-            $codePIX = $data['point_of_interaction']['transaction_data']['qr_code'];
-            $qrCode = $data['point_of_interaction']['transaction_data']['qr_code_base64'];
-
-            $response['codePIXID'] = $codePIXID;
-            $response['codePIX'] = $codePIX;
-            $response['qrCode'] = $qrCode;
-
-            return $response;
+            return $mpLib->getPix($resultPricePIX, $name, $email, $productDesc, $externalReferencee);
 
         } else if ($product->gateway == 'asaas') {
-            $idCliente = $this->getOrCreateClienteAsaas($name, $email, $cpf, $telefone);
-
-            $minutosExpiracao = $product->expiracao;
-            $dataDeExpiracao = date('Y-m-d H:i:s', strtotime("+" . $minutosExpiracao . " minutes"));
-
-            $client = new \GuzzleHttp\Client([
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'access_token' => $codeKeyPIX->token_asaas
-                ]
-            ]);
-
-            $pixURL = 'https://www.asaas.com/api/v3/payments';
-            $requestPIX = $client->post($pixURL, [
-                'form_params' => [
-                    "externalReference" => $participante,
-                    "description" => "Participação da ação " . $product->id . ' - ' . $product->name,
-                    "customer" => $idCliente,
-                    "billingType" => "PIX",
-                    'dueDate' => date('Y-m-d', strtotime($dataDeExpiracao)),
-                    "value" => $resultPricePIX,
-                ]
-            ]);
-
-            $responsePIX = json_decode($requestPIX->getBody()->getContents());
-
-            // Capturando QR Code gerado
-            $QRURL = $pixURL . '/' . $responsePIX->id . '/pixQrCode';
-            $reqQR = $client->get($QRURL);
-            $respQR = json_decode($reqQR->getBody()->getContents());
-
-            $response['codePIXID'] = $responsePIX->id;
-            $response['codePIX'] = $respQR->payload;
-            $response['qrCode'] = $respQR->encodedImage;
-
-            return $response;
+            $assasHelper = new AsaasLib($codeKeyPIX->token_asaas);
+            $idCliente = $assasHelper->getOrCreateClienteAsaas($name, $email, $cpf, $telefone);
+            return $assasHelper->getPix($product, $idCliente, $resultPricePIX, $productDesc, $externalReferencee);
         } else if ($product->gateway == 'paggue') {
-            include(app_path() . '/ThirdParty/phpqrcode/qrlib.php');
-
-            $payload = array(
-                "client_key" => $codeKeyPIX->paggue_client_key,
-                "client_secret" => $codeKeyPIX->paggue_client_secret
-            );
-
-            $paggue_curl = curl_init();
-
-            curl_setopt_array($paggue_curl, array(
-                CURLOPT_URL => 'https://ms.paggue.io/payments/api/auth/login',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_SSL_VERIFYPEER => 0,
-                CURLOPT_SSL_VERIFYHOST => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'POST',
-                CURLOPT_POSTFIELDS => http_build_query($payload),
-            ));
-
-            $auth_response = json_decode(curl_exec($paggue_curl));
-
-            curl_close($paggue_curl);
-
-            $paggue_token = $auth_response->access_token;
-            $paggue_company_id = $auth_response->user->companies[0]->id;
-
-            // Faz a requisição do pagamento
-            $payload = array(
-                "payer_name" => $name,
-                "amount" => $resultPricePIX * 100,
-                "external_id" => $participante,
-                "description" => "Participação da ação " . $product->id . ' - ' . $product->name,
-            );
-
-
-            $headers = array();
-            $headers[] = 'Accept: application/json';
-            $headers[] = 'Authorization: Bearer ' . $paggue_token;
-            $headers[] = 'Content-Type: application/json';
-            $headers[] = 'X-Company-ID: ' . $paggue_company_id;
-
-            $curl = curl_init();
-
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://ms.paggue.io/payments/api/billing_order',
-                CURLOPT_RETURNTRANSFER => true,
-                curl_setopt($curl, CURLOPT_POST, 1),
-                CURLOPT_POSTFIELDS => json_encode($payload),
-                CURLOPT_HTTPHEADER => $headers
-            ));
-
-            $payment_response = json_decode(curl_exec($curl));
-
-            curl_close($curl);
-
-            ob_start();
-            \QRCode::png($payment_response->payment, null);
-            $imageString = base64_encode(ob_get_contents());
-            ob_end_clean();
-
-            $response['codePIXID'] = $payment_response->hash;
-            $response['codePIX'] = $payment_response->payment;
-            $response['qrCode'] = $imageString;
-
-            $req = fopen('create_paggue.json', 'w') or die('Cant open the file');
-            fwrite($req, json_encode($response));
-            fclose($req);
-
-            return $response;
+            $pagLib = new PaggueLib($codeKeyPIX->paggue_client_key, $codeKeyPIX->paggue_client_secret);
+            return $pagLib->getPix($name, $resultPricePIX, $productDesc, $externalReferencee);
         } else {
             $response['codePIXID'] = '';
             $response['codePIX'] = '';
@@ -858,49 +715,6 @@ class ProductController extends Controller
         }
     }
 
-    public function getOrCreateClienteAsaas($nome, $email, $cpf, $telefone)
-    {
-        $codeKeyPIX = DB::table('consulting_environments')
-            ->select('key_pix', 'token_asaas')
-            ->where('user_id', '=', getSiteOwner())
-            ->first();
-
-        $clientURL = 'https://www.asaas.com/api/v3/customers';
-        $client = new \GuzzleHttp\Client([
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'access_token' => $codeKeyPIX->token_asaas
-            ]
-        ]);
-
-        $params = [
-            'query' => [
-                'cpfCnpj' => $cpf,
-            ]
-        ];
-
-        $request = $client->get($clientURL, $params);
-
-        $response = json_decode($request->getBody()->getContents());
-
-        if (count($response->data) > 0) {
-            $idCliente = $response->data[0]->id;
-        } else {
-            $requestClient = $client->post($clientURL, [
-                'form_params' => [
-                    "name" => $nome,
-                    "email" => $email,
-                    "cpfCnpj" => $cpf,
-                    "mobilePhone" => $telefone
-                ]
-            ]);
-
-            $responseCliente = json_decode($requestClient->getBody()->getContents());
-            $idCliente = $responseCliente->id;
-        }
-
-        return $idCliente;
-    }
 
     public function participants(Request $request)
     {
@@ -910,6 +724,7 @@ class ProductController extends Controller
             ->join('raffles', 'participant.raffles_id', 'raffles.id')
             ->where('raffles.status', '=', 'Pago')
             ->where('raffles.product_id', '=', $request->product)
+            ->where('raffles.user_id', getSiteOwnerId())
             ->inRandomOrder()
             ->count();
 
@@ -933,6 +748,7 @@ class ProductController extends Controller
             ->where('participant.telephone', '=', $resultTelephone)
             ->where('products.id', '=', $request->productID)
             ->where('raffles.status', '=', 'Pago')
+            ->where('products.user_id', getSiteOwnerId())
             ->get();
 
         return $numbersPaid;
@@ -952,6 +768,7 @@ class ProductController extends Controller
             ->join('raffles', 'participant.raffles_id', 'raffles.id')
             ->where('participant.telephone', '=', $resultTelephone)
             ->where('participant.product_id', '=', $request->product)
+            ->where('participant.user_id', getSiteOwnerId())
             ->get();
 
         return $pix;
@@ -959,75 +776,16 @@ class ProductController extends Controller
 
     public function callbackPaymentMercadoPago(Request $request)
     {
-        if ($request['action'] == 'payment.updated') {
-
-            DB::table('payment_pix')
-                ->where('key_pix', $request['data']['id'])
-                ->update(['status' => 'Concluída']);
-
-            $updatingRaffles = DB::table('payment_pix')
-                ->join('participant', 'participant.id', '=', 'payment_pix.participant_id')
-                ->join('raffles', 'raffles.id', '=', 'participant.raffles_id')
-                ->where('payment_pix.key_pix', $request['data']['id'])
-                ->update(
-                    [
-                        'raffles.status' => 'Pago',
-                        'raffles.updated_at' => Carbon::now()
-                    ]
-                );
-
-            $participantEmail = DB::table('payment_pix')
-                ->select('participant.name', 'participant.email', 'participant.telephone', 'raffles.*', 'products.name as product', 'products.id as productID', 'products.ebook')
-                ->join('participant', 'participant.id', '=', 'payment_pix.participant_id')
-                ->join('raffles', 'raffles.id', '=', 'participant.raffles_id')
-                ->join('products', 'products.id', '=', 'participant.product_id')
-                ->where('payment_pix.key_pix', $request['data']['id'])
-                ->get();
-
-            $rafflesNumber = [];
-
-            foreach ($participantEmail as $raffle) {
-                array_push($rafflesNumber, $raffle->number);
+        $mpCallback = function () use ($request) {
+            if ($request['action'] == 'payment.updated') {
+                $service = new PaymentService();
+                $service->confirmPixPaymentById($request->id);
+                return response()->json(['success' => 'success'], 200);
+            } else {
+                throw new UserErrorException("Ação inválida.");
             }
-
-            $raffleImplode = implode(',', $rafflesNumber);
-
-            $consultingEnvironment = DB::table('consulting_environments')
-                ->first();
-
-            $dddTelephone = substr($participantEmail[0]->telephone, 1, 2);
-            $n1Telephone = substr($participantEmail[0]->telephone, 5, 5);
-            $n2Telephone = substr($participantEmail[0]->telephone, 11, 4);
-
-            $dados = array(
-                'name' => $participantEmail[0]->name,
-                'email' => $participantEmail[0]->email,
-                'product' => $participantEmail[0]->product,
-                'productID' => $participantEmail[0]->productID,
-                'url' => url('/products/' . $participantEmail[0]->ebook),
-                'raffles' => $raffleImplode,
-                'environment' => $consultingEnvironment->name,
-                'instagram' => $consultingEnvironment->instagram,
-                'facebook' => $consultingEnvironment->instagram,
-                'searchMyRaffles' => url('reserva/' . $participantEmail[0]->productID . '/' . $dddTelephone . $n1Telephone . $n2Telephone)
-            );
-
-            $emailUser = $participantEmail[0]->email;
-            $environment = $consultingEnvironment->name;
-
-            Mail::send('mails.payment', ['dados' => $dados], function ($message) use ($emailUser, $environment) {
-                $message->from('contato@gosolution.com.br', $environment);
-                $message->to($emailUser);
-                $message->subject('Ação entre amigos');
-            });
-
-            return response()->json(['success' => 'success'], 200);
-        } else {
-
-            return response()->json(['error' => 'error'], 404);
-        }
-
-        //Log::info($request->all());
+        };
+        return $this->catchJsonResponse($mpCallback);
     }
 
     public function ganhadores()
@@ -1040,7 +798,7 @@ class ProductController extends Controller
         //     ->orderBy('products.id', 'desc')
         //     ->get();
 
-        $winners = ModelsProduct::where('status', '=', 'Finalizado')->get();
+        $winners = Product::siteOwner()->get();
 
         return view('ganhadores', [
             'winners' => $winners
@@ -1064,12 +822,10 @@ class ProductController extends Controller
                 if ($payment->status == 'cancelled') {
                     $paymentPix->delete();
                 } else if ($payment->status == 'approved') {
-
                     $participante = Participant::getByIdWithSiteCheck($payment->external_reference);
-                    if ($participante) {
-                        $rifa = $participante->rifa();
-                        $rifa->confirmPayment($participante->id);
-                        $paymentPix->update(['status' => 'Aprovado']);
+                    if (isset($participante['id'])) {
+                        $paymentService = new PaymentService();
+                        $paymentService->confirmPayment($participante);
                     } else {
                         $paymentPix->delete();
                     }
@@ -1085,7 +841,7 @@ class ProductController extends Controller
 
     public function rankingAdmin(Request $request)
     {
-        $rifa = ModelsProduct::find($request->id);
+        $rifa = Product::getByIdWithSiteCheck($request->id);
 
         $data = [
             'rifa' => $rifa,
@@ -1099,7 +855,7 @@ class ProductController extends Controller
 
     public function definirGanhador(Request $request)
     {
-        $rifa = ModelsProduct::find($request->id);
+        $rifa = Product::getByIdWithSiteCheck($request->id);
 
         $data = [
             'rifa' => $rifa,
@@ -1112,7 +868,7 @@ class ProductController extends Controller
 
     public function verGanhadores(Request $request)
     {
-        $rifa = ModelsProduct::find($request->id);
+        $rifa = Product::getByIdWithSiteCheck($request->id);
 
         $data = [
             'rifa' => $rifa,
@@ -1126,7 +882,7 @@ class ProductController extends Controller
     public function informarGanhadores(Request $request)
     {
         try {
-            $rifa = ModelsProduct::find($request->idRifa);
+            $rifa = Product::getByIdWithSiteCheck($request->idRifa);
             $premios = $rifa->premios();
             $ganhadores = [];
 
@@ -1173,21 +929,11 @@ class ProductController extends Controller
         fwrite($req, $request);
         fclose($req);
 
-        $participante = Participant::find($request->external_id);
+        $participante = Participant::getByIdWithSiteCheck($request->external_id);
         if ($participante && $request->status == '1') {
 
-            Raffle::where('participant_id', '=', $participante->id)->update(['status' => 'Pago']);
-
-            $numbersParticipante = $participante->numbers();
-
-            $participante->update([
-                'reservados' => 0,
-                'pagos' => count($numbersParticipante)
-            ]);
-
-            DB::table('payment_pix')->where('participant_id', '=', $participante->id)->update([
-                'status' => 'Aprovado'
-            ]);
+            $paymentService = new PaymentService();
+            $paymentService->confirmPayment($participante);
 
             return response('OK', 200)->header('Content-Type', 'text/plain');
         }

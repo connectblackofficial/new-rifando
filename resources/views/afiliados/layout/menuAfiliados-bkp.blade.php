@@ -17,16 +17,16 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="{{ asset('/plugins/fontawesome-free/css/all.min.css') }}">
-    <link href="{{ asset('/dist/css/adminlte.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('/plugins/summernote/summernote-bs4.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('/plugins/codemirror/codemirror.css') }}" rel="stylesheet">
-    <link href="{{ asset('/plugins/codemirror/theme/monokai.css') }}" rel="stylesheet">
-    {{-- <link href="{{ asset('/plugins/simplemde/simplemde.min.css') }}" rel="stylesheet"> --}}
+    <link rel="stylesheet" href="{{ cdnAsset('/plugins/fontawesome-free/css/all.min.css') }}">
+    <link href="{{ cdnAsset('/dist/css/adminlte.min.css') }}" rel="stylesheet">
+    <link href="{{ cdnAsset('/plugins/summernote/summernote-bs4.min.css') }}" rel="stylesheet">
+    <link href="{{ cdnAsset('/plugins/codemirror/codemirror.css') }}" rel="stylesheet">
+    <link href="{{ cdnAsset('/plugins/codemirror/theme/monokai.css') }}" rel="stylesheet">
+    {{-- <link href="{{ cdnAsset('/plugins/simplemde/simplemde.min.css') }}" rel="stylesheet"> --}}
 
-    <link href="{{ asset('/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css') }}"
+    <link href="{{ cdnAsset('/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css') }}"
         rel="stylesheet">
-    <link href="{{ asset('/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css') }}" rel="stylesheet">
+    <link href="{{ cdnAsset('/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css') }}" rel="stylesheet">
 
     <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" rel="stylesheet">
@@ -157,19 +157,19 @@
     <!-- ./wrapper -->
 
 
-    <script src="{{ asset('/plugins/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('/dist/js/adminlte.min.js') }}"></script>
-    <script src="{{ asset('/plugins/summernote/summernote-bs4.min.js') }}"></script>
-    <script src="{{ asset('/plugins/codemirror/codemirror.js') }}"></script>
-    <script src="{{ asset('/plugins/codemirror/mode/css/css.js') }}"></script>
-    <script src="{{ asset('/plugins/codemirror/mode/xml/xml.js') }}"></script>
-    <script src="{{ asset('/plugins/codemirror/mode/htmlmixed/htmlmixed.js') }}"></script>
-    {{-- <script src="{{ asset('/build/js/Layout.js') }}"></script> --}}
-    {{-- <script src="{{ asset('/build/js/adminlte.js') }}"></script> --}}
+    <script src="{{ cdnAsset('/plugins/jquery/jquery.min.js') }}"></script>
+    <script src="{{ cdnAsset('/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ cdnAsset('/dist/js/adminlte.min.js') }}"></script>
+    <script src="{{ cdnAsset('/plugins/summernote/summernote-bs4.min.js') }}"></script>
+    <script src="{{ cdnAsset('/plugins/codemirror/codemirror.js') }}"></script>
+    <script src="{{ cdnAsset('/plugins/codemirror/mode/css/css.js') }}"></script>
+    <script src="{{ cdnAsset('/plugins/codemirror/mode/xml/xml.js') }}"></script>
+    <script src="{{ cdnAsset('/plugins/codemirror/mode/htmlmixed/htmlmixed.js') }}"></script>
+    {{-- <script src="{{ cdnAsset('/build/js/Layout.js') }}"></script> --}}
+    {{-- <script src="{{ cdnAsset('/build/js/adminlte.js') }}"></script> --}}
 
-    <script src="{{ asset('/plugins/moment/moment.min.js') }}"></script>
-    <script src="{{ asset('/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') }}"></script>
+    <script src="{{ cdnAsset('/plugins/moment/moment.min.js') }}"></script>
+    <script src="{{ cdnAsset('/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') }}"></script>
 
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 
@@ -236,7 +236,7 @@
         integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
     @stack('datetimepicker')
 
-    <script src="{{ asset('plugins/summernote/summernote-bs4.min.js') }}"></script>
+    <script src="{{ cdnAsset('plugins/summernote/summernote-bs4.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>

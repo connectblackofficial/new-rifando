@@ -42,7 +42,7 @@ class CheckPagamentos extends Command
     {
         $codeKeyPIX = DB::table('consulting_environments')
             ->select('key_pix')
-            ->where('user_id', '=', getSiteOwner())
+            ->where('user_id', '=', getSiteOwnerId())
             ->first();
 
         $secretKey = $codeKeyPIX->key_pix;
@@ -67,7 +67,7 @@ class CheckPagamentos extends Command
 
                             $participante = Participant::find($payment->external_reference);
                             if ($participante) {
-                                $rifa = $participante->rifa();
+                                $rifa = $participante->firstProduct();
                                 $rifa->confirmPayment($participante->id);
 
                                 DB::table('payment_pix')->where('id', '=', $value->id)->update([

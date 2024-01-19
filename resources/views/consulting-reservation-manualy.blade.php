@@ -114,7 +114,7 @@
         <div class="modal-content" style="border: none;">
             <div class="modal-header" style="background-color: #132439;color: #fff;">
                 <h5 class="modal-title" id="staticBackdropLabel">PAGAMENTO VIA PIX
-                    <!--<img src="{{asset('images/pix-106.png')}}" style="width: 80px;margin-bottom: 5px;">-->
+                    <!--<img src="{{cdnImageAsset('pix-106.png')}}" style="width: 80px;margin-bottom: 5px;">-->
                 </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: #fff;">
                     <span aria-hidden="true">&times;</span>

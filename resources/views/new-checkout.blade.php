@@ -453,7 +453,7 @@
                     <a href="{{ route('product', ['slug' => $rifaDestaque->slug]) }}">
                         <div class="card-rifa {{ $config->tema }}">
                             <div class="img-rifa">
-                                <img src="/products/{{ $rifaDestaque->imagem()->name }}" alt="" srcset="">
+                                <img src="{{$rifaDestaque->getDefaultImageUrl()}}" alt="" srcset="">
                             </div>
                             <div class="title-rifa title-rifa-destaque {{ $config->tema }}">
 

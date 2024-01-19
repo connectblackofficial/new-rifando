@@ -41,71 +41,94 @@
 
                                 {{-- form auxiliar para adicionar imagens na rifa --}}
                                 <form class="d-none" action="{{ route('addFoto') }}" id="form-foto" method="POST"
-                                    enctype="multipart/form-data">
+                                      enctype="multipart/form-data">
                                     @csrf
                                     <input type="text" id="rifa-id" name="idRifa">
-                                    <input type="file" id="input-add-foto" accept="image/png,image/jpeg,image/jpg" multiple name="fotos[]">
+                                    <input type="file" id="input-add-foto" accept="image/png,image/jpeg,image/jpg"
+                                           multiple name="fotos[]">
                                 </form>
                             </div>
                         </div>
                         <table class="table table-striped table-bordered table-responsive-md table-hover align=center"
-                            id="table_rifas">
+                               id="table_rifas">
                             <thead>
-                                <tr>
-                                    <th>Miniatura</th>
-                                    <th>Status</th>
-                                    <th>Sorteio</th>
-                                    <th>Data Sorteio</th>
-                                    <th>Valor</th>
-                                    {{-- <th>Lista</th> --}}
-                                    <th>Acões</th>
-                                    <div id="copy-link"></div>
-                                </tr>
+                            <tr>
+                                <th>Miniatura</th>
+                                <th>Status</th>
+                                <th>Sorteio</th>
+                                <th>Data Sorteio</th>
+                                <th>Valor</th>
+                                {{-- <th>Lista</th> --}}
+                                <th>Acões</th>
+                                <div id="copy-link"></div>
+                            </tr>
                             </thead>
                             @foreach ($rifas as $key => $product)
                                 <tbody>
-                                    <tr>
-                                        <td style="width: 50px;" class="text-center"><img style="border-radius: 5px;"
-                                                src="/products/{{ $product->imagem() ? $product->imagem()->name : '' }}" width="50"
-                                                alt=""></td>
-                                        <td>{{ $product->status }}</td>
-                                        <td>{{ $product->name }}</td>
-                                        <td>
-                                            @if ($product->draw_date != null)
-                                                {{ \Carbon\Carbon::parse($product->draw_date)->format('d/m/Y H:i') }}
-                                            @endif
-                                        </td>
-                                        <td>{{ $product->price }}</td>
-                                        {{-- <td>
-                                            <a href="#exampleModal{{ $product->id }}" class="btn btn-primary"
-                                                data-toggle="modal" data-bs-target="#exampleModal{{ $product->id }}"
-                                                data-id="{{ $product->id }}"><i class="bi bi-card-text"></i></a>
-                                        </td> --}}
-                                        <td style="width: 20%">
-                                            @if (!$product->processado)
-                                                <span class="badge bg-warning">Processando...</span>
-                                            @else
-                                                <div class="dropdown">
-                                                    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                <tr>
+                                    <td style="width: 50px;" class="text-center"><img style="border-radius: 5px;"
+                                                                                      src="{{$product->getDefaultImageUrl()}}"
+                                                                                      width="50"
+                                                                                      alt=""></td>
+                                    <td>{{ $product->status }}</td>
+                                    <td>{{ $product->name }}</td>
+                                    <td>
+                                        @if ($product->draw_date != null)
+                                            {{ \Carbon\Carbon::parse($product->draw_date)->format('d/m/Y H:i') }}
+                                        @endif
+                                    </td>
+                                    <td>{{ $product->price }}</td>
+                                    {{-- <td>
+                                        <a href="#exampleModal{{ $product->id }}" class="btn btn-primary"
+                                            data-toggle="modal" data-bs-target="#exampleModal{{ $product->id }}"
+                                            data-id="{{ $product->id }}"><i class="bi bi-card-text"></i></a>
+                                    </td> --}}
+                                    <td style="width: 20%">
+                                        @if (!$product->processado)
+                                            <span class="badge bg-warning">Processando...</span>
+                                        @else
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button"
+                                                        data-toggle="dropdown" aria-expanded="false">
                                                     Ações
-                                                    </button>
-                                                        <div class="dropdown-menu">
-                                                        <a class="dropdown-item" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#modal_editar_rifa{{ $product->id }}"><i class="bi bi-pencil-square"></i>&nbsp;Editar</a>
-                                                        <a class="dropdown-item" href="#deleteEmployeeModal{{ $product->id }}" style="cursor: pointer" data-toggle="modal" data-bs-target="#deleteEmployeeModal{{ $product->id }}" data-id="{{ $product->id }}"><i class="bi bi-trash3"></i>&nbsp;Excluir</a>
-                                                        <a class="dropdown-item" href="{{ route('rifa.compras', $product->id) }}"><i class="fas fa-shopping-bag"></i></i>&nbsp;Compras</a>
-                                                        {{-- <a class="dropdown-item" href="{{ route('resumoRifaPDF', $product->id) }}" target="_blank"><i class="far fa-file-pdf"></i>&nbsp;PDF</a> --}}
-                                                        <a class="dropdown-item" href="{{ route('resumoRifa', $product->id) }}" target="_blank"><i class="fas fa-list-ol"></i>&nbsp;Ver Resumo</a>
-                                                        <a class="dropdown-item" href="#" onclick="copyResumoLink('{{ route('resumoRifa', $product->id) }}')"><i class="fas fa-link"></i>&nbsp;Copiar Link Resumo</a>
-                                                        <a class="dropdown-item" href="javascript:void(0)" title="Ranking" onclick="openRanking('{{ $product->id }}')"><i class="fas fa-award"></i>&nbsp;Ranking</a>
-                                                        <a class="dropdown-item" style="color: green" href="javascript:void(0)" title="Ranking" onclick="definirGanhador('{{ $product->id }}')"><i class="fas fa-check"></i>&nbsp;Definir Ganhador</a>
-                                                        <a class="dropdown-item" href="javascript:void(0)" title="Ranking" onclick="verGanhadores('{{ $product->id }}')"><i class="fas fa-users"></i>&nbsp;Visualizar Ganhadores</a>
-                                                    </div>
-                                                    
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item" style="cursor: pointer"
+                                                       data-bs-toggle="modal"
+                                                       data-bs-target="#modal_editar_rifa{{ $product->id }}"><i
+                                                                class="bi bi-pencil-square"></i>&nbsp;Editar</a>
+                                                    <a class="dropdown-item"
+                                                       href="#deleteEmployeeModal{{ $product->id }}"
+                                                       style="cursor: pointer" data-toggle="modal"
+                                                       data-bs-target="#deleteEmployeeModal{{ $product->id }}"
+                                                       data-id="{{ $product->id }}"><i class="bi bi-trash3"></i>&nbsp;Excluir</a>
+                                                    <a class="dropdown-item"
+                                                       href="{{ route('rifa.compras', $product->id) }}"><i
+                                                                class="fas fa-shopping-bag"></i></i>&nbsp;Compras</a>
+                                                    {{-- <a class="dropdown-item" href="{{ route('resumoRifaPDF', $product->id) }}" target="_blank"><i class="far fa-file-pdf"></i>&nbsp;PDF</a> --}}
+                                                    <a class="dropdown-item"
+                                                       href="{{ route('resumoRifa', $product->id) }}" target="_blank"><i
+                                                                class="fas fa-list-ol"></i>&nbsp;Ver Resumo</a>
+                                                    <a class="dropdown-item" href="#"
+                                                       onclick="copyResumoLink('{{ route('resumoRifa', $product->id) }}')"><i
+                                                                class="fas fa-link"></i>&nbsp;Copiar Link Resumo</a>
+                                                    <a class="dropdown-item" href="javascript:void(0)" title="Ranking"
+                                                       onclick="openRanking('{{ $product->id }}')"><i
+                                                                class="fas fa-award"></i>&nbsp;Ranking</a>
+                                                    <a class="dropdown-item" style="color: green"
+                                                       href="javascript:void(0)" title="Ranking"
+                                                       onclick="definirGanhador('{{ $product->id }}')"><i
+                                                                class="fas fa-check"></i>&nbsp;Definir Ganhador</a>
+                                                    <a class="dropdown-item" href="javascript:void(0)" title="Ranking"
+                                                       onclick="verGanhadores('{{ $product->id }}')"><i
+                                                                class="fas fa-users"></i>&nbsp;Visualizar Ganhadores</a>
                                                 </div>
-                                            @endif
-                                        </td>
 
-                                    </tr>
+                                            </div>
+                                        @endif
+                                    </td>
+
+                                </tr>
                                 </tbody>
                             @endforeach
                         </table>
@@ -117,12 +140,13 @@
                                     <div class="modal-header d-flex align-items-center">
                                         <h4 class="modal-title">Add Rifa</h4>
                                         <button type="button" class="close" data-dismiss="modal"
-                                            aria-hidden="true">&times;</button>
+                                                aria-hidden="true">&times;
+                                        </button>
                                     </div>
                                     <div class="modal-body">
 
                                         <form action="{{ route('addProduct') }}" method="POST"
-                                            enctype="multipart/form-data">
+                                              enctype="multipart/form-data">
 
                                             {{ csrf_field() }}
                                             <div class="row">
@@ -132,8 +156,11 @@
                                                         <label for="exampleInputEmail1">Modo de Jogo</label>
                                                         <select name="modo_de_jogo" class="form-control">
                                                             <option value="numeros">Números</option>
-                                                            <option value="fazendinha-completa">Fazendinha - Grupo Completo</option>
-                                                            <option value="fazendinha-meio">Fazendinha - Meio Grupo</option>
+                                                            <option value="fazendinha-completa">Fazendinha - Grupo
+                                                                Completo
+                                                            </option>
+                                                            <option value="fazendinha-meio">Fazendinha - Meio Grupo
+                                                            </option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -143,7 +170,7 @@
                                                     <div class="form-group">
                                                         <label for="exampleInputEmail1">Nome</label>
                                                         <input type="text" class="form-control" id="name"
-                                                            name="name" placeholder="Exemplo: Fusca 88" required>
+                                                               name="name" placeholder="Exemplo: Fusca 88" required>
                                                     </div>
                                                 </div>
 
@@ -152,7 +179,7 @@
                                                     <div class="form-group">
                                                         <label for="exampleInputEmail1">Sub Titulo</label>
                                                         <input type="text" class="form-control" id="subname"
-                                                            name="subname" required>
+                                                               name="subname" required>
                                                     </div>
                                                 </div>
 
@@ -174,7 +201,7 @@
                                                         <div class="form-group">
                                                             <label for="exampleFormControlFile1">Até 3 Imagens</label>
                                                             <input type="file" class="form-control-file"
-                                                                name="images[]" accept="image/*" multiple required>
+                                                                   name="images[]" accept="image/*" multiple required>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -186,8 +213,8 @@
                                                             <span class="input-group-text">R$:</span>
                                                         </div>
                                                         <input type="text" class="form-control" name="price"
-                                                            placeholder="Exemplo: 10,00" maxlength="6" id="price"
-                                                            required>
+                                                               placeholder="Exemplo: 10,00" maxlength="6" id="price"
+                                                               required>
                                                     </div>
                                                 </div>
                                             </div>
@@ -196,12 +223,12 @@
                                                 <div class="col-md-6">
                                                     <label>Qtd mínima de compra</label>
                                                     <input type="number" class="form-control" name="minimo"
-                                                        min="1" max="99999" required>
+                                                           min="1" max="99999" required>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label>Qtd máxima de compra</label>
                                                     <input type="number" class="form-control" name="maximo"
-                                                        min="1" max="99999" required>
+                                                           min="1" max="99999" required>
                                                 </div>
                                             </div>
 
@@ -209,32 +236,34 @@
                                                 <div class="col-md-6">
                                                     <label for="exampleInputEmail1">Quantidade de números</label>
                                                     <input type="number" class="form-control" name="numbers"
-                                                        min="1" max="99999" placeholder="Exemplo: 10" required>
+                                                           min="1" max="99999" placeholder="Exemplo: 10" required>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label>Tempo de expiração (min)</label>
                                                     <input type="number" class="form-control" name="expiracao"
-                                                        min="0" placeholder="Minutos" required>
+                                                           min="0" placeholder="Minutos" required>
                                                 </div>
 
                                             </div>
 
                                             <div class="form-group">
                                                 <label for="exampleFormControlTextarea1">Descrição do Sorteio</label>
-                                                <textarea class="form-control" id="summernote" name="description" rows="10" style="min-height: 200px;"
-                                                    required></textarea>
+                                                <textarea class="form-control" id="summernote" name="description"
+                                                          rows="10" style="min-height: 200px;"
+                                                          required></textarea>
                                             </div>
 
                                             <button type="submit"
-                                                onClick="this.form.submit(); this.disabled=true; this.innerHTML='Cadastrando…';"
-                                                class="criar btn btn-success">Criar</button>
+                                                    onClick="this.form.submit(); this.disabled=true; this.innerHTML='Cadastrando…';"
+                                                    class="criar btn btn-success">Criar
+                                            </button>
 
                                         </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <script>
                             function formatarMoeda() {
                                 var elemento = document.getElementById('price');
@@ -260,7 +289,7 @@
                             <div id="modal_editar_rifa{{ $product->id }}" class="modal fade">
                                 <div class="modal-dialog modal-lg">
                                     <form action="{{ route('update', ['id' => $product->id]) }}" method="POST"
-                                        enctype="multipart/form-data">
+                                          enctype="multipart/form-data">
                                         <div class="modal-content">
                                             @method('PUT')
                                             {{ csrf_field() }}
@@ -269,7 +298,7 @@
 
                                                 <div class="container mt-3">
                                                     <button type="button" class="close" data-bs-dismiss="modal"
-                                                        aria-label="Close">
+                                                            aria-label="Close">
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
 
@@ -282,390 +311,74 @@
                                                                     style="font-size: 12px;">
                                                                     <li class="nav-item">
                                                                         <a class="nav-link active" id="geral-tab"
-                                                                            data-toggle="tab"
-                                                                            href="#geral{{ $product->id }}"
-                                                                            role="tab" aria-controls="geral"
-                                                                            aria-selected="true">Geral</a>
+                                                                           data-toggle="tab"
+                                                                           href="#geral{{ $product->id }}"
+                                                                           role="tab" aria-controls="geral"
+                                                                           aria-selected="true">Geral</a>
                                                                     </li>
                                                                     <li class="nav-item">
                                                                         <a class="nav-link" id="premios-tab"
-                                                                            data-toggle="tab"
-                                                                            href="#premios{{ $product->id }}"
-                                                                            role="tab" aria-controls="premios"
-                                                                            aria-selected="true">Prêmios</a>
+                                                                           data-toggle="tab"
+                                                                           href="#premios{{ $product->id }}"
+                                                                           role="tab" aria-controls="premios"
+                                                                           aria-selected="true">Prêmios</a>
                                                                     </li>
                                                                     <li class="nav-item">
                                                                         <a class="nav-link" id="ajustes-tab"
-                                                                            data-toggle="tab"
-                                                                            href="#ajustes{{ $product->id }}"
-                                                                            role="tab" aria-controls="ajustes"
-                                                                            aria-selected="false">Ajustes</a>
+                                                                           data-toggle="tab"
+                                                                           href="#ajustes{{ $product->id }}"
+                                                                           role="tab" aria-controls="ajustes"
+                                                                           aria-selected="false">Ajustes</a>
                                                                     </li>
                                                                     <li class="nav-item">
                                                                         <a class="nav-link" id="promocao-tab"
-                                                                            data-toggle="tab"
-                                                                            href="#promocao{{ $product->id }}"
-                                                                            role="tab" aria-controls="promocao"
-                                                                            aria-selected="false">Promoção</a>
+                                                                           data-toggle="tab"
+                                                                           href="#promocao{{ $product->id }}"
+                                                                           role="tab" aria-controls="promocao"
+                                                                           aria-selected="false">Promoção</a>
                                                                     </li>
                                                                     <li class="nav-item">
                                                                         <a class="nav-link" id="fotos-tab"
-                                                                            data-toggle="tab"
-                                                                            href="#fotos{{ $product->id }}"
-                                                                            role="tab" aria-controls="fotos"
-                                                                            aria-selected="false">Fotos</a>
+                                                                           data-toggle="tab"
+                                                                           href="#fotos{{ $product->id }}"
+                                                                           role="tab" aria-controls="fotos"
+                                                                           aria-selected="false">Fotos</a>
                                                                     </li>
                                                                 </ul>
                                                             </nav>
 
                                                             <div class="tab-content" id="myTabContent">
                                                                 <div class="tab-pane fade show active"
-                                                                    id="geral{{ $product->id }}" role="tabpanel"
-                                                                    aria-labelledby="geral-tab">
-                                                                    <div class="row mt-3">
-                                                                        <div class="col-md-6">
-                                                                            <input type="hidden" name="product_id"
-                                                                                value="{{ $product->id }}">
-                                                                            <div class="form-group">
-                                                                                <label
-                                                                                    for="exampleInputEmail1">Nome</label>
-                                                                                <input type="text" class="form-control"
-                                                                                    name="name"
-                                                                                    value="{{ $product->name }}">
-                                                                            </div>
-                                                                        </div>
-                                                                        
-                                                                        <div class="col-md-6">
-                                                                            <label for="exampleInputEmail1">Valor</label>
-                                                                            <div class="input-group">
-                                                                                <div class="input-group-prepend">
-                                                                                    <span
-                                                                                        class="input-group-text">R$:</span>
-                                                                                </div>
-                                                                                <input type="text" class="form-control"
-                                                                                    name="price"
-                                                                                    value="{{ $product->price }}">
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-md-12">
-                                                                            <div class="form-group">
-                                                                                <label
-                                                                                    for="exampleInputEmail1">Sub Titulo</label>
-                                                                                <input type="text" class="form-control"
-                                                                                    name="subname"
-                                                                                    value="{{ $product->subname }}">
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="row mt-3">
-                                                                        <div class="col-md-4">
-                                                                            <div class="form-group">
-                                                                                <label for="">Qtd mínima de
-                                                                                    compra</label>
-                                                                                <input type="number" class="form-control"
-                                                                                    min="1" max="999999"
-                                                                                    name="minimo"
-                                                                                    value="{{ $product->minimo }}">
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-md-4">
-                                                                            <label for="">Qtd máxima de
-                                                                                compra</label>
-                                                                            <div class="input-group">
-                                                                                <input type="number" class="form-control"
-                                                                                    name="maximo"
-                                                                                    value="{{ $product->maximo }}">
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-md-4">
-                                                                            <label for="">Tempo de expiração
-                                                                                (min)
-                                                                            </label>
-                                                                            <div class="input-group">
-                                                                                <input type="number" class="form-control"
-                                                                                    name="expiracao" min="0"
-                                                                                    value="{{ $product->expiracao }}">
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="row justify-content-center">
-                                                                        <div class="col-md-6">
-                                                                            <label for="">Mostar Ranking de
-                                                                                compradores (Qtd)</label>
-                                                                            <div class="input-group">
-                                                                                <input type="number" class="form-control"
-                                                                                    name="qtd_ranking"
-                                                                                    value="{{ $product->qtd_ranking }}">
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div class="col-md-6">
-                                                                            <label>Mostrar Parcial (%)</label>
-                                                                            <select name="parcial"class="form-control">
-                                                                                <option value="1"
-                                                                                    {{ $product->parcial == 1 ? 'selected' : '' }}>
-                                                                                    Sim</option>
-                                                                                <option value="0"
-                                                                                    {{ $product->parcial == 0 ? 'selected' : '' }}>
-                                                                                    Não</option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="row mt-4">
-                                                                        <div class="col-md-12">
-                                                                            <label>Gateway de Pagamento</label>
-                                                                            <select name="gateway"class="form-control">
-                                                                                <option value="mp" {{ $product->gateway == 'mp' ? 'selected' : '' }}>Mercado Pago</option>
-                                                                                <option value="paggue" {{ $product->gateway == 'paggue' ? 'selected' : '' }}>Paggue</option>
-                                                                                <option value="asaas" {{ $product->gateway == 'asaas' ? 'selected' : '' }}>ASAAS</option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="row mt-4">
-                                                                        <div class="col-md-12">
-                                                                            <label>Descrição</label>
-                                                                            <textarea class="form-control summernote" name="description" id="desc-{{ $product->id }}" rows="10"
-                                                                                style="min-height: 200px;" required>{!! $product->descricao() !!}</textarea>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    {{-- <div class="form-group">
-                                                                        <label for="exampleInputEmail1">Quantidade de números</label>
-                                                                        <input type="number" class="form-control" name="numbers" min="1"
-                                                                               max="99999" value="{{$product->total_number}}" required>
-                                                                    </div>
-                                                                    <div class="form-group">
-                                                                        <label for="exampleFormControlTextarea1">Descrição do Sorteio</label>
-                                                                        <textarea class="form-control" id="summernote" name="description" rows="3" value="">{{$product->description}}</textarea>
-                                                                    </div> --}}
+                                                                     id="geral{{ $product->id }}" role="tabpanel"
+                                                                     aria-labelledby="geral-tab">
+                                                                    @include("product.general-tab-form")
                                                                 </div>
 
                                                                 <div class="tab-pane fade show"
-                                                                    id="premios{{ $product->id }}" role="tabpanel"
-                                                                    aria-labelledby="geral-tab">
+                                                                     id="premios{{ $product->id }}" role="tabpanel"
+                                                                     aria-labelledby="geral-tab">
                                                                     <div class="row">
-                                                                        @foreach ($product->premios() as $premio)
-                                                                            <div class="col-md-6 mt-2">
-                                                                                <label>{{ $premio->ordem }}º Prêmio</label>
-                                                                                <input type="text" class="form-control" name="descPremio[{{ $premio->ordem }}]" value="{{ $premio->descricao }}">
-                                                                            </div>
-                                                                        @endforeach
+                                                                        @include("product.premium-tab-form")
                                                                     </div>
                                                                 </div>
 
                                                                 <div class="tab-pane fade"
-                                                                    id="ajustes{{ $product->id }}" role="tabpanel"
-                                                                    aria-labelledby="ajustes-tab">
-                                                                    <div class="row mt-3">
-                                                                        <div class="col-5">
-                                                                            <div class="form-group">
-                                                                                <label for="status_sorteio">Status
-                                                                                    Sorteio</label>
-                                                                                <select class="form-control"
-                                                                                    name="status" id="status">
-                                                                                    <option value="Inativo"
-                                                                                        {{ $product->status == 'Inativo' ? "selected='selected'" : '' }}>
-                                                                                        Inativo</option>
-                                                                                    <option value="Ativo"
-                                                                                        {{ $product->status == 'Ativo' ? "selected='selected'" : '' }}>
-                                                                                        Ativo</option>
-                                                                                    <option value="Finalizado"
-                                                                                        {{ $product->status == 'Finalizado' ? "selected='selected'" : '' }}>
-                                                                                        Finalizado</option>
-                                                                                </select>
-                                                                            </div>
-                                                                        </div>
-                                                                        <form action="{{ route('drawDate') }}"
-                                                                            method="POST">
-                                                                            {{ csrf_field() }}
-                                                                            <input type="hidden" name="product_id"
-                                                                                value="{{ $product->id }}">
-                                                                            <div class="col-12 col-md-7">
-                                                                                <div class="form-group">
-                                                                                    <label for="data_sorteio">Data
-                                                                                        Sorteio</label>
-                                                                                    <input type="datetime-local"
-                                                                                        class="form-control"
-                                                                                        name="data_sorteio"
-                                                                                        id="data_sorteio"
-                                                                                        value="{{ $product->draw_date ? date('Y-m-d H:i:s', strtotime($product->draw_date)) : ''}}">
-                                                                                </div>
-                                                                            </div>
-                                                                        </form>
-                                                                    </div>
-                                                                    <div class="row mt-3">
-                                                                        <div class="col-sm">
-                                                                            <div class="form-group">
-                                                                                <label
-                                                                                    for="cadastrar_ganhador">Ganhador</label>
-                                                                                <input type="text" class="form-control"
-                                                                                    name="cadastrar_ganhador"
-                                                                                    id="cadastrar_ganhador"
-                                                                                    value="{{ $product->winner }}">
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col">
-                                                                            <div class="form-group">
-                                                                                <label for="visible_rifa">Mostrar na Página
-                                                                                    Inicial?</label>
-                                                                                <select class="form-control"
-                                                                                    name="visible" id="visible">
-                                                                                    <option value="0">Não</option>
-                                                                                    <option value="1"
-                                                                                        {{ $product->visible == 1 ? "selected='selected'" : '' }}>
-                                                                                        Sim</option>
-                                                                                </select>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="row">
-                                                                        <div class="col-md-4">
-                                                                            <label>URL amigável</label>
-                                                                            <input type="text" name="slug" value="{{ $product->slug }}" class="form-control">
-                                                                        </div>
-                                                                        {{-- <div class="col-md-4">
-                                                                            <label>Qtd de zeros</label>
-                                                                            <input type="number" name="qtd_zeros" value="{{ $product->qtd_zeros }}" class="form-control">
-                                                                        </div> --}}
-                                                                    </div>
-                                                                    <div class="row mt-3">
-                                                                        <div class="col">
-                                                                            <div class="form-group">
-                                                                                <label for="favoritar_rifa">Favoritar
-                                                                                    Rifa</label>
-                                                                                <select class="form-control"
-                                                                                    name="favoritar_rifa"
-                                                                                    id="favoritar_rifa">
-                                                                                    <option value="0">Não</option>
-                                                                                    <option value="1"
-                                                                                        {{ $product->favoritar == 1 ? "selected='selected'" : '' }}>
-                                                                                        Sim</option>
-                                                                                </select>
-                                                                            </div>
-                                                                        </div>
-                                                                        {{-- <div class="col-12 col-md-7">
-                                                                            <div class="form-group">
-                                                                                <label for="previsao_sorteio">Previsão
-                                                                                    Sorteio</label>
-                                                                                <input type="datetime-local"
-                                                                                    class="form-control"
-                                                                                    name="previsao_sorteio"
-                                                                                    value="{{ $product->draw_prediction ?date('Y-m-d H:i:s', strtotime($product->draw_prediction)) : '' }}">
-                                                                            </div>
-                                                                        </div> --}}
-                                                                    </div>
-
-                                                                    <div class="row mt-3">
-                                                                        <div class="col">
-                                                                            <div class="form-group">
-                                                                                <label for="tipo_reserva">Tipo de
-                                                                                    Reserva?</label>
-                                                                                <select class="form-control"
-                                                                                    name="tipo_reserva" id="tipo_reserva">
-                                                                                    <option value="manual"
-                                                                                        {{ $product->type_raffles == 'manual' ? "selected='selected'" : '' }}>
-                                                                                        Manual</option>
-                                                                                    <option value="automatico"
-                                                                                        {{ $product->type_raffles == 'automatico' ? "selected='selected'" : '' }}>
-                                                                                        Automático</option>
-                                                                                    <option value="mesclado"
-                                                                                        {{ $product->type_raffles == 'mesclado' ? "selected='selected'" : '' }}>
-                                                                                        Automático & Manual</option>
-                                                                                </select>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="row mt-1 d-flex justify-content-center">
-                                                                        <p>Tipo de Rifa</p>
-                                                                    </div>
-                                                                    <div class="row">
-                                                                        <div class="col">
-                                                                            <div class="form-group">
-                                                                                <label for="rifa_numero">Rifa de Números ou
-                                                                                    Fazendinha</label>
-                                                                                <select class="form-control"
-                                                                                    name="rifa_numero" id="rifa_numero" disabled>
-                                                                                    <option value="numeros"
-                                                                                        {{ $product->modo_de_jogo == 'numeros' ? "selected='selected'" : '' }}>
-                                                                                        Números</option>
-                                                                                    <option value="fazendinha-completa"
-                                                                                        {{ $product->modo_de_jogo == 'fazendinha-completa' ? "selected='selected'" : '' }}>
-                                                                                        Fazendinha - Grupo Completo</option>
-                                                                                    <option value="fazendinha-meio"
-                                                                                        {{ $product->modo_de_jogo == 'fazendinha-meio' ? "selected='selected'" : '' }}>
-                                                                                        Fazendinha - Meio Grupo</option>
-                                                                                </select>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
+                                                                     id="ajustes{{ $product->id }}" role="tabpanel"
+                                                                     aria-labelledby="ajustes-tab">
+                                                                    @include("product.ajustes-tab-form")
                                                                 </div>
 
 
-
                                                                 <div class="tab-pane fade"
-                                                                    id="promocao{{ $product->id }}" role="tabpanel"
-                                                                    aria-labelledby="promocao-tab">
+                                                                     id="promocao{{ $product->id }}" role="tabpanel"
+                                                                     aria-labelledby="promocao-tab">
+                                                                    @include("product.promo-tab-form")
 
-                                                                    @foreach ($product->promocoes() as $promo)
-                                                                        <div class="row text-center mt-2 promo">
-                                                                            <h5>Promoção {{ $promo->ordem }}</h5>
-                                                                            <div class="col-md-6">
-                                                                                <label>Qtd de números</label>
-                                                                                <input type="number" min="0"
-                                                                                    name="numPromocao[{{ $promo->ordem }}]"
-                                                                                    max="10000"
-                                                                                    class="form-control text-center"
-                                                                                    value="{{ $promo->qtdNumeros }}">
-                                                                            </div>
-                                                                            <div class="col-md-6">
-                                                                                <label
-                                                                                    for="exampleInputEmail1">% de Desconto</label>
-                                                                                <div class="input-group">
-                                                                                    <div class="input-group-prepend">
-                                                                                        <span
-                                                                                            class="input-group-text">%</span>
-                                                                                    </div>
-                                                                                    <input type="text"
-                                                                                        class="form-control text-center"
-                                                                                        name="valPromocao[{{ $promo->ordem }}]"
-                                                                                        value="{{ $promo->desconto }}">
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    @endforeach
                                                                 </div>
 
                                                                 <div class="tab-pane fade" id="fotos{{ $product->id }}"
-                                                                    role="tabpanel" aria-labelledby="promocao-tab">
-                                                                    <center><button type="button"
-                                                                            class="btn btn-sm btn-info"
-                                                                            data-id="{{ $product->id }}"
-                                                                            onclick="addFoto(this)">+ Foto(s)</button>
-                                                                    </center>
-                                                                    <div class="row d-flex justify-content-center mt-4">
-                                                                        @if ($product->fotos()->count() > 0)
-                                                                            @foreach ($product->fotos() as $key => $foto)
-                                                                                <div class="col-md-4 text-center"
-                                                                                    id="foto-{{ $foto->id }}">
-                                                                                    <img src="/products/{{ $foto->name }}"
-                                                                                        width="200"
-                                                                                        style="border-radius: 10px;">
-                                                                                        @if($key != 0)
-                                                                                        <a data-qtd="{{ $product->fotos()->count() }}" href="javascript:void(0)"
-                                                                                            class="delete btn btn-danger"
-                                                                                            onclick="excluirFoto(this)"
-                                                                                            data-id="{{ $foto->id }}"><i
-                                                                                                class="bi bi-trash3"></i></a>
-                                                                                        @endif
-                                                                                        
-                                                                                </div>
-                                                                            @endforeach
-                                                                        @endif
-                                                                    </div>
+                                                                     role="tabpanel" aria-labelledby="promocao-tab">
+
 
                                                                 </div>
                                                             </div>
@@ -676,7 +389,7 @@
                                             </div>
                                             <div class="modal-footer">
                                                 <input type="button" class="btn btn-default" data-bs-dismiss="modal"
-                                                    value="Cancelar">
+                                                       value="Cancelar">
                                                 <input type="submit" class="btn btn-success" value="Salvar">
                                             </div>
                                         </div>
@@ -684,7 +397,6 @@
                                 </div>
                             </div>
                         @endforeach
-
 
 
                     </div>
@@ -1268,17 +980,18 @@
                                         <div class="modal-header">
                                             <h4 class="modal-title">Deletar Rifa</h4>
                                             <button type="button" class="close" data-dismiss="modal"
-                                                aria-hidden="true">&times;</button>
+                                                    aria-hidden="true">&times;
+                                            </button>
                                         </div>
                                         <div class="modal-body">
                                             <p>Tem certeza de que deseja excluir esse registros?</p>
                                             <p class="text-warning"><small>Essa ação não pode ser desfeita..</small></p>
                                             <input name="deleteId" type="hidden" id="deleteId"
-                                                value="{{ $product->id }}">
+                                                   value="{{ $product->id }}">
                                         </div>
                                         <div class="modal-footer">
                                             <input type="button" class="btn btn-default" data-dismiss="modal"
-                                                value="Cancelar">
+                                                   value="Cancelar">
                                             <input type="submit" class="btn btn-danger" value="Deletar">
                                         </div>
                                     </form>
@@ -1290,7 +1003,7 @@
 
                 <!-- Modal -->
                 <div class="modal fade" id="modal-ranking" tabindex="-1" aria-labelledby="exampleModalLabel"
-                    aria-hidden="true">
+                     aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-body">
@@ -1302,15 +1015,15 @@
 
                 <!-- Modal -->
                 <div class="modal fade" id="modal-definir-ganhador" tabindex="-1" aria-labelledby="exampleModalLabel"
-                    aria-hidden="true">
+                     aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title">Definir Ganhador</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                  <span aria-hidden="true">&times;</span>
+                                    <span aria-hidden="true">&times;</span>
                                 </button>
-                              </div>
+                            </div>
                             <div class="modal-body">
                                 <span id="content-modal-definir-ganhador"></span>
                             </div>
@@ -1320,7 +1033,7 @@
 
                 <!-- Modal -->
                 <div class="modal fade" id="modal-ver-ganhadores" tabindex="-1" aria-labelledby="exampleModalLabel"
-                    aria-hidden="true">
+                     aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-body">
@@ -1342,20 +1055,20 @@
                         data: {
                             "id": id
                         },
-                        success: function(response) {
+                        success: function (response) {
                             console.log(response);
                             if (response.html) {
                                 $('#content-modal-ranking').html(response.html)
                                 $('#modal-ranking').modal('show')
                             }
                         },
-                        error: function(error) {
+                        error: function (error) {
 
                         }
                     })
                 }
 
-                document.getElementById("input-add-foto").addEventListener("change", function(el) {
+                document.getElementById("input-add-foto").addEventListener("change", function (el) {
                     $('#form-foto').submit();
                 });
 
@@ -1365,7 +1078,7 @@
                 }
 
                 function excluirFoto(el) {
-                    if(el.dataset.qtd <= 1){
+                    if (el.dataset.qtd <= 1) {
                         alert('A rifa precisa de pelo menos 1 foto, adicione outra antes de exlcuir!')
                         return;
                     }
@@ -1390,16 +1103,16 @@
                         showLoaderOnConfirm: true,
                         preConfirm: (id) => {
                             return fetch(url, {
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                        "Accept": "application/json",
-                                        "X-Requested-With": "XMLHttpRequest",
-                                        "X-CSRF-Token": $('meta[name="csrf-token"]').attr('content')
-                                    },
-                                    method: 'POST',
-                                    dataType: 'json',
-                                    body: JSON.stringify(data)
-                                })
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Accept": "application/json",
+                                    "X-Requested-With": "XMLHttpRequest",
+                                    "X-CSRF-Token": $('meta[name="csrf-token"]').attr('content')
+                                },
+                                method: 'POST',
+                                dataType: 'json',
+                                body: JSON.stringify(data)
+                            })
                                 .then(response => {
                                     if (!response.ok) {
                                         throw new Error(response.statusText)
@@ -1431,7 +1144,7 @@
                     })
                 }
 
-                function definirGanhador(id){
+                function definirGanhador(id) {
                     $('#content-modal-definir-ganhador').html('')
                     $.ajax({
                         url: "{{ route('definirGanhador') }}",
@@ -1440,13 +1153,13 @@
                         data: {
                             "id": id
                         },
-                        success: function(response) {
+                        success: function (response) {
                             if (response.html) {
                                 $('#content-modal-definir-ganhador').html(response.html)
                                 $('#modal-definir-ganhador').modal('show');
                             }
                         },
-                        error: function(error) {
+                        error: function (error) {
 
                         }
                     })
@@ -1461,13 +1174,13 @@
                         data: {
                             "id": id
                         },
-                        success: function(response) {
+                        success: function (response) {
                             if (response.html) {
                                 $('#content-modal-ver-ganhadores').html(response.html)
                                 $('#modal-ver-ganhadores').modal('show');
                             }
                         },
-                        error: function(error) {
+                        error: function (error) {
 
                         }
                     })
@@ -1508,4 +1221,4 @@
                 }
             </script>
 
-        @endsection
+@endsection
