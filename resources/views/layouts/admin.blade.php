@@ -51,6 +51,32 @@
             width: 100%;
             z-index: 9999999;
         }
+
+        .nav-icon {
+            display: inline-block !important;
+            color: currentColor;
+            fill: currentColor;
+        }
+
+        .sidebar {
+            background-color: #212529;
+        }
+
+        .dashboard-navbar {
+            background-color: #E4E4E4;
+        }
+        .dashboard-navbar .nav-link {
+            color: #212529;
+        }
+
+        .dashboard-navbar .nav-link:hover {
+            color: #671392;
+        }
+
+        .content-wrapper {
+            background-color: #F4f4f4;
+        }
+
     </style>
 </head>
 
@@ -59,7 +85,7 @@
     <div id="loadingSystem" class="d-none"></div>
     <div class="wrapper">
         <!-- Navbar -->
-        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <nav class="main-header navbar navbar-expand dashboard-navbar">
             <!-- Left navbar links -->
             <ul class="navbar-nav">
                 <li class="nav-item">
@@ -72,19 +98,20 @@
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
                     <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-                        <i class="fas fa-expand-arrows-alt"></i>
+                        <i class="fa-solid fa-expand"></i>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('inicio') }}">
-                        <span class="badge bg-primary">VER SITE</span>
+                        <i class="fa-solid fa-globe"></i>
+                        
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link">
                         <form name="logout" action="{{ route('logout') }}" method="POST">
                             {{ csrf_field() }}
-                            <span class="badge badge-warning" onclick="javascript:logout.submit()">SAIR</span>
+                            <i onclick="javascript:logout.submit()" class="fa-solid fa-arrow-right-from-bracket"></i>
                         </form>
                     </a>
                 </li>
@@ -102,10 +129,10 @@
         <!-- /.navbar -->
 
         <!-- Main Sidebar Container -->
-        <aside class="main-sidebar sidebar-dark-primary elevation-4" style="background: #3d3d3d">
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
             <a href="../../home" class="brand-link text-center"
-                style="background: #5c5c5c; text-decoration: none">
+                style="background: #212529; text-decoration: none">
                 <span class="brand-text font-weight-light">Painel</span>
             </a>
 
@@ -118,13 +145,13 @@
                         <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
                         <li class="nav-item menu-open">
-                            <a href="#" class="nav-link active">
+                            {{-- <a href="#" class="nav-link active">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <p>
                                     Painel
                                     <i class="right fas fa-angle-left"></i>
                                 </p>
-                            </a>
+                            </a> --}}
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
                                     <a href="{{ route('home') }}" class="nav-link" id="home">
@@ -134,7 +161,7 @@
                                 </li>
                                 <li class="nav-item">
                                     <a href="{{ route('profile') }}" class="nav-link" id="perfil">
-                                        <i class="far fa-circle nav-icon"></i>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="nav-icon" height="16" width="14" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M304 128a80 80 0 1 0 -160 0 80 80 0 1 0 160 0zM96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM49.3 464H398.7c-8.9-63.3-63.3-112-129-112H178.3c-65.7 0-120.1 48.7-129 112zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3z"/></svg>
                                         <p>Meu perfil</p>
                                     </a>
                                 </li>
@@ -152,7 +179,7 @@
                                 </li>
                                 <li class="nav-item">
                                     <a href="{{ route('clientes') }}" class="nav-link {{ request()->is('clientes*') ? 'active' : '' }}" id="clientes">
-                                        <i class="fas fa-users"></i>
+                                        <i class="fas fa-users nav-icon"></i>
                                         <p>Clientes</p>
                                     </a>
                                 </li>
@@ -161,7 +188,7 @@
                                         <a href="{{ route('painel.ganhadores') }}"
                                             class="nav-link {{ request()->is('admin-ganhadores*') ? 'active' : '' }}"
                                             id="meus-sorteios">
-                                            <i class="fas fa-trophy nav-icon"></i>
+                                            <i class="fas fa-trophy nav-icon nav-icon"></i>
                                             <p>Ganhadores</p>
                                         </a>
                                     </li>
@@ -170,7 +197,7 @@
                                     <a href="{{ route('wpp.index') }}"
                                         class="nav-link {{ request()->is('wpp-mensagens*') ? 'active' : '' }}"
                                         id="wpp-msgs">
-                                        <i class="fab fa-whatsapp"></i>
+                                        <i class="fab fa-whatsapp nav-icon"></i>
                                         <p>Whatsapp mensagens</p>
                                     </a>
                                 </li>
@@ -178,7 +205,7 @@
                                     <a href="{{ route('tutoriais') }}"
                                         class="nav-link {{ request()->is('tutoriais*') ? 'active' : '' }}"
                                         id="wpp-msgs">
-                                        <i class="fas fa-list"></i>
+                                        <i class="fas fa-list nav-icon"></i>
                                         <p>Tutoriais</p>
                                     </a>
                                 </li>
@@ -187,7 +214,7 @@
                                         <a href="{{ route('afiliados') }}"
                                             class="nav-link {{ request()->is('lista-afiliados*') ? 'active' : '' }}"
                                             id="wpp-msgs">
-                                            <i class="fas fa-people-arrows"></i>
+                                            <i class="fas fa-people-arrows nav-icon"></i>
                                             <p>Afiliados</p>
                                         </a>
                                     </li>
@@ -195,7 +222,7 @@
                                         <a href="{{ route('painel.solicitacaoAfiliados') }}"
                                             class="nav-link {{ request()->is('solicitacao-pagamento*') ? 'active' : '' }}"
                                             id="wpp-msgs">
-                                            <i class="fas fa-dollar-sign"></i>
+                                            <i class="fas fa-dollar-sign nav-icon"></i>
                                             <p>Solicitação de Pgto</p>
                                         </a>
                                     </li>

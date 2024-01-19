@@ -22,8 +22,8 @@ const SELECTOR_ICON = `${SELECTOR_DATA_WIDGET} i`
 const EVENT_FULLSCREEN_CHANGE = 'webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange'
 
 const Default = {
-  minimizeIcon: 'fa-compress-arrows-alt',
-  maximizeIcon: 'fa-expand-arrows-alt'
+  minimizeIcon: 'fa-solid fa-compress',
+  maximizeIcon: 'fa-solid fa-expand'
 }
 
 /**
