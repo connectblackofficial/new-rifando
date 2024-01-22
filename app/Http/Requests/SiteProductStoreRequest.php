@@ -48,7 +48,8 @@ class SiteProductStoreRequest extends FormRequest
             'qtd_ranking' => 'required|integer|max:100|min:0',
             'parcial' => 'required|in:0,1',
             'cadastrar_ganhador' => 'nullable|max:255',
-            'ganho_afiliado' => 'required|numeric|min:0|max:99'
+            'ganho_afiliado' => 'required|numeric|min:0|max:99',
+
         ];
     }
 }

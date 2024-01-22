@@ -58,7 +58,7 @@
                                     <tr>
                                         <td>{{ $solicitacao->afiliado()->name }}</td>
                                         <td>{{ $solicitacao->afiliado()->pix }}</td>
-                                        <td>{{ number_format($solicitacao->valor(), 2, ",", ".") }}</td>
+                                        <td>{{ number_format($solicitacao->valor())}}</td>
                                         <td>{!! $solicitacao->status() !!}</td>
                                         <td>
                                             <div class="dropdown">

@@ -40,7 +40,7 @@
             <label>Data da Compra: {{ date('d/m/Y H:i', strtotime($participante->created_at)) }}</label> <br>
             <label> Número Sorteado:&nbsp;</label><span class="badge bg-success"> {{ $premio->cota }}</span> <br>
             <label>Valor Pago: </label> <span
-                    class="badge bg-primary">R$ {{ number_format($participante->valor, 2, ",", ".") }}</span>
+                    class="badge bg-primary">{{ formatMoney($participante->valor)}}</span>
             <br>
             <label>{{ $participante->pagos + $participante->reservados }} Bilhete(s)
                 comprados</label> <br>

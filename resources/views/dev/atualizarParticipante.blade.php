@@ -167,7 +167,7 @@
                         <div class="col-md-4 d-flex align-items-center">
                             <span>
                                 {{ count($participante->numbers()) }} Cotas <br>
-                                R$ {{ number_format($participante->valor, 2, ',', '.') }}
+                                {{ formatMoney($participante->valor) }}
                             </span>
                         </div>
                         <div class="col-md-3 d-flex align-items-center justify-content-end">
@@ -193,7 +193,7 @@
                     <div class="col-md-4 d-flex align-items-center">
                         <span>
                             {{ count($participante->numbers()) }} Cotas <br>
-                            R$ {{ number_format($participante->valor, 2, ',', '.') }}
+                            {{ formatMoney($participante->valor) }}
                         </span>
                     </div>
                     <div class="col-md-3 d-flex align-items-center justify-content-end">

@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\CompraAutomatica;
+use App\Enums\CacheExpiresInEnum;
 use App\Enums\FileUploadTypeEnum;
 use App\Enums\PaymentGatewayEnum;
 use App\Environment;
+use App\Events\ProductUpdated;
 use App\Exceptions\UserErrorException;
 use App\Helpers\FileUploadHelper;
 use App\Models\Product;
@@ -39,8 +41,6 @@ class ProductService
         } elseif ($gatewayName == PaymentGatewayEnum::PAGGUE && (empty($siteConfig->paggue_client_key) || empty($siteConfig->paggue_client_secret))) {
             $msg = 'Para utilizar o gateway de pagamento Paggue é necessário informar o CLIENT KEY e CLIENT SECRET na sessão "Meu Perfil".';
             throw  new UserErrorException($msg);
-        } else {
-            throw  new UserErrorException("Gateway de pagamento inválido.");
         }
     }
 
@@ -50,11 +50,15 @@ class ProductService
         $gatewayName = $request->gateway;
         $gameMode = $request->modo_de_jogo;
         $qtdNumbers = $request->numbers;
-        $zerosQtd = $request->qtd_zeros;
+        $zerosQtd = strlen((string)$request->numbers);;
+
         $this->validateGateways($gatewayName);/** @noinspection PhpUnreachableStatementInspection */;
         $product = $this->create($requestData);
         $product->createPromos();
         $product->createDefaultPremiums($requestData);
+        if (!$request->hasFile('images')) {
+            throw UserErrorException::emptyImage();
+        }
         $this->processImages($product, $request);
 
         $this->saveNumbers($product, $gameMode, $qtdNumbers, $zerosQtd);
@@ -63,10 +67,10 @@ class ProductService
 
     function processImages(Product $product, $request, $fileName = 'images')
     {
+
         if ($request->hasFile($fileName)) {
             $files = $request->file($fileName);
             try {
-                \DB::beginTransaction();
                 foreach ($files as $key => $imageUpload) {
                     $uploadHelper = new FileUploadHelper($imageUpload, FileUploadTypeEnum::Image);
                     $imageUrl = $uploadHelper->upload();
@@ -75,9 +79,8 @@ class ProductService
                         throw UserErrorException::uplaodError();
                     }
                 }
-                \DB::commit();
+
             } catch (\Exception $exception) {
-                \DB::rollBack();
                 throw UserErrorException::uplaodError();
             }
 
@@ -86,7 +89,6 @@ class ProductService
 
     function create(array $productData): Product
     {
-
         return Product::create([
             'name' => $productData['name'],
             'subname' => $productData['subname'],
@@ -102,7 +104,8 @@ class ProductService
             'minimo' => $productData['minimo'],
             'maximo' => $productData['maximo'],
             'modo_de_jogo' => $productData['modo_de_jogo'],
-            'gateway' => $productData['gateway']
+            'gateway' => $productData['gateway'],
+            'qtd_zeros' => strlen((string)$productData['numbers'])
         ]);
     }
 
@@ -169,7 +172,7 @@ class ProductService
                 'qtd_ranking' => $request->qtd_ranking,
                 'ganho_afiliado' => $request->ganho_afiliado,
                 'gateway' => $request->gateway,
-                'tipo_reserva' => $request->tipo_reserva
+                'type_raffles' => $request->tipo_reserva,
             ]
         );
         if (!$updated) {
@@ -184,6 +187,9 @@ class ProductService
         $this->updateOrCreatePromos($product, $request->numPromocao, $request->valPromocao);
         $this->updateAutoBuy($product, $request);
         $this->updatePremium($product, $request);
+
+        event(new ProductUpdated($product));
+        return true;
     }
 
     public function updateOrCreatePromos(Product $product, array $numPromocao, array $valPromocao)
@@ -270,6 +276,83 @@ class ProductService
         if (!$product_delete->delete()) {
             throw  UserErrorException::deleteFailed();
         }
+
+    }
+
+    public function destroyPhoto($photoId)
+    {
+        $photo = ProductImage::getByIdWithSiteCheckOrFail($photoId);
+        $product = Product::getByIdWithSiteCheckOrFail($photo->product_id);
+        if ($product->images()->count() >= 0) {
+            throw new UserErrorException("A rifa precisa de pelo menos 1 foto, adicione outra antes de exlcuir esta.");
+        }
+        if (!$photo->delete()) {
+            throw  UserErrorException::deleteFailed();
+        }
+
+    }
+
+    public function getRaffles(Request $request)
+    {
+        $productData = Product::siteOwner()->whereId($request->idProductURL)->first();
+        if (!isset($productData['id'])) {
+            abort(404);
+        }
+        $rifa = $productData;
+        $numbers = $rifa->numbers();
+        foreach ($rifa->participantes() as $participante) {
+            $statusParticipante = $participante->pagos > 0 ? 'pago' : 'reservado';
+            foreach ($participante->numbers() as $value) {
+                array_push($numbers, $value . '-' . $statusParticipante . '-' . $participante->name);
+            }
+        }
+
+        sort($numbers);
+        $x = 1;
+        foreach ($numbers as $number) {
+            if ($x >= 50) {
+                break;
+            }
+            $bg = '#585858';
+            $ex = explode("-", $number);
+            $number = $ex[0];
+            $status = 'disponivel';
+            if (isset($ex[1])) {
+                $status = $ex[1];
+                $nome = $ex[2];
+            }
+            if ($status == 'disponivel') {
+                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . " product-number-free' onclick=\"selectRaffles('" . $number . "', '" . $number . "')\" id=" . $number . ">" . $number . "</a>";
+            } else if ($status == 'reservado') {
+                $nome = 'Reservado por ' . $nome;
+                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . " product-number-reserved' onclick=\"infoParticipante('" . $nome . "')\" style='background-color: rgb(13,202,240);color: #000;' id=" . $number . ">" . $number . "</a>";
+            } else if ($status == 'pago') {
+                $nome = 'Pago por ' . $nome;
+                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . " product-number-paid' onclick=\"infoParticipante('" . $nome . "')\" style='background-color: #28a745;color: #000;' id=" . $number . ">" . $number . "</a>";
+            }
+            $x++;
+        }
+
+
+        return json_encode($resultRaffles);
+    }
+
+    public function getRandomFreeNumbers(Product $product, $qty)
+    {
+        $numbers = explode(",", $product['numbers']);
+        $chavesAleatorias = array_rand($numbers, $qty);
+        $valoresSorteados = [];
+        foreach ($chavesAleatorias as $chave) {
+            $valoresSorteados[] = $numbers[$chave];
+        }
+        return $valoresSorteados;
+
+    }
+
+    public function getProductQtyCache($productId, $forceUpdate = false)
+    {
+
+        return Product::getResumeCache($productId, $forceUpdate);
 
     }
 }

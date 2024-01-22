@@ -35,15 +35,17 @@ let siteScriptsFooter = [
     `${resourceCdnDirVendor}/fotorama-4.6.4/fotorama.js`,
     `${resourceCdnDir}/js/sw.js`,
     `${nodeDir}/sweetalert2/dist/sweetalert2.all.js`,
+    `${resourceCdnDir}/js/shared-functions.js`,
     `${resourceCdnDir}/js/site-functions.js`
 ];
-
+///home/caique/sites/new-rifando/resources/cdn/js/jquery/jquery.maskMoney.min.js
 //resources/assets/cdn/css/admin.scss
 mix.sass('resources/cdn/saas/site.scss', 'public/cdn/build').sass('resources/cdn/saas/admin.scss', 'public/cdn/build').combine([
     `${resourceCdnDirVendor}/jquery/jquery-3.7.0.min.js`,
     `${nodeDir}/bootstrap_4_6_1/dist/js/bootstrap.bundle.js`,
     `${resourceCdnDirVendor}/summernote/summernote-bs4.min.js`,
     `${resourceCdnDir}/dist/js/adminlte.min.js`,
+    `${resourceCdnDirVendor}//jquery/jquery.maskMoney.min.js`,
     `${resourceCdnDirVendor}/codemirror/codemirror.js`,
     `${resourceCdnDirVendor}/codemirror/mode/css/css.js`,
     `${resourceCdnDirVendor}/codemirror/mode/xml/xml.js`,
@@ -58,9 +60,12 @@ mix.sass('resources/cdn/saas/site.scss', 'public/cdn/build').sass('resources/cdn
     `${resourceCdnDirVendor}/others/buttons.html5.min.js`,
     `${resourceCdnDirVendor}/others/buttons.print.min.js`,
     `${nodeDir}/bootstrap_5_0_2/dist/js/bootstrap.bundle.js`,
+    `${nodeDir}/bootstrap_5_0_2/dist/js/bootstrap.bundle.js`,
     `${nodeDir}/@popperjs/core/dist/umd/popper.min.js`,
     `${nodeDir}/sweetalert2/dist/sweetalert2.all.js`,
+    `${resourceCdnDir}/js/shared-functions.js`,
     `${resourceCdnDir}/js/functions-admin.js`,
-], `${publicCdnDir}/js/admin-bundle.min.js`).combine(sitesScriptsHeader, `${publicCdnDir}/js/site-header-bundle.min.js`).
-combine(sitesScriptsHeader, `${publicCdnDir}/js/site-header-bundle.min.js`).
-combine(siteScriptsFooter, `${publicCdnDir}/js/site-footer-bundle.min.js`).copyDirectory('resources/cdn', 'public/cdn').version();
+], `${publicCdnDir}/js/admin-bundle.min.js`).combine(sitesScriptsHeader, `${publicCdnDir}/js/site-header-bundle.min.js`).combine(sitesScriptsHeader, `${publicCdnDir}/js/site-header-bundle.min.js`).combine(siteScriptsFooter, `${publicCdnDir}/js/site-footer-bundle.min.js`).copyDirectory('resources/cdn', 'public/cdn').version();
+
+///home/caique/sites/new-rifando/resources/cdn/vendor/jquery/jquery.maskMoney.min.js
+

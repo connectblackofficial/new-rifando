@@ -57,7 +57,7 @@
                                     <tr>
                                         <td>{{ $afiliado->name }}</td>
                                         <td>{{ date('d/m/Y', strtotime($afiliado->created_at)) }}</td>
-                                        <td>R$ {{ number_format($afiliado->totalGanhos(), 2, ",", ".") }}</td>
+                                        <td>{{ formatMoney($afiliado->totalGanhos())}}</td>
                                         <td>
                                             <div class="dropdown">
                                                 <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">

@@ -88,7 +88,7 @@
         <div class="row mt-4">
             <div class="col-md-4">
                 <label>Subtotal</label> <br>
-                <span>R$ {{ number_format($participante->valor, 2, ',', '.') }}</span>
+                <span>{{ formatMoney($participante->valor) }}</span>
             </div>
 
             <div class="col-md-4">
@@ -98,7 +98,7 @@
 
             <div class="col-md-4">
                 <label>Subtotal</label> <br>
-                <span>R$ {{ number_format($participante->valor, 2, ',', '.') }}</span>
+                <span>{{ formatMoney($participante->valor) }}</span>
             </div>
 
             <div class="col-md-4 mt-4">

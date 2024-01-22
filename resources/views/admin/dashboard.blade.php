@@ -149,7 +149,7 @@
                 <div class="dashboard-item pending_entry block-copy" onclick="link('{{ route('resumo.ranking') }}')">
                     <div class="dashboard-item-body">
                         <p>Ranking</p>
-                        {{-- <p>R$ {{ number_format($participantes->where('reservados', '>', 0)->sum('valor'), 2, ",", ".") }}</p> --}}
+                        {{-- <p>{{ formatMoney($participantes->where('reservados', '>', 0)->sum('valor'))}}</p> --}}
                         <i class="fas fa-medal blink"></i>
                     </div>
                 </div>

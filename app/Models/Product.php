@@ -4,8 +4,11 @@ namespace App\Models;
 
 use App\AutoMessage;
 use App\CompraAutomatica;
+use App\Enums\CacheExpiresInEnum;
+use App\Enums\CacheKeysEnum;
 use App\Environment;
 use App\RifaAfiliado;
+use App\Traits\HasEloquentCacheTrait;
 use App\Traits\ModelSiteOwnerTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -15,10 +18,9 @@ use Illuminate\Support\Facades\DB;
 class Product extends Model
 {
     use ModelSiteOwnerTrait;
+    use HasEloquentCacheTrait;
 
-    protected $fillable = ['id', 'name', 'user_id', 'slug', 'price', 'status', 'type_raffles', 'winner', 'draw_prediction',
-        'draw_date', 'visible', 'favoritar', 'minimo', 'maximo', 'expiracao', 'qtd_ranking', 'parcial', 'gateway', 'subname',
-        'qtd_zeros', 'modo_de_jogo', 'numbers', 'ganho_afiliado', 'msg_pago_enviada'];
+    protected $fillable = ['name', 'subname', 'parcial', 'expiracao', 'qtd_ranking', 'qtd_zeros', 'product', 'slug', 'price', 'ganho_afiliado', 'status', 'qtd', 'numbers', 'processado', 'type_raffles', 'favoritar', 'modo_de_jogo', 'minimo', 'maximo', 'user_id', 'draw_prediction', 'draw_date', 'winner', 'visible', 'gateway'];
 
     public function saveNumbers($numbersArray)
     {
@@ -37,6 +39,16 @@ class Product extends Model
             return $compras->where('popular', '=', true)->first()->id;
         } else {
             return 0;
+        }
+    }
+
+    public function getFreeNumbers()
+    {
+        if ($this->modo_de_jogo == 'numeros') {
+            $numbersRifa = explode(",", $this->numbers);
+            return $numbersRifa;
+        } else {
+            return Raffle::select("number")->whereProductId($this->id)->where("status", "Disponível")->get()->pluck("number");
         }
     }
 
@@ -431,6 +443,23 @@ class Product extends Model
 
     }
 
+    public static function scopeSearch($query, $q)
+    {
+        if (!empty($q)) {
+            return $query->where(function ($query) use ($q) {
+                $query->orWhere('name', 'like', '%' . $q . '%');
+                $query->orWhere('subname', 'like', '%' . $q . '%');
+                $query->orWhere('product', 'like', '%' . $q . '%');
+                $query->orWhere('status', 'like', '%' . $q . '%');
+                $query->orWhere('gateway', 'like', '%' . $q . '%');
+                $query->orWhere('winner', 'like', '%' . $q . '%');
+                $query->orWhere('slug', 'like', '%' . $q . '%');
+            });
+        } else {
+            return $query;
+        }
+
+    }
 
     public static function scopeHasFinished($query)
     {
@@ -473,9 +502,63 @@ class Product extends Model
         $imagem = $this->imagem();
         if (isset($imagem['name'])) {
             return imageAsset($imagem['name']);
-        }else{
+        } else {
             return url('images/sem-foto.jpg');
         }
+
+    }
+
+    public function getBasicInfo()
+    {
+        return [
+            'name' => $this->name,
+            'subname' => $this->subname,
+            'id' => $this->id,
+            'price' => $this->price,
+            'min_buy' => $this->minimo,
+            'max_buy' => $this->maximo,
+            'numbers_qty' => $this->qtd,
+            'type_raffles' => $this->type_raffles,
+            'game_mode' => $this->modo_de_jogo,
+            'draw_prediction' => $this->draw_prediction
+        ];
+    }
+
+    public function getAllImages()
+    {
+        return $this->images()->get();
+    }
+
+    public function carts()
+    {
+        return $this->hasMany(Cart::class, 'product_id', 'id')->get();
+    }
+
+    public function getNumbersAsArray()
+    {
+        return implode(",", $this->numbers);
+    }
+
+    public static function getResumeCache($productId, $forceUpdate = false)
+    {
+        $key = "product_resume_3_" . $productId;
+        $callBack = function () use ($productId) {
+            $product = Product::siteOwner()->whereId($productId)->firstOrFail();
+            $productAsArray = convertToArray($product);
+            unset($productAsArray['numbers']);
+            return [
+                'reserved' => $product->qtdNumerosReservados(),
+                'paid' => $product->qtdNumerosPagos(),
+                'free' => $product->qtdNumerosDisponiveis(),
+                'percentage' => $product->porcentagem(),
+                'promos' => $product->promocoes(),
+                'free_numbers' => $product->getFreeNumbers(),
+                'product' => $productAsArray
+            ];
+        };
+
+        return getCacheOrCreate($key, null, $callBack, CacheExpiresInEnum::OneWeek, $forceUpdate);
+
 
     }
 }

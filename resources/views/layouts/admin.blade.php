@@ -7,31 +7,20 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
     <meta name="robots" content="noindex">
     <meta name="googlebot" content="noindex">
 
-
     <link href="{{ cdnAsset('css/admin.css') }}" rel="stylesheet">
-
-
-    <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" rel="stylesheet">
-
     <title><?php echo @$data['social']->name; ?> @if(isset($pgTitle))
             - {{$pgTitle}}
         @endif</title>
     <script>
-        var CDN_URL="<?=cdnAsset()?>";
-        var PRODUCT_EDIT_ROUTE="{{route('product.edit',['id'=>'replace_here'])}}";
-        var PRODUCT_EDIT_ROUTE="{{route('product.edit',['id'=>'replace_here'])}}";
+        var ROUTES = <?= getJsRoutes() ?>;
+        var CDN_URL = "<?= cdnAsset() ?>";
     </script>
+    @section('scripts-top')
 
-
-
-    <style>
-
-    </style>
+    @endsection
 </head>
 
 <body class="sidebar-mini layout-fixed layout-navbar-fixed" style="height: auto;">
@@ -109,12 +98,6 @@
                                     <p>Meu perfil</p>
                                 </a>
                             </li>
-                            {{-- <li class="nav-item">
-                                <a href="{{route('adminProduct')}}" class="nav-link" id="adicionar-sorteio">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Adicionar Sorteio</p>
-                                </a>
-                            </li> --}}
                             <li class="nav-item">
                                 <a href="{{ route('mySweepstakes') }}" class="nav-link" id="meus-sorteios">
                                     <i class="far fa-clone nav-icon"></i>
@@ -203,9 +186,7 @@
 @stack('scripts')
 <script>
     $(document).ready(function () {
-        initAjaxSetup();
-        setUrlsPages();
-
+        initPage();
     })
 </script>
 @stack('datetimepicker')

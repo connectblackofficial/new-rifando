@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\AutoMessage;
 use App\Exceptions\UserErrorException;
 use App\GanhosAfiliado;
+use App\Helpers\CartManagerHelper;
 use App\Libs\AsaasLib;
 use App\Libs\MpLib;
 use App\Libs\PaggueLib;
@@ -16,6 +17,7 @@ use App\Models\Premio;
 use App\Models\Product;
 use App\Models\Raffle;
 use App\RifaAfiliado;
+use App\Services\CartService;
 use App\Services\PaymentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -76,7 +78,7 @@ class ProductController extends Controller
         $this->verificaSorteio($productID);
         $user = getSiteOwnerUser();
 
-        $imagens = $productData->images()->get();
+        $imagens = $productData->getAllImagesFromCache();
 
 
         $productDetail = $productData;
@@ -85,10 +87,9 @@ class ProductController extends Controller
         $productDescription = $productData->descriptions()->select('description', 'video')->first();
 
         $productModel = $productData;
-
+        $cart = CartManagerHelper::currentCart($productData['id']);
         $config = getSiteConfig();
-
-        $activePromo = $productModel->promosAtivas();
+        $activePromo = $productModel->promosAtivasFromCache();
         $arrayProducts = [
             'tokenAfiliado' => $tokenAfiliado,
             'imagens' => $imagens,
@@ -96,15 +97,16 @@ class ProductController extends Controller
             'productDescription' => $productDescription ? $productDescription->description : '',
             'productDescriptionVideo' => $productDescription ? $productDescription->video : '',
             'totalNumbers' => $productModel->qtd,
-            'totalDispo' => $productModel->qtdNumerosDisponiveis(),
-            'totalReser' => $productModel->qtdNumerosReservados(),
-            'totalPago' => $productModel->qtdNumerosPagos(),
+            'totalDispo' => $productModel->qtdNumerosDisponiveisFromCache(),
+            'totalReser' => $productModel->qtdNumerosReservadosFromCache(),
+            'totalPago' => $productModel->qtdNumerosPagosFromCache(),
             'telephone' => $user->telephone,
             'type_raffles' => $productDetail->type_raffles,
             'productModel' => $productModel,
-            'ranking' => $productModel->ranking(),
+            'ranking' => $productModel->rankingFromCache(),
             'config' => $config,
-            'activePromos' => $activePromo
+            'activePromos' => $activePromo,
+            'cart' => $cart
         ];
 
 
@@ -190,7 +192,6 @@ class ProductController extends Controller
         }
         $rifa = $productData;
         $numbers = $rifa->numbers();
-
         foreach ($rifa->participantes() as $participante) {
             $statusParticipante = $participante->pagos > 0 ? 'pago' : 'reservado';
             foreach ($participante->numbers() as $value) {
@@ -199,28 +200,29 @@ class ProductController extends Controller
         }
 
         sort($numbers);
-
+        $x = 1;
         foreach ($numbers as $number) {
+            if ($x >= 50) {
+                break;
+            }
             $bg = '#585858';
             $ex = explode("-", $number);
             $number = $ex[0];
-
             $status = 'disponivel';
             if (isset($ex[1])) {
                 $status = $ex[1];
                 $nome = $ex[2];
             }
-
             if ($status == 'disponivel') {
-                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . "' onclick=\"selectRaffles('" . $number . "', '" . $number . "')\" style='background-color: " . $bg . ";color: #000;' id=" . $number . ">" . $number . "</a>";
+                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . " product-number-free' onclick=\"selectRaffles('" . $number . "', '" . $number . "')\" id=" . $number . ">" . $number . "</a>";
             } else if ($status == 'reservado') {
                 $nome = 'Reservado por ' . $nome;
-                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . "' onclick=\"infoParticipante('" . $nome . "')\" style='background-color: rgb(13,202,240);color: #000;' id=" . $number . ">" . $number . "</a>";
+                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . " product-number-reserved' onclick=\"infoParticipante('" . $nome . "')\" style='background-color: rgb(13,202,240);color: #000;' id=" . $number . ">" . $number . "</a>";
             } else if ($status == 'pago') {
                 $nome = 'Pago por ' . $nome;
-                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . "' onclick=\"infoParticipante('" . $nome . "')\" style='background-color: #28a745;color: #000;' id=" . $number . ">" . $number . "</a>";
+                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . " product-number-paid' onclick=\"infoParticipante('" . $nome . "')\" style='background-color: #28a745;color: #000;' id=" . $number . ">" . $number . "</a>";
             }
-
+            $x++;
         }
 
 
@@ -523,7 +525,7 @@ class ProductController extends Controller
                         // $qrCode = $object->point_of_interaction->transaction_data->qr_code_base64;
 
                         $paymentPIX = DB::table('payment_pix')->insert([
-                            'user_id'=>getSiteOwnerId(),
+                            'user_id' => getSiteOwnerId(),
                             'key_pix' => $codePIXID,
                             'full_pix' => $codePIX,
                             'status' => 'Pendente',
@@ -550,7 +552,7 @@ class ProductController extends Controller
                         'key_pix' => $codePIXID,
                         'participant_id' => $participante,
                         'valor' => $price,
-                        'user_id'=>getSiteOwnerId()
+                        'user_id' => getSiteOwnerId()
                     ]);
 
 
@@ -570,7 +572,7 @@ class ProductController extends Controller
                             'afiliado_id' => $afiliado->afiliado_id,
                             'valor' => $part->valor * $prod->ganho_afiliado / 100,
                             'pago' => false,
-                            'user_id'=>getSiteOwnerId()
+                            'user_id' => getSiteOwnerId()
 
                         ]);
                     }

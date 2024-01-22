@@ -15,6 +15,21 @@
 
     @yield('ogContent')
     @yield('scripts-top')
+    <script>
+        var ROUTES = <?= getSiteJsRoutes() ?>;
+        var CDN_URL = "<?= cdnAsset() ?>";
+    </script>
+    <style>
+        :root {
+            --brand-color: #671392;
+            --btn-free-color: #198754;
+            --btn-reserved-color: #ffc107;
+            --btn-paid-color: #0dcaf0;
+            --brand-bg-color: #000;
+
+        }
+
+    </style>
 
     <!-- Bootstrap CSS -->
     <link href="{{cdnAsset("build/site.css")}}" rel="stylesheet">
@@ -30,9 +45,10 @@
     </script>
 
     <script src="{{cdnAsset("js/site-header-bundle.min.js")}}"></script>
+
 </head>
 
-<body id="{{Route::currentRouteName()}}">
+<body id="pg-{{Route::currentRouteName()}}-route">
 @section('sidebar')
 @show
 
@@ -105,7 +121,7 @@ $subDomain = explode('.', request()->getHost());
                     </div>
                 </div>
             </header>
-            <div class="modal-body" style="background: #000 !important">
+            <div class="modal-body" style="background: var(--brand-bg-color) !important">
                 <div class="container container-600">
                     <nav class="nav-vertical nav-submenu font-xs mb-2">
                         <ul>
@@ -198,36 +214,16 @@ $subDomain = explode('.', request()->getHost());
         </div>
     </div>
 </div>
-
 <script>
-    document.getElementById('telephone').addEventListener('input', function (e) {
-        var aux = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
-        e.target.value = !aux[2] ? aux[1] : '(' + aux[1] + ') ' + aux[2] + (aux[3] ? '-' + aux[3] : '');
-    });
 
-    document.getElementById('telephone1').addEventListener('input', function (e) {
-        var aux = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
-        e.target.value = !aux[2] ? aux[1] : '(' + aux[1] + ') ' + aux[2] + (aux[3] ? '-' + aux[3] : '');
-    });
-
-    function loading() {
-        var el = document.getElementById('loadingSystem');
-        el.classList.toggle("d-none");
-    }
 </script>
 <script src="{{cdnAsset("js/site-footer-bundle.min.js")}}"></script>
 <script>
-    $(function () {
-        $('[data-toggle="tooltip"]').tooltip();
-
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-    });
+    $(document).ready(function () {
+        initSitePg();
+    })
 </script>
-
+@yield('scripts-footer')
 </body>
 
 </html>

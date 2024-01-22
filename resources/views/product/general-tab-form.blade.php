@@ -12,7 +12,7 @@ $baseLang = 'product';
     </div>
 
     <div class="col-md-6">
-        <?= inputField('price', 'numeric', $product) ?>
+        <?= inputField('price', 'numeric', $product,['onclick'=>'return maskMoney(this)']) ?>
     </div>
     <div class="col-md-12">
         <?= inputField('subname', 'text', $product) ?>

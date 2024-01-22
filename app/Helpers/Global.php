@@ -120,6 +120,26 @@ function htmlTitle($txt)
     return ucwords(strtolower(__($txt)));
 }
 
+function safeMul($n1, $n2)
+{
+    return bcmul($n1, $n2, 2);
+}
+
+function safeAdd($n1, $n2)
+{
+    return bcadd($n1, $n2, 2);
+}
+
+function safeDiv($n1, $n2)
+{
+    return bcdiv($n1, $n2, 2);
+}
+
+function safeSub($n1, $n2)
+{
+    return bcsub($n1, $n2, 2);
+}
+
 function getCacheOrCreate($cacheKey, $instance, $callback, $timeInMinutes = 3600, $forceUpdate = false)
 {
     if ($forceUpdate) {
@@ -128,7 +148,11 @@ function getCacheOrCreate($cacheKey, $instance, $callback, $timeInMinutes = 3600
     if (Cache::has($cacheKey)) {
         return Cache::get($cacheKey);
     } else {
-        $expiresAt = now()->addMinutes($timeInMinutes);
+        if (is_null($timeInMinutes)) {
+            $expiresAt = null;
+        } else {
+            $expiresAt = now()->addMinutes($timeInMinutes);
+        }
         Cache::put($cacheKey, $callback($instance), $expiresAt);
         return Cache::get($cacheKey);
     }
@@ -161,7 +185,7 @@ function cdnImageAsset($asset)
     return cdnAsset('images/' . $asset);
 }
 
-function cdnAsset($asset="")
+function cdnAsset($asset = "")
 {
     $file = 'cdn/' . ltrim($asset, '/');;
     if (isLocalEnv() && $asset != "/" && !empty($asset)) {
@@ -213,4 +237,78 @@ function getSiteUploadPath()
 function convertToArray($data)
 {
     return json_decode(json_encode($data), true);
+}
+
+function calcExecTime($name, $action)
+{
+    $start = microtime(true);
+    $action();
+
+    $end = microtime(true) - $start;
+    echo "$name executed in: " . $end;
+
+}
+
+function routesToJs($routes)
+{
+    $routeTxt = "replace_id_here";
+    $routesJs = [];
+    foreach ($routes as $k => $id) {
+        $newK = str_replace([".", '-'], "_", $k);
+        if ($id) {
+            $routesJs[$newK] = route($k, ['id' => $routeTxt]);
+        } else {
+            $routesJs[$newK] = route($k);
+        }
+
+    }
+    return json_encode($routesJs);
+
+}
+
+function getJsRoutes()
+{
+    $hasNotParams = false;
+    $hasParam = true;
+    $routes = [
+        'product.edit' => $hasParam,
+        'product.destroy' => $hasParam,
+        'excluirFoto' => $hasNotParams,
+        'product.destroy_photo' => $hasParam,
+        'verGanhadores' => $hasNotParams,
+        'definirGanhador' => $hasNotParams,
+        'ranking.admin' => $hasNotParams,
+        'product.create' => $hasNotParams
+    ];
+    return routesToJs($routes);
+}
+
+function getSiteJsRoutes()
+{
+    $hasNotParams = false;
+    $hasParam = true;
+    $routes = [
+        'product.get-free-numbers' => $hasParam,
+        'randomParticipant' => $hasNotParams,
+        'getRafflesAjax' => $hasNotParams,
+        'cart.add_rm'=>$hasNotParams,
+        'cart.resume'=>$hasNotParams,
+
+    ];
+    return routesToJs($routes);
+}
+function isOnlyIntegers($str) {
+    return preg_match('/^-?\d+$/', $str) === 1;
+}
+function formatMoney($val, $showCurrency = true)
+{
+    if (!is_numeric($val)) {
+        $val = 0;
+    }
+    $number = number_format($val, 2, ",", ".");
+    if ($showCurrency) {
+        return "R$ " . $number;
+    } else {
+        return $number;
+    }
 }

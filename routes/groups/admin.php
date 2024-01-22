@@ -17,10 +17,9 @@ Route::get('adicionar-sorteio', [ProductAdminController::class, 'index'])->name(
 Route::post('add-sorteio', [ProductAdminController::class, 'addProduct'])->name('addProduct');
 Route::post('duplicar-sorteio', [ProductAdminController::class, 'duplicar'])->name('duplicarProduct');
 Route::put('update/{id}', [MySweepstakesController::class, 'update'])->name('update');
-Route::delete('destroy', [ProductAdminController::class, 'destroy'])->name('destroy');
 Route::post('agendar-sorteio', [ProductAdminController::class, 'drawDate'])->name('drawDate');
 Route::post('previsao-sorteio', [ProductAdminController::class, 'drawPrediction'])->name('drawPrediction');
-Route::get('meus-sorteios', [MySweepstakesController::class, 'index'])->name('mySweepstakes');
+Route::get('meus-sorteios', [ProductAdmController::class, 'index'])->name('mySweepstakes');
 Route::any('liberar-reservas', [MySweepstakesController::class, 'releaseReservedRafflesNumbers'])->name('releaseReservedRafflesNumbers');
 Route::any('pagar-reservas', [MySweepstakesController::class, 'pagarReservas'])->name('pagarReservas');
 Route::any('reservar-numeros', [MySweepstakesController::class, 'reservarNumeros'])->name('reservarNumeros');
@@ -72,7 +71,7 @@ Route::get('/tutoriais/excluir-video/{id}', [MySweepstakesController::class, 'ex
 
 // WDM - Relatorios Painel Home
 Route::get('/resumo-lucro', [MySweepstakesController::class, 'resumoLucro'])->name('resumo.lucro');
-Route::get('/resumo-rifas-ativas', [MySweepstakesController::class, 'resumoRifasAtivas'])->name('resumo.rifasAtivas');
+Route::get('/resumo-rifas-ativas', [ProductAdmController::class, 'activeProducts'])->name('resumo.rifasAtivas');
 Route::get('/resumo-pendentes', [MySweepstakesController::class, 'resumoPendentes'])->name('resumo.pendentes');
 Route::post('/resumo-pendentes-search', [MySweepstakesController::class, 'resumoPendentesSearc'])->name('resumo.pendentesSearch');
 Route::get('/resumo-ranking', [MySweepstakesController::class, 'resumoRanking'])->name('resumo.ranking');
@@ -91,8 +90,10 @@ Route::get('/rifa-premiada', [MySweepstakesController::class, 'rifaPremiada'])->
 Route::post('/selecioonar-rifa', [MySweepstakesController::class, 'getRifa'])->name('selecionarRifa');
 Route::post('/buscar-cota-premiada', [MySweepstakesController::class, 'buscarCotaPremiada'])->name('buscarCotaPremiada');
 
-
-
+Route::delete('product', [ProductAdmController::class, 'destroy'])->name('destroy');
+Route::delete('product/{id}/destroy_phoyo', [ProductAdmController::class, 'destroyPhoto'])->name('product.destroy_photo');
+Route::delete('product/{id}/destroy', [ProductAdmController::class, 'destroy'])->name('product.destroy');
+Route::post('/product/store', [ProductAdmController::class, 'store'])->name('product.store');
 Route::get('/product/create', [ProductAdmController::class, 'create'])->name('product.create');
 Route::get('/product/{id}', [ProductAdmController::class, 'edit'])->name('product.edit');
 Route::post('/product/{id}', [ProductAdmController::class, 'update'])->name('product.update');

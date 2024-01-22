@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\MySweepstakesController;
@@ -7,10 +8,15 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RegulationController;
 use App\Http\Controllers\TermsOfUse;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Site\ProductController as ProductSiteController;
 
 Route::get('home', function () {
     return redirect(route("home"));
 })->name('homeRedirect');
+
+
+Route::post('get-free-numbers/{id}', [ProductSiteController::class, 'getFreeNumbers'])->name('product.get-free-numbers');
+
 
 Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
 Route::post('login', 'Auth\LoginController@login');
@@ -26,7 +32,7 @@ Route::get('/pagar-reserva/{id}', [CheckoutController::class, 'pagarReserva'])->
 Route::post('/get-customer', [CheckoutController::class, 'getCustomer'])->name('getCustomer');
 Route::get('/', [ProductController::class, 'index'])->name('inicio');
 Route::get('/sorteios', [ProductController::class, 'sorteios'])->name('sorteios');
-Route::get('sorteio/{id}/{tokenAfiliado?}', [ProductController::class, 'product'])->name('product');
+Route::get('sorteio/{id}/{tokenAfiliado?}', [ProductSiteController::class, 'details'])->name('product');
 Route::get('resumo-rifa/{id}', [MySweepstakesController::class, 'resumoRifa'])->name('resumoRifa');
 Route::get('resumo-rifa-pdf/{id}', [MySweepstakesController::class, 'resumoPDF'])->name('resumoRifaPDF');
 Route::post('buscar-numeros', [ProductController::class, 'getRaffles'])->name('getRafflesAjax');
@@ -50,3 +56,7 @@ Route::get('terms-of-use', [TermsOfUse::class, 'index'])->name('terms');
 Route::get('politica-privacidade', [TermsOfUse::class, 'politica'])->name('politica');
 Route::post('/random-participant', [ProductController::class, 'randomParticipant'])->name('randomParticipant');
 Route::get('/reset-pass', [Controller::class, 'resetPass']);
+
+
+Route::post('cart/add_rmo', [CartController::class, 'addRm'])->name('cart.add_rm');
+Route::post('cart/resume', [CartController::class, 'index'])->name('cart.resume');

@@ -10,7 +10,7 @@ class ProductDescription extends Model
     use ModelSiteOwnerTrait;
 
     protected $table = "product_description";
-    protected $fillable = ['id', 'description', 'video', 'user_id'];
+    protected $fillable = ['id', 'product_id', 'description', 'video', 'user_id'];
 
     public function product()
     {

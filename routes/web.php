@@ -1,12 +1,28 @@
 <?php
 
 use App\Models\Participant;
+use App\Models\Raffle;
+use App\Services\CartService;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 
-Route::get('/pwd', function () {
-   dd(getSiteConfig()->user()->first());
+Route::get('/numbersss', function () {
+    calcExecTime('cache', function () {
+        $product = \App\Models\Product::firstOrFail();
+        echo json_encode($product->getCompraMaisPopularFromCache());
+    });
+
 });
+Route::get('/cart_model', function () {
+    $cartModell = new \App\Services\CartService(105);
+    return $cartModell->getCurrentCart()->id;
 
+});
+Route::get('/session_pg', function () {
+    dd(Session::all());
+
+});
 Route::middleware(['check', 'subDomain'])->group(function () {
 
     Route::prefix('area-afiliado')->group(function () {

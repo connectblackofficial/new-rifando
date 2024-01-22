@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\FileUploadTypeEnum;
 use App\Exceptions\UserErrorException;
 use App\Helpers\FileUploadHelper;
+use App\Services\ProductService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -134,24 +135,55 @@ class Controller extends BaseController
         }
     }
 
-    public function processAjaxResponse(Request $request, array $rules, $callback)
+    public function processAjaxResponseWithTrans(array $formData, array $rules, $callback, $redirect = false)
     {
-        $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
+
+        return $this->processAjaxResponse($formData, $rules, $callback, $redirect, true);
+
+    }
+
+    public function processAjaxResponse(array $formData, array $rules, $callback, $redirect = false, $withTrans = false)
+    {
+        $validator = Validator::make($formData, $rules);
+        if (count($rules) > 0 && $validator->fails()) {
             $res = $validator->errors()->getMessages();
             $return["error"] = true;
             $return["error_message"] = $res;
             return response()->json($return);
         } else {
             try {
-                if ($callback() === true) {
+                if ($withTrans) {
+                    \DB::beginTransaction();
+                }
+                $response = $callback();
+                if (!$response) {
+                    throw new UserErrorException("Ocorreu um erro desconhecido.");
+                } else {
+                    if (!empty($response)) {
+                        $return["data"] = $response;
+                    }
                     $return["success"] = true;
                     $return["sucess_message"] = "Operação realizada com sucesso.";
+                    if ($redirect) {
+                        $return['redirect'] = true;
+                        $return['redirect_url'] = url()->previous();
+                    }
+                    if ($withTrans) {
+                        \DB::commit();
+                    }
                     return response()->json($return);
-                } else {
-                    throw new UserErrorException("Ocorreu um erro desconhecido.");
                 }
+            } catch (UserErrorException $e) {
+                if ($withTrans) {
+                    \DB::rollBack();
+                }
+                $return["error"] = true;
+                $return["error_message"] = ['id' => parseExceptionMessage($e)];
+                return response()->json($return);
             } catch (\Exception $e) {
+                if ($withTrans) {
+                    \DB::rollBack();
+                }
                 $return["error"] = true;
                 $return["error_message"] = ['id' => parseExceptionMessage($e)];
                 return response()->json($return);

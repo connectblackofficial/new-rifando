@@ -133,7 +133,7 @@
                         <br>
                         <span style="font-size: 12px;">Qtd. de Bilhetes {{ $rk->totalReservas }}</span>
                         <br>
-                        <span style="font-size: 12px;"><strong>Total Gasto: R$ {{ number_format($rk->totalGasto, 2, ",", ".") }}</strong></span>
+                        <span style="font-size: 12px;"><strong>Total Gasto: {{ formatMoney($rk->totalGasto)}}</strong></span>
                     </div>
                 @endforeach
             </div>

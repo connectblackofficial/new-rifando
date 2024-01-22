@@ -39,51 +39,11 @@ class MySweepstakesController extends Controller
 {
     public function index(Request $request)
     {
-        $rifas = ModelsProduct::siteOwner()->get();
-
-        // Finalizando rifas vencidas ou que foram vendidas 100%
-        foreach ($rifas->where('status', '=', 'Ativo') as $value) {
-            if ($value->qtdNumerosDisponiveis() == 0) {
-                $value->status = 'Finalizado';
-                $value->update();
-            }
-        }
 
         $search = $request->get('search');
-        // informações de user logado pelo sistema do laravel
-        $user = Auth::user();
-        $cleanNumbers = [];
-        $rifas = DB::table('products')
-            ->select('products.id', 'products.name', 'products.modo_de_jogo', 'products.price', 'products.type_raffles', 'products.winner', 'products.slug', 'products_images.name as image', 'raffles.number as total_number', 'product_description.description as description', 'products.status', 'products.draw_date', 'products.draw_prediction', 'products.visible', 'products.favoritar')
-            ->join('products_images', 'products.id', 'products_images.product_id')
-            ->join('product_description', 'products.id', 'product_description.product_id')
-            ->join('raffles', 'products.id', 'raffles.product_id', 'raffles.id')
-            ->where('products.user_id', '=', getSiteOwnerId())
-            ->groupBy('products.id')
-            ->orderBy('products.id', 'DESC')
-            ->get();
-
-
-        foreach ($rifas as $keyRaffles => $valRaffles) :
-            $_ProductID = $valRaffles->id;
-            $cleanNumbers[] = MySweepstakesController::getRafflesNumbers($_ProductID);
-        endforeach;
-        $getArrayCleaner = MySweepstakesController::cleanEmptyArrays($cleanNumbers);
-
-
-        $total_numeros = Raffle::select('raffles.number')
-            ->siteOwner()
-            ->where('raffles.product_id', '=', 3)
-            ->count();
-
-
-        $rifas = ModelsProduct::siteOwner()->orderBy('id', 'desc')->get();
-        return view('my-sweepstakes', [
-
-            'rifas' => $rifas,
-            'rifas_numeros' => $getArrayCleaner,
-            'total_numeros' => $total_numeros,
-
+        $rifas = Product::siteOwner()->search($search)->orderBy('id', 'desc')->get();
+        return view('product.edit', [
+            'rifas' => $rifas
         ]);
     }
 

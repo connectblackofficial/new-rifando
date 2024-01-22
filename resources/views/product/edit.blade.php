@@ -98,10 +98,8 @@
 
         </div>
     </div>
-    <div class="form-group">
-        <div class="col-lg-12" align="right">
-            <button class="mr-2 mb-2 btn btn-success" type="submit" style="margin-top: 30px;">
-                Salvar <i class="os-icon os-icon-grid-18"></i></button>
-        </div>
+    <div class="separator-20" style="height: 20px"></div>
+    <div class="row mb-4">
+        <button type="submit" class="criar btn btn-lg btn-success"><i class="fa fa-save"></i> Salvar</button>
     </div>
 </form>

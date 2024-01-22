@@ -7,13 +7,6 @@ function loading() {
     el.classList.toggle("d-none");
 }
 
-function initAjaxSetup() {
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-}
 
 function setUrlsPages() {
     var url_atual = window.location.pathname;
@@ -101,53 +94,10 @@ function getLinkAfiliado(el) {
     $('#modal-link').modal('show');
 }
 
-function alrt(title, content) {
 
-    swal(title, content);
-}
 
-function alrtError(title, content) {
-    Swal.fire({
-        title: title,
-        text: content,
-        icon: "error" // type can be error/warning/success
-    });
 
-}
 
-function alrtSucess(title, content) {
-    Swal.fire({
-        title: title,
-        text: content,
-        icon: "success" // type can be error/warning/success
-    });
-}
-
-function alrtConfirm(title, content, confirmRedirect) {
-    swal({
-        title: title,
-        text: content,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: share_trans.YesIamsure,
-        cancelButtonText: share_trans.Nocancelit,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-    }, function (isConfirm) {
-        if (isConfirm) {
-            location.href = confirmRedirect;
-        }
-    })
-}
-
-function focusRed(input) {
-    $("input").focusout();
-    $("select").focusout();
-    $("input").attr("style", "border-color:none;");
-    $("select").attr("style", "border-color:none;");
-    $(input).focus();
-    element = $(input).attr("style", "border-color:red;");
-}
 
 function removeFocusRed(input) {
     element = $(input).removeAttr("style")
@@ -160,6 +110,20 @@ function modal(title, content) {
     $("#modalMsgBody").html(content);
     $('#modal_url').modal('show');
     $('[data-toggle="tooltip"]').tooltip();
+}
+
+function addFoto(el) {
+    $('#rifa-id').val(el.dataset.id)
+    $('#input-add-foto').click()
+}
+
+function duplicar(el) {
+    var id = el.dataset.id;
+    var name = el.dataset.name
+    $('#id-duplicar').val(id);
+    $('#titulo-duplicar').text(`Copiando dados da rifa: ${name}`);
+
+    $('#duplicar-modal').modal('show')
 }
 
 function formatarMoeda() {
@@ -190,58 +154,8 @@ function loadUrlBigModal(title, url) {
     $('#big_modal_url').modal('show');
 }
 
-function fBlockUi() {
-    $.blockUI({
-        baseZ: 200000,
-        // message: "<h4><img width='50' src='" + URL + '/assets/images/core/icons/loading.gif' + "'></h4>",
-        message: "",
-        css: {
-            border: 'none',
-            padding: '5px',
-            backgroundColor: 'transparent',
-            '-webkit-border-radius': '5px',
-            '-moz-border-radius': '5px',
-            opacity: 0,
-            color: '#fff',
-        }
-    });
-}
 
-function ltrimAsset(asset) {
-    return asset.replace(/^\//, '');
-}
 
-function cdnAsset(asset) {
-
-    return CDN_URL + "/" + asset.replace(/^\//, '');
-}
-
-function fBlockUiLoading() {
-    let loadingImg = cdnAsset("images/loading.gif");
-    $.blockUI({
-        baseZ: 200000,
-        message: '<div class="psoload">' +
-            '  <div class="straight"></div>' +
-            '  <div class="curve"></div>' +
-            '  <div class="center"><img style="width: 70px;" src="' + loadingImg + '"></div>' +
-            '  <div class="inner"></div>' +
-            '</div>',
-        css: {
-            border: 'none',
-            padding: '5px',
-            backgroundColor: 'transparent',
-            '-webkit-border-radius': '5px',
-            '-moz-border-radius': '5px',
-            opacity: 1,
-            color: '#fff',
-        },
-        overlayCSS: {
-            backgroundColor: '#323c58',
-            opacity: 1,
-            cursor: 'wait'
-        },
-    });
-}
 
 function startLoading() {
     $("#modalLoadingMsg").show();
@@ -252,6 +166,12 @@ function endLoading() {
     $("#modalLoadingMsg").hide();
     $("#modalMsgBody").show();
 }
+
+function closeUrlModal() {
+    $("#modal_url").modal('hide');
+    return false;
+}
+
 
 function loadUrlModal(title, url, size) {
     startLoading();
@@ -276,63 +196,6 @@ function loadUrlModal(title, url, size) {
     $('#modal_url').modal('show');
 }
 
-function sendForm(form) {
-    startLoading();
-    $.ajax({
-        url: form.attr('action'),
-        method: form.attr('method'),
-        data: form.serialize(),
-        dataType: "json",
-        cache: false,
-        success: function (response) {
-            console.log(response);
-            if (response.callback) {
-                if (typeof response.callback != "undefined") {
-                    console.log(response.callback);
-                    eval(response.callback_function);
-                }
-
-            }
-            if (response.error) {
-                if (typeof response.error_message != "undefined") {
-                    for (var i in response.error_message) {
-                        focusRed("#" + i);
-                        if (typeof response.confirm_redirect != 'undefined') {
-                            alrtConfirm("Ops!", response.error_message[i], response.confirm_redirect);
-                        } else {
-                            if (Array.isArray(response.error_message[i])) {
-                                alrtError("Ops!", response.error_message[i][0]);
-                            } else {
-                                alrtError("Ops!", response.error_message[i]);
-                            }
-                        }
-                        break;
-                    }
-
-                }
-            }
-            if (response.success) {
-                if (typeof response.sucess_message != "undefined") {
-                    alrtSucess("Sucesso!", response.sucess_message);
-                }
-            }
-            if (response.redirect) {
-                if (typeof response.redirect_url != "undefined") {
-                    setTimeout(function () {
-                        location.href = response.redirect_url;
-                    }, 1000);
-                }
-
-            }
-            endLoading();
-        },
-        error: function (response) {
-            alrtError("Ops!", "Ocorreu um erro desconhecido;.");
-            endLoading();
-        }
-    });
-    return false;
-}
 
 function changePopular(el) {
     var rifaID = el.dataset.rifa;
@@ -340,11 +203,127 @@ function changePopular(el) {
 }
 
 function productEdit(id) {
-    let url = PRODUCT_EDIT_ROUTE.replace("replace_here", id)
+    let url = replaceId(ROUTES.product_edit, id);
     loadUrlModal("Editar rifa", url);
     return false;
 }
 
-function deleteProduct() {
+function productCreate() {
+    let url = ROUTES.product_create;
+    loadUrlModal("Nova rifa", url);
+    return false;
+}
+
+function replaceId(txt, id) {
+    return txt.replace("replace_id_here", id);
+}
+
+function deleteProduct(id) {
+    let url = replaceId(ROUTES.product_destroy, id);
+    return deleteConfirm(function () {
+        return sendAjaxRequest(url, 'delete', {'id': id});
+    });
+}
+
+
+
+function openRanking(id) {
+    //$('#content-modal-ranking').html('')
+    $.ajax({
+        url: ROUTES.ranking_admin,
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            "id": id
+        },
+        success: function (response) {
+            console.log(response);
+            if (response.html) {
+                $('#content-modal-ranking').html(response.html)
+                $('#modal-ranking').modal('show')
+            }
+        },
+        error: function (error) {
+
+        }
+    })
+}
+
+function definirGanhador(id) {
+    $('#content-modal-definir-ganhador').html('')
+    $.ajax({
+        url: ROUTES.definirGanhador,
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            "id": id
+        },
+        success: function (response) {
+            if (response.html) {
+                $('#content-modal-definir-ganhador').html(response.html)
+                $('#modal-definir-ganhador').modal('show');
+            }
+        },
+        error: function (error) {
+
+        }
+    })
+}
+
+function verGanhadores(id) {
+    $('#content-modal-ver-ganhadores').html('')
+    $.ajax({
+        url: ROUTES.verGanhadores,
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            "id": id
+        },
+        success: function (response) {
+            if (response.html) {
+                $('#content-modal-ver-ganhadores').html(response.html)
+                $('#modal-ver-ganhadores').modal('show');
+            }
+        },
+        error: function (error) {
+
+        }
+    })
+}
+
+function copyResumoLink(link) {
+    const element = document.querySelector('#copy-link');
+    const storage = document.createElement('textarea');
+    storage.value = link;
+    element.appendChild(storage);
+
+    // Copy the text in the fake `textarea` and remove the `textarea`
+    storage.select();
+    storage.setSelectionRange(0, 99999);
+    document.execCommand('copy');
+    element.removeChild(storage);
+    alrtSucess("Sucesso!", "LINK para resumo copiado com sucesso.");
+
+}
+
+function excluirFoto(el) {
+
+    var id = el.dataset.id;
+    let url = replaceId(ROUTES.product_destroy_photo, id);
+    return deleteConfirm(function () {
+        return sendAjaxRequest(url, 'delete', {'id': id});
+    });
+}
+
+function initPage() {
+    initAjaxSetup();
+    setUrlsPages();
+
+    if (idExists("input-add-foto")) {
+        document.getElementById("input-add-foto").addEventListener("change", function (el) {
+            $('#form-foto').submit();
+        });
+    }
+
 
 }

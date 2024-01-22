@@ -7,13 +7,7 @@ function loading() {
     el.classList.toggle("d-none");
 }
 
-function initAjaxSetup() {
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-}
+
 
 function setUrlsPages() {
     var url_atual = window.location.pathname;

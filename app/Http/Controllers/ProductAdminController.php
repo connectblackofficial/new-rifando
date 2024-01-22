@@ -33,50 +33,7 @@ class ProductAdminController extends Controller
         $this->middleware('auth');
     }
 
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index(Request $request)
-    {
 
-
-    }
-
-    /*public function update(Request $request, $id){
-        $products = Product::find(6)
-            ->select('products.id', 'products.name', 'products.price', 'products.type_raffles', 'products.winner', 'products.slug', 'products_images.name as image', 'raffles.number as total_number', 'product_description.description as description', 'products.status', 'products.draw_date', 'products.draw_prediction', 'products.visible', 'products.favoritar')
-            ->join('products_images', 'products.id', 'products_images.product_id')
-            ->join('product_description', 'products.id', 'product_description.product_id')
-            ->join('raffles', 'products.id', 'raffles.product_id')           
-            ->groupBy('products.id')
-            ->orderBy('products.id', 'DESC')
-            ->get();
-        return view('my-sweepstakes', [           
-            'products' => $products
-        ]);
-        
-    }*/
-    public function destroy(Request $request)
-    {
-
-        $id = $request->input('deleteId');
-
-        $product_delete = Product::getByIdWithSiteCheck($id);
-        if (!isset($product_delete['id'])) {
-            return back()->withErrors(['Produto não encontrado.']);
-        }
-
-        $path = 'numbers/' . $product_delete->id . '.json';
-        if (file_exists($path)) {
-            unlink($path);
-        }
-
-        $name_rifa = $product_delete->name;
-        $product_delete->delete();
-        return redirect('/meus-sorteios')->with('success', 'Rifa (' . $name_rifa . ') excluida com Sucesso');
-    }
 
 
     public function addProduct(SiteProductStoreRequest $request)

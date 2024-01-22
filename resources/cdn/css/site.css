@@ -1,5 +1,5 @@
 body {
-    background: #000 !important;
+    background: var(--brand-bg-color);
 }
 
 @media (max-width: 768px) {
@@ -96,9 +96,6 @@ img {
     border-radius: 10px;
 }
 
-:root {
-    --brand-color: #671392;
-}
 
 .navbar {
     background-color: var(--brand-color);
@@ -334,6 +331,7 @@ img {
 .btn-add-qtd:hover {
     cursor: pointer;
 }
+
 .duvida {
     background-color: #ffffff5e;
     border-radius: 10px;
@@ -420,4 +418,119 @@ img {
 
 .app-title.dark {
     color: #fff;
+}
+
+
+.product-number-free {
+    background-color: var(--btn-free-color) !important;
+    color: #fff !important;
+}
+
+.product-number-reserved {
+    background-color: var(--btn-reserved-color) !important;
+    color: #fff !important;
+}
+
+.product-number-paid {
+    background-color: var(--btn-paid-color) !important;
+    color: #fff !important;
+}
+
+.qty-numbers-zeros-4 a.number {
+    width: 20% !important;
+}
+
+.qty-numbers-zeros-5 a.number {
+    width: 20% !important;
+}
+
+.qty-numbers-zeros-6 a.number {
+    width: 21% !important;
+}
+
+.qty-numbers-zeros-7 a.number {
+    width: 21% !important;
+}
+
+#pg-product-route {
+    @media screen and (max-width: 768px) {
+        .detail {
+            /* margin-top: 90px !important; */
+            /* margin-top: 20px !important; */
+            /* margin-top: -15px !important; */
+            position: absolute;
+            z-index: 9999 !important;
+        }
+    }
+
+    .rifa-content.dark {
+        background: #383838;
+    }
+
+    ::-webkit-scrollbar {
+        display: none;
+    }
+}
+.body-compra-auto {
+    background-color: #fff;
+    border: none;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.body-compra-auto.dark {
+    background: #222222;
+}
+
+.title-compra-auto h5 {
+    color: #000;
+}
+
+.title-compra-auto span {
+    color: #000;
+}
+
+.title-compra-auto.dark h5 {
+    color: #fff;
+}
+
+.title-compra-auto.dark span {
+    color: #fff;
+}
+
+.btn-add-qtd {
+    color: #000;
+    background-color: #fff;
+    border-radius: 0px;
+    padding: 10px;
+    margin: 2px;
+    border: 1px solid;
+    width: 100%;
+    min-width: 50px;
+    max-width: 300px;
+}
+
+.btn-add-qtd.dark {
+    background: rgba(0, 0, 0, .1) !important;
+    border-color: rgba(0, 0, 0, .1) !important;
+    color: #fff !important;
+}
+
+.disponivel-rm {
+    background-color: #A0A1A3;
+    color: #fff;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.reservadas-rm {
+    background-color: #F0BF1A;
+    color: #fff;
+}
+
+.pagas-rm {
+    background-color: #6C757E;
+    color: #fff;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
 }

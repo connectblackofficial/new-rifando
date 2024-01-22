@@ -14,19 +14,19 @@
         <div class="row d-flex mb-4" style="justify-content: space-evenly">
             <div class="col-md-2 p-4 bg-primary rounded text-center">
                 <h3>Disponível</h3>
-                <h1>R$ {{ number_format($disponivel, 2, ",", ".") }}</h1>
+                <h1>{{ formatMoney($disponivel)}}</h1>
                 <a href="{{ route('afiliado.solicitarSaque') }}" style="color: #000">Solicitar Saque</a>
             </div>
 
             <div class="col-md-2 p-4 bg-warning rounded text-center">
                 <h3 style="color: #000">Solicitado</h3>
-                <h1 style="color: #000">R$ {{ number_format($solicitado, 2, ",", ".") }}</h1>
+                <h1 style="color: #000">{{ formatMoney($solicitado)}}</h1>
                 <a href="#" style="color: #000">&nbsp;</a>
             </div>
 
             <div class="col-md-2 p-4 bg-success rounded text-center">
                 <h3>Recebido</h3>
-                <h1>R$ {{ number_format($recebido, 2, ",", ".") }}</h1>
+                <h1>{{ formatMoney($recebido)}}</h1>
                 <a href="#" style="color: #000">&nbsp;</a>
             </div>
         </div>
@@ -81,7 +81,7 @@
                             <td>{{ $ganho->id }}</td>
                             <td>{{ $ganho->participante()->name }}</td>
                             <td>{{ $ganho->rifa()->name }}</td>
-                            <td>{{ number_format($ganho->valor, 2, ",", ".") }}</td>
+                            <td>{{ number_format($ganho->valor)}}</td>
                             <td>{!! $ganho->status() !!}</td>
                         </tr>
                     @endforeach

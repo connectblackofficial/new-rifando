@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exceptions\UserErrorException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SiteProductFastStoreRequest;
 use App\Http\Requests\SiteProductUpdateRequest;
 use App\Models\Product;
 use App\Models\ProductImage;
@@ -16,44 +18,85 @@ class ProductController extends Controller
         $product = Product::getByIdWithSiteCheckOrFail($id);
         return view('product.edit', ['product' => $product]);
     }
+
+    public function index(Request $request)
+    {
+
+        return $this->showIndex(Product::siteOwner(), 'Meus Sorteios', $request);
+    }
+
+    public function activeProducts(Request $request)
+    {
+
+        return $this->showIndex(Product::siteOwner()->where('status', 'Ativo'), 'Rifas Ativas', $request);
+    }
+
     public function create()
     {
 
         return view('product.create', ['product' => []]);
     }
+
+    public function store(Request $request)
+    {
+
+        $rules = (new SiteProductFastStoreRequest())->rules();
+        $update = function () use ($request) {
+            $productService = new ProductService();
+            $productService->processAddProduct($request);
+            return true;
+        };
+
+
+        return $this->processAjaxResponseWithTrans($request->all(), $rules, $update);
+    }
+
     public function update(Request $request, $id)
     {
         $rules = (new SiteProductUpdateRequest())->rules();
         $update = function () use ($id, $request) {
-            try {
-                \DB::beginTransaction();
-                $product = Product::getByIdWithSiteCheckOrFail($id);
-                $productService = new ProductService();
-                $productService->update($product, $request);
-                \DB::commit();
-                return true;
-            } catch (\Exception $e) {
-                \DB::rollBack();
-                return false;
-            }
+            $product = Product::getByIdWithSiteCheckOrFail($id);
+            $productService = new ProductService();
+            $productService->update($product, $request);
+            return true;
+
         };
 
 
-        return $this->processAjaxResponse($request, $rules, $update);
+        return $this->processAjaxResponseWithTrans($request->all(), $rules, $update);
     }
 
-    public function deletePhoto(Request $request)
+    public function destroyPhoto($id)
     {
-        try {
-            ProductImage::getByIdWithSiteCheck($request->id)->delete();
-            $response['message'] = 'Imagem excluida com sucesso!';
-            $response['success'] = true;
-
-            return $response;
-        } catch (\Throwable $th) {
-            $response['error'] = $th->getMessage();
-
-            return $response;
-        }
+        $destroyPhoto = function () use ($id) {
+            $productService = new ProductService();
+            $productService->destroyPhoto($id);
+            return true;
+        };
+        return $this->processAjaxResponse(['id' => $id], [], $destroyPhoto, true);
     }
+
+    public function destroy($id)
+    {
+        $destroyProduct = function () use ($id) {
+            $productService = new ProductService();
+            $productService->destroyProduct($id);
+            return true;
+        };
+        return $this->processAjaxResponse(['id' => $id], [], $destroyProduct, true);
+
+
+    }
+
+    public function showIndex($query, $title, Request $request)
+    {
+
+        $search = $request->get('search');
+        $rifas = $query->search($search)->orderBy('id', 'desc')->get();
+        return view('product.index', [
+            'rifas' => $rifas,
+            'pageTitle' => $title
+        ]);
+    }
+
 }

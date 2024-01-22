@@ -1,46 +1,46 @@
 @extends('layouts.admin')
+@section("scripts-top")
+    <style>
+        .item-compra {
+            border: 1px solid;
+            color: white;
+            background-color: #000;
+            border-radius: 5px;
+            /* border-radius: 10px; */
+        }
 
-<style>
-    .item-compra {
-        border: 1px solid;
-        color: white;
-        background-color: #000;
-        border-radius: 5px;
-        /* border-radius: 10px; */
-    }
+        .reservado {
+            /* background-color: rgb(68, 124, 170); */
+        }
 
-    .reservado {
-        /* background-color: rgb(68, 124, 170); */
-    }
+        .pago {
+            background-color: rgb(17, 109, 17);
+        }
 
-    .pago {
-        background-color: rgb(17, 109, 17);
-    }
+        .qtd-livres {
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+        }
 
-    .qtd-livres {
-        padding-left: 10px !important;
-        padding-right: 10px !important;
-        border-top-left-radius: 5px;
-        border-bottom-left-radius: 5px;
-    }
+        .qtd-pagos {
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
 
-    .qtd-pagos {
-        padding-left: 10px !important;
-        padding-right: 10px !important;
-        border-top-right-radius: 5px;
-        border-bottom-right-radius: 5px;
-    }
+        .qtd-reservas {
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+        }
 
-    .qtd-reservas {
-        padding-left: 10px !important;
-        padding-right: 10px !important;
-    }
-
-    .info-qtd {
-        cursor: pointer;
-    }
-</style>
-
+        .info-qtd {
+            cursor: pointer;
+        }
+    </style>
+@endsection
 
 
 @section('content')
@@ -51,7 +51,7 @@
             <h4>Resumo Aguardando Pgto.</h4>
             <h6>Participantes: {{ $participantes->count() }}</h6>
             <h6>Total de Cotas: {{ $participantes->sum('reservados') }}</h6>
-            <h6>Total: R$ {{ number_format($participantes->sum('valor'), 2, ',', '.') }}</h6>
+            <h6>Total: {{ formatMoney($participantes->sum('valor')) }}</h6>
         </div>
 
         <form action="{{ route('resumo.pendentesSearch') }}" method="POST">
@@ -105,7 +105,7 @@
                 <div class="col-md-4 d-flex align-items-center">
                     <span>
                         {{ count($participante->numbers()) }} Cotas <br>
-                        R$ {{ number_format($participante->valor, 2, ',', '.') }}
+                        {{ formatMoney($participante->valor) }}
                     </span>
                 </div>
                 <div class="col-md-3 d-flex align-items-center justify-content-end">
@@ -131,13 +131,13 @@
                 data: {
                     "id": el.dataset.id
                 },
-                success: function(response) {
+                success: function (response) {
                     loading();
                     console.log(response.html);
                     $('#content-modal-detalhes-compra').html(response.html)
                     $('#modal_detalhes_compra').modal('show')
                 },
-                error: function(error) {
+                error: function (error) {
                     loading();
                     Swal.fire(
                         'Erro Desconhecido!',
@@ -146,9 +146,8 @@
                     )
                 }
             })
-    
-    
-    
+
+
         }
     </script>
 @endsection

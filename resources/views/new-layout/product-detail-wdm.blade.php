@@ -711,7 +711,7 @@
 
                         <div class="container text-center">
                             <div class="raffles {{ $product[0]->status == 'Finalizado' ? 'finished' : '' }}"
-                                id="raffles" style="margin-bottom: 150px !important;">
+                                id="raffles" style="margin-bottom: 1501px !important;">
                                 <div id="message-raffles" class="blob"
                                     style="background-color: transparent;color: #000;font-weight: bold;text-align: center;">
                                 </div>
