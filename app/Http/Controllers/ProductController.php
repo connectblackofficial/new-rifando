@@ -184,7 +184,9 @@ class ProductController extends Controller
         return json_encode($resultUserRandom);
     }
 
-    public function getRaffles(Request $request)
+
+
+    public function getRaffles3(Request $request)
     {
         $productData = Product::siteOwner()->whereId($request->idProductURL)->first();
         if (!isset($productData['id'])) {
@@ -195,34 +197,12 @@ class ProductController extends Controller
         foreach ($rifa->participantes() as $participante) {
             $statusParticipante = $participante->pagos > 0 ? 'pago' : 'reservado';
             foreach ($participante->numbers() as $value) {
-                array_push($numbers, $value . '-' . $statusParticipante . '-' . $participante->name);
+                $numbers[] = $value . '-' . $statusParticipante . '-' . $participante->name;
             }
         }
+        $pages=[];
+        foreach (array_chunk($numbers, 100) as  $number) {
 
-        sort($numbers);
-        $x = 1;
-        foreach ($numbers as $number) {
-            if ($x >= 50) {
-                break;
-            }
-            $bg = '#585858';
-            $ex = explode("-", $number);
-            $number = $ex[0];
-            $status = 'disponivel';
-            if (isset($ex[1])) {
-                $status = $ex[1];
-                $nome = $ex[2];
-            }
-            if ($status == 'disponivel') {
-                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . " product-number-free' onclick=\"selectRaffles('" . $number . "', '" . $number . "')\" id=" . $number . ">" . $number . "</a>";
-            } else if ($status == 'reservado') {
-                $nome = 'Reservado por ' . $nome;
-                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . " product-number-reserved' onclick=\"infoParticipante('" . $nome . "')\" style='background-color: rgb(13,202,240);color: #000;' id=" . $number . ">" . $number . "</a>";
-            } else if ($status == 'pago') {
-                $nome = 'Pago por ' . $nome;
-                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . " product-number-paid' onclick=\"infoParticipante('" . $nome . "')\" style='background-color: #28a745;color: #000;' id=" . $number . ">" . $number . "</a>";
-            }
-            $x++;
         }
 
 

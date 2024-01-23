@@ -34,14 +34,13 @@ class ProductAdminController extends Controller
     }
 
 
-
-
     public function addProduct(SiteProductStoreRequest $request)
     {
-
+dd($request->file('images'));
         $storeProduct = function () use ($request) {
             $productService = new ProductService();
-            $productService->processAddProduct($request);
+            dd($request->file('images'));
+            $productService->processAddProduct($request->all(),$request->file('images'));
             return redirect()->back()->with('success', 'Cadastro da Rifa efetuado com sucesso!');
         };
         return $this->catchAndRedirect($storeProduct);

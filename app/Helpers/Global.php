@@ -291,15 +291,19 @@ function getSiteJsRoutes()
         'product.get-free-numbers' => $hasParam,
         'randomParticipant' => $hasNotParams,
         'getRafflesAjax' => $hasNotParams,
-        'cart.add_rm'=>$hasNotParams,
-        'cart.resume'=>$hasNotParams,
+        'cart.add_rm' => $hasNotParams,
+        'cart.resume' => $hasNotParams,
+        'product.site.numbers' => $hasNotParams
 
     ];
     return routesToJs($routes);
 }
-function isOnlyIntegers($str) {
+
+function isOnlyIntegers($str)
+{
     return preg_match('/^-?\d+$/', $str) === 1;
 }
+
 function formatMoney($val, $showCurrency = true)
 {
     if (!is_numeric($val)) {
@@ -311,4 +315,10 @@ function formatMoney($val, $showCurrency = true)
     } else {
         return $number;
     }
+}
+
+function setSiteEnv(Environment $siteEnv)
+{
+    Session::put('siteEnv', $siteEnv);
+    Session::put('siteOwnerEnv', $siteEnv->user()->firstOrFail());
 }

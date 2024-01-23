@@ -105,11 +105,15 @@ function sendAjaxRequest(url, method, data) {
     return false;
 }
 
-function sendAjaxPostData(url, formData, callback) {
-    startLoading();
+function sendAjaxData(url, method, formData, callback,beforeCallback,alwaysCallback) {
+    if (beforeCallback && typeof beforeCallback === "function") {
+        beforeCallback();
+    } else {
+        startLoading();
+    }
     let ajaxData = {
         url: url,
-        method: 'POST',
+        method: method,
         data: formData,
         dataType: "json",
         cache: false,
@@ -122,13 +126,25 @@ function sendAjaxPostData(url, formData, callback) {
             alrtError("Ops!", "Ocorreu um erro desconhecido.");
 
         }, always: function () {
-           alert("Aooba")
+            alert("Aooba")
         }
     };
-    $.ajax(ajaxData).always(function (){
-        startLoading();
+    $.ajax(ajaxData).always(function () {
+        if (alwaysCallback && typeof alwaysCallback === "function") {
+            alwaysCallback();
+        } else {
+            startLoading();
+        }
     })
     return false;
+}
+
+function sendAjaxPostData(url, formData, callback,beforeCallback,alwaysCallback) {
+    return sendAjaxData(url, 'POST', formData, callback,beforeCallback,alwaysCallback)
+}
+
+function sendAjaxGetData(url, formData, callback,beforeCallback,alwaysCallback) {
+    return sendAjaxData(url, 'GET', formData, callback,beforeCallback,alwaysCallback)
 }
 
 
@@ -145,7 +161,9 @@ function alrtError(title, content) {
     });
 
 }
-
+function replaceId(txt, id) {
+    return txt.replace("replace_id_here", id);
+}
 function alrtSucess(title, content) {
     Swal.fire({
         title: title,

@@ -8,9 +8,12 @@ use BadMethodCallException;
 
 final class CacheKeysEnum extends Enum
 {
-    const ComprasAuto = 'p_compras_auto_{id}';
-    const OptionTwo = 1;
-    const OptionThree = 2;
+    const PaginationKeyFomNumbers = 'p_number_page_{id}_{pg}';
+    const  PaginationQtyPagesFomNumbers = 'p_number_qty_{id}';
+
+    const  PaginationQtyRowsperPage = 'p_number_row_per_page_{id}';
+
+    const  CartProductKey = 'cart_product_{id}';
 
     public static function __callStatic($name, $arguments)
     {
@@ -28,14 +31,36 @@ final class CacheKeysEnum extends Enum
     }
 
 
-    private static function getCacheKey($value, $id)
+    static function replaceVars($value, $vars = [])
     {
-        return self::replaceId($value, $id);
+        foreach ($vars as $k => $v) {
+            $value = str_replace('{' . $k . '}', $v, $value);
+        }
+
+        return $value;
     }
 
-    private static function replaceId($key, $id)
+    public static function getQtyPaginationPageKey($productId)
     {
-        return str_replace("{id}", $id, $key);
+        $key = self::PaginationQtyPagesFomNumbers;
+        return self::replaceVars($key, ['id' => $productId]);
     }
 
+    public static function getPaginationPageKey($productId, $page)
+    {
+        $key = self::PaginationKeyFomNumbers;
+        return self::replaceVars($key, ['id' => $productId, 'pg' => $page]);
+    }
+
+    public static function getQtyQtyRowsPerPageKey($productId)
+    {
+        $key = self::PaginationQtyRowsperPage;
+        return self::replaceVars($key, ['id' => $productId]);
+    }
+
+    public static function getCartSessionKey($productId)
+    {
+        $key = self::CartProductKey;
+        return self::replaceVars($key, ['id' => $productId]);
+    }
 }

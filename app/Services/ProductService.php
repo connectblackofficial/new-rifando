@@ -4,19 +4,23 @@ namespace App\Services;
 
 use App\CompraAutomatica;
 use App\Enums\CacheExpiresInEnum;
+use App\Enums\CacheKeysEnum;
 use App\Enums\FileUploadTypeEnum;
 use App\Enums\PaymentGatewayEnum;
+use App\Enums\ReservationTypeEnum;
 use App\Environment;
+use App\Events\ProductCreated;
 use App\Events\ProductUpdated;
 use App\Exceptions\UserErrorException;
 use App\Helpers\FileUploadHelper;
 use App\Models\Product;
-use App\Models\ProductDescription;
 use App\Models\ProductImage;
 use App\Models\Promocao;
 use App\Models\Raffle;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 
 class ProductService
 {
@@ -44,47 +48,51 @@ class ProductService
         }
     }
 
-    public function processAddProduct(Request $request)
+    public function processAddProduct(array $productData, array $images)
     {
-        $requestData = $request->all();
-        $gatewayName = $request->gateway;
-        $gameMode = $request->modo_de_jogo;
-        $qtdNumbers = $request->numbers;
-        $zerosQtd = strlen((string)$request->numbers);;
 
+        $gatewayName = $productData['gateway'];
+        $gameMode = $productData['modo_de_jogo'];
+        $qtdNumbers = $productData['numbers'];
+        $zerosQtd = strlen((string)$productData['numbers']);;
         $this->validateGateways($gatewayName);/** @noinspection PhpUnreachableStatementInspection */;
-        $product = $this->create($requestData);
+        $product = $this->create($productData);
         $product->createPromos();
-        $product->createDefaultPremiums($requestData);
-        if (!$request->hasFile('images')) {
-            throw UserErrorException::emptyImage();
-        }
-        $this->processImages($product, $request);
-
+        $product->createDefaultPremiums($productData);
+        $this->processImages($product, $images);
         $this->saveNumbers($product, $gameMode, $qtdNumbers, $zerosQtd);
-        $product->createOrUpdateDescription($request->description);
+        $product->createOrUpdateDescription($productData['description']);
+        event(new ProductCreated($product));
+        return $product;
     }
 
-    function processImages(Product $product, $request, $fileName = 'images')
+    function processImages(Product $product, array $images)
     {
-
-        if ($request->hasFile($fileName)) {
-            $files = $request->file($fileName);
-            try {
-                foreach ($files as $key => $imageUpload) {
-                    $uploadHelper = new FileUploadHelper($imageUpload, FileUploadTypeEnum::Image);
-                    $imageUrl = $uploadHelper->upload();
-                    $productImage = $product->createProductImage($imageUrl);
-                    if (!isset($productImage['id'])) {
-                        throw UserErrorException::uplaodError();
-                    }
+        try {
+            if (count($images) == 0) {
+                throw UserErrorException::emptyImage();
+            }
+            foreach ($images as $image) {
+                if (!($image instanceof UploadedFile)) {
+                    throw new \Exception("Imagem inválida.");
                 }
-
-            } catch (\Exception $exception) {
-                throw UserErrorException::uplaodError();
             }
 
+            foreach ($images as $key => $imageUpload) {
+                $uploadHelper = new FileUploadHelper($imageUpload, FileUploadTypeEnum::Image);
+                $imageUrl = $uploadHelper->upload();
+                $productImage = $product->createProductImage($imageUrl);
+                if (!isset($productImage['id'])) {
+                    throw UserErrorException::uplaodError();
+                }
+            }
+
+        } catch (UserErrorException $exception) {
+            throw new UserErrorException($exception->getMessage());
+        } catch (\Exception $exception) {
+            throw UserErrorException::uplaodError();
         }
+
     }
 
     function create(array $productData): Product
@@ -109,7 +117,8 @@ class ProductService
         ]);
     }
 
-    private function saveNumbers(Product $product, $gameMode, $qtdNumbers, $zerosQtd = null)
+    private
+    function saveNumbers(Product $product, $gameMode, $qtdNumbers, $zerosQtd = null)
     {
         if (str_starts_with($gameMode, 'fazendinha')) {
             if ($gameMode == 'fazendinha-completa') {
@@ -126,13 +135,15 @@ class ProductService
                 }
             }
         } else {
+
             $product->numbers = $this->genNumbers($qtdNumbers, $zerosQtd);
             $product->saveOrFail();
         }
 
     }
 
-    public function genNumbers($qty, $zerosQtd = null)
+    public
+    function genNumbers($qty, $zerosQtd = null)
     {
         $qtdNumbers = $qty;
         $arr = [];
@@ -149,30 +160,34 @@ class ProductService
 
     public function update(Product $product, $request)
     {
-        if ($request->favoritar_rifa && $product->favoritar == 1) {
+        if ($request['favoritar_rifa'] && $product->favoritar == 1) {
             $product->favoritar = 0;
             $product->saveOrFail();
         }
+        $limitRaffle = 10000;
+        if ($product->qtd >= $limitRaffle && $request['tipo_reserva'] != ReservationTypeEnum::Automatic) {
+            throw new UserErrorException("Rifas com mais de $limitRaffle números não podem ser manuais ou mescladas.");
+        }
         $updated = $product->update(
             [
-                'name' => $request->name,
-                'subname' => $request->subname,
-                'price' => $request->price,
-                'status' => $request->status,
-                'expiracao' => $request->expiracao,
-                'parcial' => $request->parcial,
-                'slug' => $request->slug,
+                'name' => $request['name'],
+                'subname' => $request['subname'],
+                'price' => $request['price'],
+                'status' => $request['status'],
+                'expiracao' => $request['expiracao'],
+                'parcial' => $request['parcial'],
+                'slug' => $request['slug'],
                 'user_id' => getSiteOwnerId(),
-                'visible' => $request->visible,
-                'favoritar' => $request->favoritar_rifa,
-                'winner' => $request->cadastrar_ganhador,
-                'draw_date' => date("Y-m-d H:i:s", strtotime($request->data_sorteio)),
-                'maximo' => $request->maximo,
-                'minimo' => $request->minimo,
-                'qtd_ranking' => $request->qtd_ranking,
-                'ganho_afiliado' => $request->ganho_afiliado,
-                'gateway' => $request->gateway,
-                'type_raffles' => $request->tipo_reserva,
+                'visible' => $request['visible'],
+                'favoritar' => $request['favoritar_rifa'],
+                'winner' => $request['cadastrar_ganhador'],
+                'draw_date' => date("Y-m-d H:i:s", strtotime($request['data_sorteio'])),
+                'maximo' => $request['maximo'],
+                'minimo' => $request['minimo'],
+                'qtd_ranking' => $request['qtd_ranking'],
+                'ganho_afiliado' => $request['ganho_afiliado'],
+                'gateway' => $request['gateway'],
+                'type_raffles' => $request['tipo_reserva'],
             ]
         );
         if (!$updated) {
@@ -181,18 +196,20 @@ class ProductService
 
         $productDesc = $product->descriptions()->first();
         if (isset($productDesc['id'])) {
-            $productDesc->description = $request->description;
+            $productDesc->description = $request['description'];
             $productDesc->saveOrFail();
         }
-        $this->updateOrCreatePromos($product, $request->numPromocao, $request->valPromocao);
+        $this->updateOrCreatePromos($product, $request['numPromocao'], $request['valPromocao']);
         $this->updateAutoBuy($product, $request);
         $this->updatePremium($product, $request);
 
         event(new ProductUpdated($product));
-        return true;
+        return $product;
     }
 
-    public function updateOrCreatePromos(Product $product, array $numPromocao, array $valPromocao)
+
+    public
+    function updateOrCreatePromos(Product $product, array $numPromocao, array $valPromocao)
     {
         if ($product->promocoes()->count() === 0) {
             $product->createPromos();
@@ -227,29 +244,29 @@ class ProductService
         }
     }
 
-    public function updateAutoBuy(Product $product, Request $request)
+
+    function updateAutoBuy(Product $product, $productData)
     {
-        foreach ($request->compra as $key => $qtd) {
-            $autoBuy = CompraAutomatica::siteOwner()->whereProductId($product->id)->whereId($key)->first();
+        foreach ($productData['compra'] as $key => $qtd) {
+            $autoBuy = CompraAutomatica::whereProductId($product->id)->whereId($key)->first();
             if (isset($autoBuy['id'])) {
                 $autoBuy->qtd = $qtd;
                 $autoBuy->popular = false;
                 $autoBuy->saveOrFail();
             }
         }
-        if (!empty($request->popularCheck) && $request->popularCheck > 0) {
-            $autoBuy = CompraAutomatica::siteOwner()->whereProductId($product->id)->whereId($request->popularCheck)->first();
+        if (!empty($productData['popularCheck']) && $productData['popularCheck'] > 0) {
+            $autoBuy = CompraAutomatica::whereProductId($product->id)->whereId($productData['popularCheck'])->first();
             if (isset($autoBuy['id'])) {
                 $autoBuy->popular = true;
                 $autoBuy->saveOrFail();
             }
         }
-        // Atualizando mais popular
-
 
     }
 
-    public function updatePremium(Product $product, Request $request)
+
+    function updatePremium(Product $product, Request $request)
     {
         foreach ($product->premios() as $premio) {
             $descPremio = $request->descPremio;
@@ -261,7 +278,8 @@ class ProductService
 
     }
 
-    public function destroyProduct($productId)
+    public
+    function destroyProduct($productId)
     {
 
         $product_delete = Product::getByIdWithSiteCheck($productId);
@@ -279,7 +297,8 @@ class ProductService
 
     }
 
-    public function destroyPhoto($photoId)
+    public
+    function destroyPhoto($photoId)
     {
         $photo = ProductImage::getByIdWithSiteCheckOrFail($photoId);
         $product = Product::getByIdWithSiteCheckOrFail($photo->product_id);
@@ -292,52 +311,9 @@ class ProductService
 
     }
 
-    public function getRaffles(Request $request)
-    {
-        $productData = Product::siteOwner()->whereId($request->idProductURL)->first();
-        if (!isset($productData['id'])) {
-            abort(404);
-        }
-        $rifa = $productData;
-        $numbers = $rifa->numbers();
-        foreach ($rifa->participantes() as $participante) {
-            $statusParticipante = $participante->pagos > 0 ? 'pago' : 'reservado';
-            foreach ($participante->numbers() as $value) {
-                array_push($numbers, $value . '-' . $statusParticipante . '-' . $participante->name);
-            }
-        }
 
-        sort($numbers);
-        $x = 1;
-        foreach ($numbers as $number) {
-            if ($x >= 50) {
-                break;
-            }
-            $bg = '#585858';
-            $ex = explode("-", $number);
-            $number = $ex[0];
-            $status = 'disponivel';
-            if (isset($ex[1])) {
-                $status = $ex[1];
-                $nome = $ex[2];
-            }
-            if ($status == 'disponivel') {
-                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . " product-number-free' onclick=\"selectRaffles('" . $number . "', '" . $number . "')\" id=" . $number . ">" . $number . "</a>";
-            } else if ($status == 'reservado') {
-                $nome = 'Reservado por ' . $nome;
-                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . " product-number-reserved' onclick=\"infoParticipante('" . $nome . "')\" style='background-color: rgb(13,202,240);color: #000;' id=" . $number . ">" . $number . "</a>";
-            } else if ($status == 'pago') {
-                $nome = 'Pago por ' . $nome;
-                $resultRaffles[] = "<a href='javascript:void(0);' class='number filter " . $status . " product-number-paid' onclick=\"infoParticipante('" . $nome . "')\" style='background-color: #28a745;color: #000;' id=" . $number . ">" . $number . "</a>";
-            }
-            $x++;
-        }
-
-
-        return json_encode($resultRaffles);
-    }
-
-    public function getRandomFreeNumbers(Product $product, $qty)
+    public
+    function getRandomFreeNumbers(Product $product, $qty)
     {
         $numbers = explode(",", $product['numbers']);
         $chavesAleatorias = array_rand($numbers, $qty);
@@ -349,10 +325,52 @@ class ProductService
 
     }
 
-    public function getProductQtyCache($productId, $forceUpdate = false)
+
+    public
+    static function processRafflePages(Product $productData)
     {
-
-        return Product::getResumeCache($productId, $forceUpdate);
-
+        $rifa = $productData;
+        $freeNumbers = $rifa->numbers();
+        $pageRows = 100;
+        if ($productData->qtd <= 10000) {
+            $pageRows = 100;
+        } elseif ($productData->qtd <= 100000) {
+            $pageRows = 1000;
+        } elseif ($productData->qtd <= 1000000) {
+            $pageRows = 10000;
+        }
+        foreach ($rifa->participantes() as $participante) {
+            $statusParticipante = $participante->pagos > 0 ? 'pago' : 'reservado';
+            foreach ($participante->numbers() as $value) {
+                $freeNumbers[] = $value . '-' . $statusParticipante . '-' . $participante->name;
+            }
+        }
+        $expiresIn = now()->addMinutes(CacheExpiresInEnum::OneMonth);
+        $pages = [];
+        $pgIndex = 1;
+        foreach (array_chunk($freeNumbers, $pageRows) as $numbers) {
+            $pages[$pgIndex] = view("site.product.number-filter", ['numbers' => $numbers])->render();
+            $cacheKey = CacheKeysEnum::getPaginationPageKey($productData->id, $pgIndex);
+            Cache::store('file')->put($cacheKey, $pages[$pgIndex], $expiresIn);
+            $pgIndex++;
+        }
+        $cacheKey = CacheKeysEnum::getQtyPaginationPageKey($productData->id);
+        Cache::put($cacheKey, $pgIndex, $expiresIn);
+        $cacheKey = CacheKeysEnum::getQtyQtyRowsPerPageKey($productData->id);
+        Cache::put($cacheKey, $pageRows, $expiresIn);
     }
+
+
+    function getPagination($rows, $qtyRows, $perPage, $page)
+    {
+        $paginator = new LengthAwarePaginator(
+            $rows,
+            $qtyRows,
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+        return $paginator->links('vendor.pagination.ajax_bootstrap_4')->toHtml();
+    }
+
 }

@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Enums\CacheKeysEnum;
 use App\Enums\ReservationTypeEnum;
 use App\Exceptions\UserErrorException;
 use App\Models\Cart;
@@ -48,7 +49,17 @@ class CartManagerHelper
         $price = $this->getPrice($newQty);
 
         if (ReservationTypeEnum::Manual == $reservationType) {
-            $this->cartModel->numbers = json_encode(array_merge($this->getCartNumbers(), $qtyOrNumbers));
+            $allowedNumbers = $productResume['free_numbers'];
+            $cartNewItens = [];
+            foreach ($qtyOrNumbers as $item) {
+                if (!in_array($item, $allowedNumbers)) {
+                    throw new UserErrorException("O item '$item' não está disponível.");
+                } else {
+                    $cartNewItens[$item] = $item;
+                }
+            }
+
+            $this->cartModel->numbers = json_encode($this->getMergedNewValues($qtyOrNumbers));
         } else {
             $this->cartModel->random_numbers += $qtyOrNumbers;
         }
@@ -90,7 +101,7 @@ class CartManagerHelper
     private function getNewQty($reservationType, $qtyOrNumbers)
     {
         if ($reservationType == ReservationTypeEnum::Manual) {
-            $numbers = array_merge($this->getCartNumbers(), $qtyOrNumbers);
+            $numbers = $this->getMergedNewValues($qtyOrNumbers);
             return count($numbers) + $this->cartModel->random_numbers;
         } else {
             $newRandom = $this->cartModel->random_numbers + $qtyOrNumbers;
@@ -99,6 +110,21 @@ class CartManagerHelper
 
         }
 
+    }
+
+    private function getMergedNewValues($qtyOrNumbers)
+    {
+        $cartsNumbers = $this->getCartNumbers();
+
+        foreach ($qtyOrNumbers as $number) {
+            if (isset($cartsNumbers[$number])) {
+                unset($cartsNumbers[$number]);
+            } else {
+                $cartsNumbers[$number] = $number;
+            }
+        }
+
+        return $cartsNumbers;
     }
 
     private function checkProductRules($newQty)
@@ -148,18 +174,30 @@ class CartManagerHelper
 
     static function currentCart($productId): Cart
     {
-        $cartKey = 'cart_product_' . $productId;
+        $cartKey = CacheKeysEnum::getCartSessionKey($productId);
         if (Session::exists($cartKey)) {
-            return Cart::where("uuid", Session::get($cartKey))->first();
-        } else {
-            $cart = new Cart();
-            $cart->product_id = $productId;
-            $cart->uuid = Uuid::uuid4();
-            $cart->saveOrFail();
-            Session::put($cartKey, $cart->uuid);
+            $cart = Cart::where("uuid", Session::get($cartKey))->first();
+            if (is_null($cart)) {
+                return self::createCart($productId);
+            }
             return $cart;
+        } else {
+            return self::createCart($productId);
+
 
         }
+
+    }
+
+    public static function createCart($productId)
+    {
+        $cartKey = CacheKeysEnum::getCartSessionKey($productId);
+        $cart = new Cart();
+        $cart->product_id = $productId;
+        $cart->uuid = Uuid::uuid4();
+        $cart->saveOrFail();
+        Session::put($cartKey, $cart->uuid);
+        return $cart;
 
     }
 }

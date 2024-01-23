@@ -43,7 +43,7 @@ class ProductController extends Controller
         $rules = (new SiteProductFastStoreRequest())->rules();
         $update = function () use ($request) {
             $productService = new ProductService();
-            $productService->processAddProduct($request);
+            $productService->processAddProduct($request->all(),$request->file('images'));
             return true;
         };
 

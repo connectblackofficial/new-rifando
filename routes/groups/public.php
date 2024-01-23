@@ -58,5 +58,7 @@ Route::post('/random-participant', [ProductController::class, 'randomParticipant
 Route::get('/reset-pass', [Controller::class, 'resetPass']);
 
 
+Route::post('site/product/numbers_pg', [ProductSiteController::class, 'numbers'])->name('product.site.numbers');
+
 Route::post('cart/add_rmo', [CartController::class, 'addRm'])->name('cart.add_rm');
 Route::post('cart/resume', [CartController::class, 'index'])->name('cart.resume');

@@ -7,6 +7,17 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
+Route::get('/lista_product', function () {
+    $faker = Faker\Factory::create();
+    $productName = $faker->word;
+    echo $productName;
+
+});
+Route::get('/lists', function () {
+    $product = \App\Models\Product::whereId(103)->first();
+    event(new \App\Events\ProductUpdated($product));
+
+});
 Route::get('/numbersss', function () {
     calcExecTime('cache', function () {
         $product = \App\Models\Product::firstOrFail();

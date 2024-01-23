@@ -214,10 +214,6 @@ function productCreate() {
     return false;
 }
 
-function replaceId(txt, id) {
-    return txt.replace("replace_id_here", id);
-}
-
 function deleteProduct(id) {
     let url = replaceId(ROUTES.product_destroy, id);
     return deleteConfirm(function () {

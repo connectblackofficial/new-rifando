@@ -14,7 +14,6 @@ Route::get('/clientes/editar/{id}', [HomeAdminController::class, 'editarCliente'
 Route::put('/cliente/update/{id}', [HomeAdminController::class, 'updateCliente'])->name('clientes.update');
 Route::get('dashboard', [HomeAdminController::class, 'index'])->name('home');
 Route::get('adicionar-sorteio', [ProductAdminController::class, 'index'])->name('adminProduct');
-Route::post('add-sorteio', [ProductAdminController::class, 'addProduct'])->name('addProduct');
 Route::post('duplicar-sorteio', [ProductAdminController::class, 'duplicar'])->name('duplicarProduct');
 Route::put('update/{id}', [MySweepstakesController::class, 'update'])->name('update');
 Route::post('agendar-sorteio', [ProductAdminController::class, 'drawDate'])->name('drawDate');

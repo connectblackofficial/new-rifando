@@ -21,24 +21,34 @@ class UserErrorException extends Exception
         return new self("Pagamento não encontrado;");
 
     }
+
     public static function pixNotFound()
     {
         return new self("PIX não encontrado;");
 
     }
+
     public static function uplaodError()
     {
         return new self("Ocorreu um erro durante o upload.");
 
     }
+
     public static function productNotFound()
     {
         return new self("Produto não encontrado;");
 
     }
+
     public static function deleteFailed()
     {
         return new self("Ocorreu um erro ao deletar o registro.");
+
+    }
+
+    public static function pageNotFound()
+    {
+        return new self("Página não encontrada.");
 
     }
 }

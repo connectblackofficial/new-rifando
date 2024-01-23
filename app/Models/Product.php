@@ -534,16 +534,11 @@ class Product extends Model
         return $this->hasMany(Cart::class, 'product_id', 'id')->get();
     }
 
-    public function getNumbersAsArray()
-    {
-        return implode(",", $this->numbers);
-    }
-
     public static function getResumeCache($productId, $forceUpdate = false)
     {
         $key = "product_resume_3_" . $productId;
         $callBack = function () use ($productId) {
-            $product = Product::siteOwner()->whereId($productId)->firstOrFail();
+            $product = Product::whereId($productId)->firstOrFail();
             $productAsArray = convertToArray($product);
             unset($productAsArray['numbers']);
             return [

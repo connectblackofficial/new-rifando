@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Helpers\CartManagerHelper;
 use App\Models\Cart;
 use App\Rules\ArrayOrIntRule;
-use App\Services\CartService;
 use Illuminate\Http\Request;
 
 class CartController extends Controller

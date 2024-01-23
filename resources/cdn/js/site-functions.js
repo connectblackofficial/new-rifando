@@ -131,154 +131,8 @@ function calPrices() {
 }
 
 function selectRaffles(id, key) {
-    const x = document.getElementById(id);
-
-    if (x.classList[3] == "selected") {
-
-        x.classList.remove("selected");
-
-        numbersManual.splice(numbersManual.indexOf(x.id + '-' + key), 1);
-
-        // document.getElementById('numberSelected').innerHTML = numbersManual;
-        $('#selected-' + x.id).remove()
-        document.getElementById('numberSelectedModal').innerHTML = numbersManual;
-        document.getElementById('numberSelectedInput').value = numbersManual;
-        document.getElementById('qtdManual').value = numbersManual.length;
-        $('#promo').val(0)
-        var lDescontos = JSON.parse(descontos)
-        var percentDesconto = 0;
-
-        lDescontos.forEach(function (i) {
-            if (numbersManual.length >= parseInt(i.numeros)) {
-                percentDesconto = i.desconto
-            }
-        })
-        if (percentDesconto > 0) {
-            total = valuePrices.toString().replace(",", ".") * numbersManual.length - (valuePrices.toString()
-                .replace(",", ".") * numbersManual.length * percentDesconto / 100);
-            totalFomat = total.toLocaleString('pt-br', {
-                style: 'currency',
-                currency: 'BRL'
-            });
-
-            totalPromo = total.toLocaleString('pt-br', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-            });
-
-            // alert(totalPromo);
-            $('#promo').val(totalPromo)
-        } else {
-            $('#promo').val(0)
-            total = valuePrices.toString().replace(",", ".") * numbersManual.length;
-            totalFomat = total.toLocaleString('pt-br', {
-                style: 'currency',
-                currency: 'BRL'
-            });
-        }
-
-        // total = valuePrices.toString().replace(",", ".") * numbersManual.length;
-        // totalFomat = total.toLocaleString('pt-br', {
-        //     style: 'currency',
-        //     currency: 'BRL'
-        // });
-
-        productSetNumbersModal(totalFomat);
-
-        if (numbersManual.length == 0) {
-            if (productData.type_raffles == 'manual') {
-                document.getElementById("payment").style.display = "none";
-                document.getElementById("paymentAutomatic").style.display = "block";
-
-            } else if (productData.type_raffles == 'mesclado') {
-                document.getElementById("payment").style.display = "none";
-                document.getElementById("paymentAutomatic").style.display = "block";
-
-            }
-
-            const value = productData.price;
-
-
-            total = value.toString().replace(",", ".") * 1;
-            totalFomat = total.toLocaleString('pt-br', {
-                style: 'currency',
-                currency: 'BRL'
-            });
-
-            document.getElementById('qtdNumbers').value = 1;
-            document.getElementById('numbersA').value = 1;
-
-
-            productSetNumbersModal(totalFomat);
-
-        }
-    } else {
-        x.classList.add("selected");
-
-        numbersManual.push(x.id + '-' + key);
-
-        var teste = document.createElement('div');
-        var texto = document.createTextNode(x.id);
-        teste.classList = 'number-selected';
-        teste.id = 'selected-' + x.id
-        teste.appendChild(texto)
-        document.getElementById('numberSelected').appendChild(teste)
-
-        document.getElementById('numberSelectedModal').innerHTML = numbersManual;
-        document.getElementById('numberSelectedInput').value = numbersManual;
-        document.getElementById('qtdManual').value = numbersManual.length;
-
-        const productID = productData.id;
-
-        $('#promo').val(0)
-        var lDescontos = JSON.parse(descontos)
-        var percentDesconto = 0;
-
-        lDescontos.forEach(function (i) {
-            if (numbersManual.length >= parseInt(i.numeros)) {
-                percentDesconto = i.desconto
-            }
-        })
-
-        if (percentDesconto > 0) {
-            total = valuePrices.toString().replace(",", ".") * numbersManual.length - (valuePrices.toString()
-                .replace(",", ".") * numbersManual.length * percentDesconto / 100);
-            totalFomat = total.toLocaleString('pt-br', {
-                style: 'currency',
-                currency: 'BRL'
-            });
-
-            totalPromo = total.toLocaleString('pt-br', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-            });
-
-            // alert(totalPromo);
-            $('#promo').val(totalPromo)
-        } else {
-            $('#promo').val(0)
-            total = valuePrices.toString().replace(",", ".") * numbersManual.length;
-            totalFomat = total.toLocaleString('pt-br', {
-                style: 'currency',
-                currency: 'BRL'
-            });
-        }
-
-        //*********************************************//
-        // total = valuePrices.toString().replace(",", ".") * numbersManual.length;
-        // totalFomat = total.toLocaleString('pt-br', {
-        //     style: 'currency',
-        //     currency: 'BRL'
-        // });
-
-        productSetNumbersModal(totalFomat);
-
-        if (idExists('payment')) {
-            document.getElementById("payment").style.display = "";
-
-        }
-
-    }
+    addRm([id]);
+    return false;
 }
 
 function wdm() {
@@ -645,7 +499,6 @@ function productPageTouchStart() {
 }
 
 function lastParticipantsNotifications() {
-    var refInterval = window.setInterval('updateRandomParticipan()', 1000 * 60 * 1); // 30 seconds
 
     var updateRandomParticipan = function () {
         $('#messageIn').fadeIn('fast');
@@ -668,26 +521,14 @@ function lastParticipantsNotifications() {
         }, 2000); // <-- time in milliseconds
     }
     updateRandomParticipan();
+    var refInterval = window.setInterval('updateRandomParticipan()', 1000 * 60 * 1); // 30 seconds
+
 
 }
 
-function getNumbers() {
 
-    $.ajax({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        type: 'POST',
-        dataType: 'json',
-        url: ROUTES.getRafflesAjax,
-        data: {
-            idProductURL: productData.id
-        },
-        success: function (data) {
-            document.getElementById("raffles").innerHTML = data.join('');
-            $("#message-raffles").hide();
-        },
-    });
+function getNumbers() {
+    changeAjaxPage(1);
 
 
 }
@@ -794,6 +635,13 @@ function hasCartId(obj) {
     return false;
 }
 
+function hasTotalPages(obj) {
+    if (obj && obj.data && typeof obj.data.total_pages === 'number') {
+        return true;
+    }
+    return false;
+}
+
 function addRm(qtyOrList) {
     let url = ROUTES.cart_add_rm;
     let data = {
@@ -803,7 +651,7 @@ function addRm(qtyOrList) {
     }
     var callback = function (data) {
         if (hasCartId(data)) {
-            var cartResponseData=data.data;
+            var cartResponseData = data.data;
             $("#payment").html(cartResponseData.view)
             $("#payment").show();
 
@@ -811,4 +659,34 @@ function addRm(qtyOrList) {
         }
     };
     return sendAjaxPostData(url, data, callback);
+}
+
+function processNumberAjaxPageResponse(response) {
+    if (hasTotalPages(response)) {
+        var responseData = response.data;
+        $("#ajax-raffles-content").html(responseData.html_page);
+    }
+}
+
+function changeAjaxPage(page) {
+    let url = ROUTES.product_site_numbers;
+    if (page == 1) {
+        beforeCallback = function () {
+            $("#message-raffles").show();
+        }
+        alwaysCallback = function () {
+            $("#message-raffles").hide();
+        }
+    } else {
+        beforeCallback = false;
+        alwaysCallback = false;
+    }
+    let data = {
+        'product_id': productData.id,
+        'page': page
+    }
+    var callback = function (data) {
+        processNumberAjaxPageResponse(data);
+    };
+    return sendAjaxPostData(url, data, callback, beforeCallback, alwaysCallback);
 }

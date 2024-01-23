@@ -24,9 +24,9 @@ if (isset($imagens[0])) {
         @endsection
     @stop
     @section('content')
-        @include("product.product-site-header")
+        @include("site.product.product-header")
 
-        @include("product.product-site-alerts")
+        @include("site.product.product-alerts")
 
         <div class="container detail">
             <input type="hidden" id="product-name" value="{{ $productModel->name }}">
