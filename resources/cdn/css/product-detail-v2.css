@@ -130,10 +130,11 @@ a.nav-link.active.show {
     text-decoration: none;
     color: #fff !important;
     padding: 8px !important;
-    width: 15% !important;
+    background-color: var(--bs-primary);
+    cursor: pointer;
 }
 
-.number-selected.fazendinha{
+.number-selected.fazendinha {
     width: 25% !important;
 }
 
@@ -160,7 +161,6 @@ a.nav-link.active.show {
     width: 20%;
     text-decoration: none;
     color: #000;
-    background-color: #585858;
     vertical-align: middle;
     border-radius: 6px;
     padding: 10px;
@@ -309,13 +309,12 @@ a.nav-link.active.show {
     color: #000;
 }
 
-.rifa-content{
+.rifa-content {
     background: #e4e4e4;
     margin-top: 40px;
     border-top-right-radius: 20px;
     border-top-left-radius: 20px;
 }
-
 
 
 @keyframes animate {

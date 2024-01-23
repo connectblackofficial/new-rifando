@@ -1,29 +1,26 @@
-
 <div class="modal fade" id="staticBackdrop" data-backdrop="MODA" data-keyboard="false" tabindex="-1"
-    aria-labelledby="staticBackdropLabel" aria-hidden="true" style="z-index: 999999;">
+     aria-labelledby="staticBackdropLabel" aria-hidden="true" style="z-index: 999999;">
     <div class="modal-dialog modal-lg">
         <form action="{{ route('bookProductManualy') }}" id="form-checkout" method="POST">
             {{ csrf_field() }}
             <div class="modal-content" style="border: none;">
                 <div class="modal-header" style="background-color: #939393;color: #fff;">
                     <h5 class="modal-title" id="staticBackdropLabel">FINALIZAR RESERVA</h5>
-                    <button type="button" class="btn btn-link text-white menu-mobile--button pe-0 font-lgg" data-bs-dismiss="modal" aria-label="Fechar"><i class="bi bi-x-circle"></i></button>
+                    <button type="button" class="btn btn-link text-white menu-mobile--button pe-0 font-lgg"
+                            data-bs-dismiss="modal" aria-label="Fechar"><i class="bi bi-x-circle"></i></button>
                 </div>
                 <div class="modal-body" style="background: #efefef;color: #939393;">
-                    @if ($type_raffles == 'manual')
-                        <small class="form-text d-none" style="color: green;"><b>Valor a pagar: <small
-                                    style="font-size: 15px;" id="numberSelectedTotalModal"></small></b></small>
-                    @else
-                        <small class="form-text d-none" style="color: green;"><b>Valor a pagar: <small
-                                    style="font-size: 15px;" id="numberSelectedTotalModal"></small></b></small>
-                    @endif
+                    <small class="form-text d-none" style="color: green;">
+                        <b>Valor a pagar: <small style="font-size: 15px;" id="numberSelectedTotalModal"></small>
+                        </b>
+                    </small>
 
                     <div class="form-group">
                         <input type="hidden" name="tokenAfiliado" value="{{ $tokenAfiliado }}">
                         <div class="row">
                             <div class="col-md-12 d-none">
                                 <div class="numberSelected" id="numberSelectedModal"
-                                    style="overflow-y: auto;width: 190px;"></div>
+                                     style="overflow-y: auto;width: 190px;"></div>
                             </div>
                         </div>
                         @if (str_starts_with($productModel->modo_de_jogo, 'fazendinha'))
@@ -31,9 +28,9 @@
                         @else
                             @if ($type_raffles == 'manual')
                                 <input type="hidden" class="form-control" name="qtdNumbers" id="qtdNumbers"
-                                    value="">
+                                       value="">
                                 <input type="hidden" class="form-control" name="rifaManual" id="qtdNumbers"
-                                    value="1">
+                                       value="1">
                             @else
                                 <input type="hidden" class="form-control" name="qtdNumbers" id="qtdNumbers">
                             @endif
@@ -46,7 +43,7 @@
                     </div>
 
                     <div class="form-group"
-                        style="background-color: #cff4fc;padding: 10px;border-radius: 10px;color: #055160;">
+                         style="background-color: #cff4fc;padding: 10px;border-radius: 10px;color: #055160;">
                         <span>Você está adquirindo <strong id="qtd-checkout">33</strong> cota(s) da ação entre amigos
                             <strong id="rifa-checkout">20 MIL NA CONTA</strong> , seu(s) número(s)
                             sera(ão) gerado(s) assim que concluir a compra.</span>
@@ -55,7 +52,7 @@
                     <div class="form-group d-flex d-none" id="div-customer">
                         <div>
                             <img src="{{ cdnImageAsset('default-user.jpg') }}"
-                                style="width: 70px; height: 70px;border-radius: 10px;">
+                                 style="width: 70px; height: 70px;border-radius: 10px;">
                         </div>
 
                         <div class="ml-2" style="color: #000">
@@ -67,8 +64,8 @@
                     <div class="form-group" id="div-telefone">
                         <label style="color: #000"><strong>Informe seu telefone</strong></label>
                         <input type="text" class="form-control numbermask keydown"
-                            style="background-color: #fff;border: none;color: #333;" name="telephone" id="telephone1"
-                            placeholder="(00) 90000-0000" maxlength="15" required>
+                               style="background-color: #fff;border: none;color: #333;" name="telephone" id="telephone1"
+                               placeholder="(00) 90000-0000" maxlength="15" required>
                         <input type="hidden" name="telephone" id="phone-cliente">
                         <input type="hidden" id="customer" name="customer">
                     </div>
@@ -76,22 +73,23 @@
                     <div class="form-group d-none" id="div-nome">
                         <label style="color: #000"><strong>Nome Completo</strong></label>
                         <input type="text" class="form-control"
-                            style="background-color: #fff;border: none;color: #333;" name="name" id="name"
-                            required>
+                               style="background-color: #fff;border: none;color: #333;" name="name" id="name"
+                               required>
                     </div>
 
                     <div class="form-group" id="div-info"
-                        style="background-color: #fff3cd;padding: 10px;border-radius: 10px;color: #664d03;">
+                         style="background-color: #fff3cd;padding: 10px;border-radius: 10px;color: #664d03;">
                         <span><i class="fas fa-info-circle"></i>&nbsp;<span id="info-footer">Informe seu telefone para
                                 continuar.</span></span>
                     </div>
 
                     <button class="btn btn-block btn-primary" id="btn-checkout-action" onclick="checkCustomer()"
-                        type="button"><strong id="btn-checkout">Continuar</strong></button>
+                            type="button"><strong id="btn-checkout">Continuar</strong></button>
 
                     <center>
                         <button class="btn btn-sm btn-outline-secondary mt-2 d-none" id="btn-alterar"
-                            onclick="clearModal()">Alterar Telefone</button>
+                                onclick="clearModal()">Alterar Telefone
+                        </button>
                     </center>
                     <input type="hidden" id="promo" name="promo">
                 </div>
@@ -101,11 +99,11 @@
 </div>
 
 <script>
-    $('#staticBackdrop').on('hide.bs.modal', function() {
+    $('#staticBackdrop').on('hide.bs.modal', function () {
         clearModal()
     })
 
-    $('input.keydown').on('keydown', function(e) {
+    $('input.keydown').on('keydown', function (e) {
         var code = e.which || e.keyCode;
 
         if (code == 13) {
@@ -115,9 +113,8 @@
     });
 
 
-
     function checkCustomer() {
-        var phone = $('#telephone1').val()
+        var phone = $('#telephone1').val();
         if (phone == null || phone == '') {
             alert('Informe o telefone para continuar!');
             $('#telephone1').focus();
@@ -127,7 +124,6 @@
             $('#telephone1').select();
             return;
         }
-
         loading()
         $.ajax({
             url: "{{ route('getCustomer') }}",
@@ -136,7 +132,7 @@
             data: {
                 "phone": phone,
             },
-            success: function(response) {
+            success: function (response) {
                 loading()
                 if (response.customer == null) {
                     novoCliente(phone);
@@ -144,7 +140,7 @@
                     findCustomer(response.customer)
                 }
             },
-            error: function(error) {
+            error: function (error) {
                 Swal.fire(
                     'Erro Desconhecido!',
                     '',
@@ -208,13 +204,13 @@
 
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
-    style="z-index: 9999999;">
+     style="z-index: 9999999;">
     <div class="modal-dialog">
         <div class="modal-content" style="border: none;">
             <div class="modal-header" style="background-color: #020f1e;">
                 <h5 class="modal-title" id="exampleModalLabel" style="color: #fff;">CONSULTAR RESERVAS</h5>
                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
-                    style="color: #fff;">
+                        style="color: #fff;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -225,9 +221,9 @@
                             {{ csrf_field() }}
                             <input type="hidden" name="productID" value="{{ $productModel->id }}">
                             <input type="text" id="telephone3" name="telephone"
-                                style="background-color: #fff;border: none;color: #000;margin-right:5px;"
-                                aria-describedby="passwordHelpBlock" maxlength="15" placeholder="Celular com DDD"
-                                class="form-control" required>
+                                   style="background-color: #fff;border: none;color: #000;margin-right:5px;"
+                                   aria-describedby="passwordHelpBlock" maxlength="15" placeholder="Celular com DDD"
+                                   class="form-control" required>
                             <button type="submit" class="btn btn-danger">Buscar</button>
                         </form>
                     </div>
@@ -243,7 +239,7 @@
             <div class="modal-header" style="background-color: #020f1e;">
                 <h5 class="modal-title" id="exampleModalLabel" style="color: #fff;">DÚVIDAS FREQUENTES</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"
-                    style="color: #fff;background-color: red!important;">
+                        style="color: #fff;background-color: red!important;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -269,13 +265,13 @@
 
 {{-- Modal Premios --}}
 <div class="modal fade" id="modal-premios" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
-    style="z-index: 9999999;">
+     style="z-index: 9999999;">
     <div class="modal-dialog">
         <div class="modal-content" style="border: none;">
             <div class="modal-header" style="background-color: #020f1e;">
                 <h5 class="modal-title" id="exampleModalLabel" style="color: #fff;">PRÊMIOS</h5>
                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
-                    style="color: #fff;">
+                        style="color: #fff;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -298,36 +294,37 @@
 
 {{-- Modal Ranking Compradores --}}
 <div class="modal fade" id="modal-ranking" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
-    style="z-index: 9999999;">
+     style="z-index: 9999999;">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="border: none;">
             <div class="modal-header" style="background-color: #fff;">
                 <h5 class="modal-title" id="exampleModalLabel" style="color: #000;"><img
-                        src="{{ cdnImageAsset('treofeu.png') }}" alt=""> Top Compradores</h5>
+                            src="{{ cdnImageAsset('treofeu.png') }}" alt=""> Top Compradores</h5>
                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
-                    style="color: #000;">
+                        style="color: #000;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body" style="color: #000" >
+            <div class="modal-body" style="color: #000">
                 <div class="col-md-12 text-center" style="font-weight: 400">
-                    Esses são os maiores compradores no sorteio <strong style="font-weight: 600">{{ $productModel->name }}</strong>
+                    Esses são os maiores compradores no sorteio <strong
+                            style="font-weight: 600">{{ $productModel->name }}</strong>
                 </div>
                 @foreach ($ranking as $key => $rk)
                     <div class="row mt-3" style="font-weight: 400">
                         <div class="col-1 text-center">
                             @if ($key == 0)
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#000"
-                                    viewBox="0 0 16 16" style="width: 30px; height: auto; fill: rgb(255, 193, 7);">
+                                     viewBox="0 0 16 16" style="width: 30px; height: auto; fill: rgb(255, 193, 7);">
                                     <path
-                                        d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5c0 .538-.012 1.05-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33.076 33.076 0 0 1 2.5.5zm.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935zm10.083 3.935a2 2 0 0 0 .72-3.935c-.133 1.59-.388 2.885-.72 3.935zM3.504 1c.007.517.026 1.006.056 1.469.13 2.028.457 3.546.87 4.667C5.294 9.48 6.484 10 7 10a.5.5 0 0 1 .5.5v2.61a1 1 0 0 1-.757.97l-1.426.356a.5.5 0 0 0-.179.085L4.5 15h7l-.638-.479a.501.501 0 0 0-.18-.085l-1.425-.356a1 1 0 0 1-.757-.97V10.5A.5.5 0 0 1 9 10c.516 0 1.706-.52 2.57-2.864.413-1.12.74-2.64.87-4.667.03-.463.049-.952.056-1.469H3.504z">
+                                            d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5c0 .538-.012 1.05-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33.076 33.076 0 0 1 2.5.5zm.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935zm10.083 3.935a2 2 0 0 0 .72-3.935c-.133 1.59-.388 2.885-.72 3.935zM3.504 1c.007.517.026 1.006.056 1.469.13 2.028.457 3.546.87 4.667C5.294 9.48 6.484 10 7 10a.5.5 0 0 1 .5.5v2.61a1 1 0 0 1-.757.97l-1.426.356a.5.5 0 0 0-.179.085L4.5 15h7l-.638-.479a.501.501 0 0 0-.18-.085l-1.425-.356a1 1 0 0 1-.757-.97V10.5A.5.5 0 0 1 9 10c.516 0 1.706-.52 2.57-2.864.413-1.12.74-2.64.87-4.667.03-.463.049-.952.056-1.469H3.504z">
                                     </path>
                                 </svg>
                             @else
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#000"
-                                    viewBox="0 0 16 16" style="width: 22px; height: auto; margin-left: 5px;">
+                                     viewBox="0 0 16 16" style="width: 22px; height: auto; margin-left: 5px;">
                                     <path
-                                        d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5c0 .538-.012 1.05-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33.076 33.076 0 0 1 2.5.5zm.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935zm10.083 3.935a2 2 0 0 0 .72-3.935c-.133 1.59-.388 2.885-.72 3.935zM3.504 1c.007.517.026 1.006.056 1.469.13 2.028.457 3.546.87 4.667C5.294 9.48 6.484 10 7 10a.5.5 0 0 1 .5.5v2.61a1 1 0 0 1-.757.97l-1.426.356a.5.5 0 0 0-.179.085L4.5 15h7l-.638-.479a.501.501 0 0 0-.18-.085l-1.425-.356a1 1 0 0 1-.757-.97V10.5A.5.5 0 0 1 9 10c.516 0 1.706-.52 2.57-2.864.413-1.12.74-2.64.87-4.667.03-.463.049-.952.056-1.469H3.504z">
+                                            d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5c0 .538-.012 1.05-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33.076 33.076 0 0 1 2.5.5zm.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935zm10.083 3.935a2 2 0 0 0 .72-3.935c-.133 1.59-.388 2.885-.72 3.935zM3.504 1c.007.517.026 1.006.056 1.469.13 2.028.457 3.546.87 4.667C5.294 9.48 6.484 10 7 10a.5.5 0 0 1 .5.5v2.61a1 1 0 0 1-.757.97l-1.426.356a.5.5 0 0 0-.179.085L4.5 15h7l-.638-.479a.501.501 0 0 0-.18-.085l-1.425-.356a1 1 0 0 1-.757-.97V10.5A.5.5 0 0 1 9 10c.516 0 1.706-.52 2.57-2.864.413-1.12.74-2.64.87-4.667.03-.463.049-.952.056-1.469H3.504z">
                                     </path>
                                 </svg>
                             @endif
@@ -356,7 +353,7 @@
 
 
 <div class="blob green" id="messageIn"
-    style="position: fixed;
+     style="position: fixed;
 bottom: 15px;
 z-index: 99999;
 color: #fff;

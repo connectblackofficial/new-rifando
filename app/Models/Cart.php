@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 class Cart extends Model
 {
+    use ModelSiteOwnerTrait;
+
     protected $fillable = [
         'product_id', 'participant_id', 'random_numbers', 'uuid', 'numbers', 'total'
     ];

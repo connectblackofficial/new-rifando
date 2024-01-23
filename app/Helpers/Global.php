@@ -293,8 +293,10 @@ function getSiteJsRoutes()
         'getRafflesAjax' => $hasNotParams,
         'cart.add_rm' => $hasNotParams,
         'cart.resume' => $hasNotParams,
-        'product.site.numbers' => $hasNotParams
-
+        'product.site.numbers' => $hasNotParams,
+        'cart.destroy' => $hasNotParams,
+        'site.checkout' => $hasParam,
+        ''
     ];
     return routesToJs($routes);
 }
@@ -321,4 +323,12 @@ function setSiteEnv(Environment $siteEnv)
 {
     Session::put('siteEnv', $siteEnv);
     Session::put('siteOwnerEnv', $siteEnv->user()->firstOrFail());
+}
+
+function checkUserIdSite($userId)
+{
+    if ($userId != getSiteOwnerId()) {
+        throw UserErrorException::pageNotFound();
+    }
+
 }

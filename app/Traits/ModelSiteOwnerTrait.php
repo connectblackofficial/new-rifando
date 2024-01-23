@@ -10,6 +10,11 @@ trait ModelSiteOwnerTrait
 
     }
 
+    public static function getOnlyIdByIdWithSiteCheck($id)
+    {
+        return self::siteOwner()->select("id")->whereId($id)->first();
+    }
+
     public static function getByIdWithSiteCheck($id)
     {
         return self::siteOwner()->whereId($id)->first();

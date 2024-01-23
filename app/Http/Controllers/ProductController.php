@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\AutoMessage;
 use App\Exceptions\UserErrorException;
 use App\GanhosAfiliado;
-use App\Helpers\CartManagerHelper;
 use App\Libs\AsaasLib;
 use App\Libs\MpLib;
 use App\Libs\PaggueLib;
@@ -66,62 +65,6 @@ class ProductController extends Controller
             'productModel' => Product::getByIdWithSiteCheck(4),
             'config' => $config
         ]);
-    }
-
-    public function product($slug, $tokenAfiliado = null)
-    {
-        $productData = Product::siteOwner()->whereSlug($slug)->first();
-        if (!isset($productData['id'])) {
-            abort(404);
-        }
-        $productID = $productData->id;
-        $this->verificaSorteio($productID);
-        $user = getSiteOwnerUser();
-
-        $imagens = $productData->getAllImagesFromCache();
-
-
-        $productDetail = $productData;
-
-
-        $productDescription = $productData->descriptions()->select('description', 'video')->first();
-
-        $productModel = $productData;
-        $cart = CartManagerHelper::currentCart($productData['id']);
-        $config = getSiteConfig();
-        $activePromo = $productModel->promosAtivasFromCache();
-        $arrayProducts = [
-            'tokenAfiliado' => $tokenAfiliado,
-            'imagens' => $imagens,
-            'product' => $productDetail,
-            'productDescription' => $productDescription ? $productDescription->description : '',
-            'productDescriptionVideo' => $productDescription ? $productDescription->video : '',
-            'totalNumbers' => $productModel->qtd,
-            'totalDispo' => $productModel->qtdNumerosDisponiveisFromCache(),
-            'totalReser' => $productModel->qtdNumerosReservadosFromCache(),
-            'totalPago' => $productModel->qtdNumerosPagosFromCache(),
-            'telephone' => $user->telephone,
-            'type_raffles' => $productDetail->type_raffles,
-            'productModel' => $productModel,
-            'ranking' => $productModel->rankingFromCache(),
-            'config' => $config,
-            'activePromos' => $activePromo,
-            'cart' => $cart
-        ];
-
-
-        return view('product-detail', $arrayProducts);
-    }
-
-    public function verificaSorteio($productId)
-    {
-
-        // Verificando se sorteio ja expirou ou se ja foi vendido todas as cotas para finalizar automatico.
-        $product = Product::getByIdWithSiteCheck($productId);
-        if ($product->qtdNumerosDisponiveis() == 0) {
-            $product->status = 'Finalizado';
-            $product->update();
-        }
     }
 
     public function randomParticipant()

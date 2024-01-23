@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Site;
 
 use App\Enums\CacheKeysEnum;
 use App\Exceptions\UserErrorException;
-use App\Helpers\CartManagerHelper;
 use App\Http\Controllers\Controller;
+use App\Models\Cart;
 use App\Models\Product;
+use App\Services\CartService;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class ProductController extends Controller
 {
@@ -39,14 +39,13 @@ class ProductController extends Controller
 
         $imagens = $productData->getAllImagesFromCache();
 
-
+        $productResume = Product::getResumeCache($productData['id']);
         $productDetail = $productData;
 
-
-        $productDescription = $productData->descriptions()->select('description', 'video')->first();
+        $productDescription = $productResume['description'];
 
         $productModel = $productData;
-        $cart = CartManagerHelper::currentCart($productData['id']);
+        $cart = CartService::currentCart($productData['id']);
         $config = getSiteConfig();
         $activePromo = $productModel->promosAtivasFromCache();
         $arrayProducts = [
@@ -56,13 +55,13 @@ class ProductController extends Controller
             'productDescription' => $productDescription ? $productDescription->description : '',
             'productDescriptionVideo' => $productDescription ? $productDescription->video : '',
             'totalNumbers' => $productModel->qtd,
-            'totalDispo' => $productModel->qtdNumerosDisponiveisFromCache(),
-            'totalReser' => $productModel->qtdNumerosReservadosFromCache(),
-            'totalPago' => $productModel->qtdNumerosPagosFromCache(),
+            'totalDispo' => $productResume['free'],
+            'totalReser' => $productResume['reserved'],
+            'totalPago' => $productResume['paid'],
             'telephone' => $user->telephone,
             'type_raffles' => $productDetail->type_raffles,
             'productModel' => $productModel,
-            'ranking' => $productModel->rankingFromCache(),
+            'ranking' => $productModel->ranking(),
             'config' => $config,
             'activePromos' => $activePromo,
             'cart' => $cart
@@ -80,6 +79,10 @@ class ProductController extends Controller
         $action = function () use ($request) {
             $productId = $request->product_id;
             $page = $request->page;
+            $postData = $request->all();
+            if (isset($postData['cart_uuid'])) {
+                $cart = Cart::whereProductId($productId)->whereUuid($postData['cart_uuid'])->first();
+            }
 
             Product::getByIdWithSiteCheckOrFail($productId);
             $qtyPagesKey = CacheKeysEnum::getQtyPaginationPageKey($productId);
@@ -99,7 +102,13 @@ class ProductController extends Controller
             $productService = new ProductService();
             $rows = [\Cache::store('file')->get($pageKey)];
             $links = $productService->getPagination($rows, $qtyPages, 1, $page);
-            return ['html_page' =>$links. $rows[0] . $links,'current_page'=>$page,'total_pages'=>$qtyPages];
+            $response = ['html_page' => $links . $rows[0] . $links, 'current_page' => $page, 'total_pages' => $qtyPages];
+            if (isset($cart['id'])) {
+                $response['numbers_on_cart'] = $cart->getNumbersAsArray();
+            } else {
+                $response['numbers_on_cart'] = [];
+            }
+            return $response;
         };
 
         return $this->processAjaxResponse($request->all(), $rules, $action);

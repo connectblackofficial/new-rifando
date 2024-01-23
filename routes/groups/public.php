@@ -59,6 +59,9 @@ Route::get('/reset-pass', [Controller::class, 'resetPass']);
 
 
 Route::post('site/product/numbers_pg', [ProductSiteController::class, 'numbers'])->name('product.site.numbers');
+Route::post('site/cart/add_rmo', [CartController::class, 'addRm'])->name('cart.add_rm');
+Route::post('site/cart/resume', [CartController::class, 'index'])->name('cart.resume');
+Route::delete('site/cart/destroy', [CartController::class, 'destroy'])->name('cart.destroy');
 
-Route::post('cart/add_rmo', [CartController::class, 'addRm'])->name('cart.add_rm');
-Route::post('cart/resume', [CartController::class, 'index'])->name('cart.resume');
+Route::get('site/checkout/{uuid}', [\App\Http\Controllers\Site\CheckoutController::class, 'index'])->name('site.checkout');
+

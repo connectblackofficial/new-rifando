@@ -536,7 +536,7 @@ class Product extends Model
 
     public static function getResumeCache($productId, $forceUpdate = false)
     {
-        $key = "product_resume_3_" . $productId;
+        $key = "product_resume_4_" . $productId;
         $callBack = function () use ($productId) {
             $product = Product::whereId($productId)->firstOrFail();
             $productAsArray = convertToArray($product);
@@ -548,7 +548,8 @@ class Product extends Model
                 'percentage' => $product->porcentagem(),
                 'promos' => $product->promocoes(),
                 'free_numbers' => $product->getFreeNumbers(),
-                'product' => $productAsArray
+                'product' => $productAsArray,
+                'description'=>$product->descriptions()->select('description', 'video')->first()
             ];
         };
 

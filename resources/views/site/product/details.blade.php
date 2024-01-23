@@ -75,11 +75,16 @@ if (isset($imagens[0])) {
                 const numbersManual = [];
                 const valuePrices = "{{ $product->price }}";
                 const descontos = '{!!$activePromos!!}'
+                const totalOnCart = '{!!$cart->total!!}'
+
                 let total;
                 var avaliableNums = parseInt('{{$totalDispo}}');
                 $(document).ready(function () {
 
                     productDetailPage();
+                    if (totalOnCart > 0) {
+                        showCart();
+                    }
 
                 });
 

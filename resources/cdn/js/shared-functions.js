@@ -6,13 +6,26 @@ function deleteConfirm(callback) {
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Confirmar"
+        confirmButtonText: "Confirmar",
+        cancelButtonText: "Cancelar"
     }).then((result) => {
         if (result.isConfirmed) {
             callback();
         }
     });
     return false;
+}
+
+function errorMsg(msg) {
+    alrtError("Ops!", msg);
+}
+
+function successMsg(msg) {
+    alrtSucess("Sucesso!", msg);
+}
+
+function alertUnkonwnError() {
+    errorMsg("Ocorreu um erro desconhecido.")
 }
 
 function processAjaxError(response) {
@@ -24,9 +37,9 @@ function processAjaxError(response) {
                     alrtConfirm("Ops!", response.error_message[i], response.confirm_redirect);
                 } else {
                     if (Array.isArray(response.error_message[i])) {
-                        alrtError("Ops!", response.error_message[i][0]);
+                        errorMsg(response.error_message[i][0]);
                     } else {
-                        alrtError("Ops!", response.error_message[i]);
+                        errorMsg(response.error_message[i]);
                     }
                 }
                 break;
@@ -48,7 +61,7 @@ function processAjaxSuccess(response) {
     processAjaxError(response);
     if (response.success) {
         if (typeof response.sucess_message != "undefined") {
-            alrtSucess("Sucesso!", response.sucess_message);
+            successMsg(response.sucess_message);
         }
     }
     if (response.redirect) {
@@ -95,7 +108,7 @@ function sendAjaxRequest(url, method, data) {
             processAjaxSuccess(response);
         },
         error: function () {
-            alrtError("Ops!", "Ocorreu um erro desconhecido.");
+            alertUnkonwnError();
             endLoading();
         }
     };
@@ -105,7 +118,7 @@ function sendAjaxRequest(url, method, data) {
     return false;
 }
 
-function sendAjaxData(url, method, formData, callback,beforeCallback,alwaysCallback) {
+function sendAjaxData(url, method, formData, callback, beforeCallback, alwaysCallback) {
     if (beforeCallback && typeof beforeCallback === "function") {
         beforeCallback();
     } else {
@@ -123,10 +136,8 @@ function sendAjaxData(url, method, formData, callback,beforeCallback,alwaysCallb
 
         },
         error: function () {
-            alrtError("Ops!", "Ocorreu um erro desconhecido.");
+            alertUnkonwnError();
 
-        }, always: function () {
-            alert("Aooba")
         }
     };
     $.ajax(ajaxData).always(function () {
@@ -139,12 +150,12 @@ function sendAjaxData(url, method, formData, callback,beforeCallback,alwaysCallb
     return false;
 }
 
-function sendAjaxPostData(url, formData, callback,beforeCallback,alwaysCallback) {
-    return sendAjaxData(url, 'POST', formData, callback,beforeCallback,alwaysCallback)
+function sendAjaxPostData(url, formData, callback, beforeCallback, alwaysCallback) {
+    return sendAjaxData(url, 'POST', formData, callback, beforeCallback, alwaysCallback)
 }
 
-function sendAjaxGetData(url, formData, callback,beforeCallback,alwaysCallback) {
-    return sendAjaxData(url, 'GET', formData, callback,beforeCallback,alwaysCallback)
+function sendAjaxGetData(url, formData, callback, beforeCallback, alwaysCallback) {
+    return sendAjaxData(url, 'GET', formData, callback, beforeCallback, alwaysCallback)
 }
 
 
@@ -152,6 +163,7 @@ function alrt(title, content) {
 
     swal(title, content);
 }
+
 
 function alrtError(title, content) {
     Swal.fire({
@@ -161,9 +173,11 @@ function alrtError(title, content) {
     });
 
 }
+
 function replaceId(txt, id) {
     return txt.replace("replace_id_here", id);
 }
+
 function alrtSucess(title, content) {
     Swal.fire({
         title: title,

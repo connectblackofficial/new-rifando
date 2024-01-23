@@ -436,19 +436,24 @@ img {
     color: #fff !important;
 }
 
-.qty-numbers-zeros-4 a.number {
+.number.on-cart {
+    background-color: var(--bs-primary) !important;
+    color: #fff !important;
+}
+
+.qty-numbers-zeros-4 a.number, .qty-numbers-zeros-4 a.number-selected {
     width: 20% !important;
 }
 
-.qty-numbers-zeros-5 a.number {
+.qty-numbers-zeros-5 a.number,.qty-numbers-zeros-5 a.number-selected {
     width: 20% !important;
 }
 
-.qty-numbers-zeros-6 a.number {
+.qty-numbers-zeros-6 a.number,.qty-numbers-zeros-6 a.number-selected {
     width: 21% !important;
 }
 
-.qty-numbers-zeros-7 a.number {
+.qty-numbers-zeros-7 a.number,.qty-numbers-zeros-7 a.number-selected {
     width: 21% !important;
 }
 
@@ -471,6 +476,7 @@ img {
         display: none;
     }
 }
+
 .body-compra-auto {
     background-color: #fff;
     border: none;
@@ -533,4 +539,48 @@ img {
     color: #fff;
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
+}
+.body-ranking {
+    background-color: #fff;
+    border: none;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.body-ranking.dark {
+    background: #222222;
+}
+
+.title-ranking h5 {
+    color: #000;
+}
+
+.title-ranking span {
+    color: #000;
+}
+
+.title-ranking.dark h5 {
+    color: #fff;
+}
+
+.title-ranking.dark span {
+    color: #fff;
+}
+
+.body-promo {
+    background-color: #fff;
+    border: none;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+.body-promo .bg-success{
+    cursor: pointer;
+}
+
+.body-promo.dark {
+    background: #222222;
+}
+
+.title-promo.dark {
+    color: #fff !important;
 }

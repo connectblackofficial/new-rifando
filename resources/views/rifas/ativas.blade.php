@@ -1,45 +1,5 @@
 <style>
-    .body-ranking {
-        background-color: #fff;
-        border: none;
-        border-radius: 10px;
-        margin-top: 10px;
-    }
 
-    .body-ranking.dark {
-        background: #222222;
-    }
-
-    .title-ranking h5 {
-        color: #000;
-    }
-
-    .title-ranking span {
-        color: #000;
-    }
-
-    .title-ranking.dark h5 {
-        color: #fff;
-    }
-
-    .title-ranking.dark span {
-        color: #fff;
-    }
-
-    .body-promo {
-        background-color: #fff;
-        border: none;
-        border-radius: 10px;
-        margin-top: 20px;
-    }
-
-    .body-promo.dark {
-        background: #222222;
-    }
-
-    .title-promo.dark {
-        color: #fff !important;
-    }
 </style>
 
 {{-- Ranking de compradores (WDM) --}}

@@ -642,6 +642,17 @@ function hasTotalPages(obj) {
     return false;
 }
 
+function processCartResponse(data) {
+    if (hasCartId(data)) {
+        var cartResponseData = data.data;
+        $("#payment").html(cartResponseData.view)
+        $("#payment").show();
+        $("#numbersA").val(cartResponseData.random_numbers);
+        markNumbersOnCart(cartResponseData.numbers)
+    }
+
+}
+
 function addRm(qtyOrList) {
     let url = ROUTES.cart_add_rm;
     let data = {
@@ -650,21 +661,64 @@ function addRm(qtyOrList) {
         'qty_or_list': qtyOrList
     }
     var callback = function (data) {
-        if (hasCartId(data)) {
-            var cartResponseData = data.data;
-            $("#payment").html(cartResponseData.view)
-            $("#payment").show();
-
-            $("#numbersA").val(cartResponseData.random_numbers);
-        }
+        processCartResponse(data);
     };
     return sendAjaxPostData(url, data, callback);
+}
+
+function showCart() {
+    let url = ROUTES.cart_resume;
+    let data = {
+        'product_id': productData.id,
+        'uuid': cartUuid,
+    }
+    var callback = function (data) {
+        processCartResponse(data);
+    };
+    return sendAjaxPostData(url, data, callback);
+}
+
+function destroyCart() {
+    deleteConfirm(function () {
+        processDestroyCart();
+    });
+    return false;
+}
+
+function processDestroyCart() {
+
+    let url = ROUTES.cart_destroy;
+    let data = {
+        'product_id': productData.id,
+        'uuid': cartUuid,
+    }
+    var callback = function (data) {
+        location.reload();
+    };
+    return sendAjaxData(url, 'DELETE', data, callback);
+}
+
+
+function markNumbersOnCart(numbersOnCart) {
+
+    const elementosOnCart = document.querySelectorAll('.on-cart');
+    elementosOnCart.forEach(function (elemento) {
+        elemento.classList.remove('on-cart');
+    });
+
+    for (const k in numbersOnCart) {
+        if (numbersOnCart.hasOwnProperty(k)) {
+            $(`#${k}`).addClass('on-cart')
+        }
+    }
+
 }
 
 function processNumberAjaxPageResponse(response) {
     if (hasTotalPages(response)) {
         var responseData = response.data;
         $("#ajax-raffles-content").html(responseData.html_page);
+        markNumbersOnCart(responseData.numbers_on_cart);
     }
 }
 
@@ -683,10 +737,48 @@ function changeAjaxPage(page) {
     }
     let data = {
         'product_id': productData.id,
-        'page': page
+        'page': page,
+        'cart_uuid': cartUuid
     }
     var callback = function (data) {
         processNumberAjaxPageResponse(data);
     };
     return sendAjaxPostData(url, data, callback, beforeCallback, alwaysCallback);
+}
+function checkCustomer() {
+    var phone = $('#telephone1').val()
+    if (phone == null || phone == '') {
+        alert('Informe o telefone para continuar!');
+        $('#telephone1').focus();
+        return;
+    } else if (phone.length < 15) {
+        alert('Informe um telefone válido!');
+        $('#telephone1').select();
+        return;
+    }
+
+    loading()
+    $.ajax({
+        url: "{{ route('getCustomer') }}",
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            "phone": phone,
+        },
+        success: function (response) {
+            loading()
+            if (response.customer == null) {
+                novoCliente(phone);
+            } else {
+                findCustomer(response.customer)
+            }
+        },
+        error: function (error) {
+            Swal.fire(
+                'Erro Desconhecido!',
+                '',
+                'error'
+            )
+        }
+    })
 }

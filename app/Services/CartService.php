@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Helpers;
+namespace App\Services;
 
 use App\Enums\CacheKeysEnum;
 use App\Enums\ReservationTypeEnum;
@@ -10,7 +10,7 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Session;
 use Ramsey\Uuid\Uuid;
 
-class CartManagerHelper
+class CartService
 {
     private $cartModel;
     private $productResume;
@@ -165,9 +165,10 @@ class CartManagerHelper
             'formated_total' => formatMoney($this->cartModel->total, false),
             'qty_numbers' => $this->cartModel->getNumbersQty(),
             'random_numbers' => $this->cartModel->random_numbers,
-            'numbers' => $this->cartModel->getNumbersAsArray()
+            'numbers' => $this->cartModel->getNumbersAsArray(),
+            "qtd_zeros" => $this->productResume['product']['qtd_zeros']
         ];
-        $cartData['view'] = view("cart.index", $cartData)->render();
+        $cartData['view'] = view("site.cart.index", $cartData)->render();
         return $cartData;
 
     }
@@ -198,6 +199,15 @@ class CartManagerHelper
         $cart->saveOrFail();
         Session::put($cartKey, $cart->uuid);
         return $cart;
+    }
 
+    public static function resetCart($cartModel)
+    {
+        $cart = $cartModel;
+        $productId = $cartModel->product_id;
+        $cartKey = CacheKeysEnum::getCartSessionKey($productId);
+        Session::forget($cartKey);
+        $cart->delete();
+        return self::currentCart($productId);
     }
 }
