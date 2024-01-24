@@ -2,29 +2,30 @@
 
 namespace App\Services;
 
-use App\CompraAutomatica;
 use App\Enums\CacheExpiresInEnum;
 use App\Enums\CacheKeysEnum;
 use App\Enums\FileUploadTypeEnum;
 use App\Enums\PaymentGatewayEnum;
 use App\Enums\ReservationTypeEnum;
-use App\Environment;
 use App\Events\ProductCreated;
 use App\Events\ProductUpdated;
 use App\Exceptions\UserErrorException;
 use App\Helpers\FileUploadHelper;
 use App\Models\Product;
 use App\Models\ProductImage;
-use App\Models\Promocao;
+use App\Models\Promo;
 use App\Models\Raffle;
+use App\Models\ShoppingSuggestion;
+use App\Models\Site;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
+use Ramsey\Uuid\Uuid;
 
 class ProductService
 {
-    /** @var Environment $siteConfig */
+    /** @var Site $siteConfig */
     private $siteConfig;
 
 
@@ -98,6 +99,7 @@ class ProductService
     function create(array $productData): Product
     {
         return Product::create([
+            'uuid' => Uuid::uuid4(),
             'name' => $productData['name'],
             'subname' => $productData['subname'],
             'price' => $productData['price'],
@@ -211,7 +213,7 @@ class ProductService
     public
     function updateOrCreatePromos(Product $product, array $numPromocao, array $valPromocao)
     {
-        if ($product->promocoes()->count() === 0) {
+        if ($product->promos()->count() === 0) {
             $product->createPromos();
         } else {
             // atualizando promocao
@@ -231,7 +233,7 @@ class ProductService
                 } else {
                     $valorComDesconto = $total;
                 }
-                $promo = Promocao::where('product_id', '=', $product['id'])->where('ordem', '=', $i)->first();
+                $promo = Promo::where('product_id', '=', $product['id'])->where('ordem', '=', $i)->first();
                 if (isset($promo['id'])) {
                     $promo->qtdNumeros = $numPromocao[$i];
                     $promo->desconto = $desconto;
@@ -248,7 +250,7 @@ class ProductService
     function updateAutoBuy(Product $product, $productData)
     {
         foreach ($productData['compra'] as $key => $qtd) {
-            $autoBuy = CompraAutomatica::whereProductId($product->id)->whereId($key)->first();
+            $autoBuy = ShoppingSuggestion::whereProductId($product->id)->whereId($key)->first();
             if (isset($autoBuy['id'])) {
                 $autoBuy->qtd = $qtd;
                 $autoBuy->popular = false;
@@ -256,7 +258,7 @@ class ProductService
             }
         }
         if (!empty($productData['popularCheck']) && $productData['popularCheck'] > 0) {
-            $autoBuy = CompraAutomatica::whereProductId($product->id)->whereId($productData['popularCheck'])->first();
+            $autoBuy = ShoppingSuggestion::whereProductId($product->id)->whereId($productData['popularCheck'])->first();
             if (isset($autoBuy['id'])) {
                 $autoBuy->popular = true;
                 $autoBuy->saveOrFail();
@@ -268,7 +270,7 @@ class ProductService
 
     function updatePremium(Product $product, Request $request)
     {
-        foreach ($product->premios() as $premio) {
+        foreach ($product->prizeDraws() as $premio) {
             $descPremio = $request->descPremio;
             if (isset($descPremio[$premio->ordem])) {
                 $premio->descricao = $descPremio[$premio->ordem];
@@ -339,7 +341,7 @@ class ProductService
         } elseif ($productData->qtd <= 1000000) {
             $pageRows = 10000;
         }
-        foreach ($rifa->participantes() as $participante) {
+        foreach ($rifa->participants() as $participante) {
             $statusParticipante = $participante->pagos > 0 ? 'pago' : 'reservado';
             foreach ($participante->numbers() as $value) {
                 $freeNumbers[] = $value . '-' . $statusParticipante . '-' . $participante->name;

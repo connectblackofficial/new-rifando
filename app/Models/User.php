@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use App\Enums\UserRolesEnum;
-use App\Environment;
-use App\GanhosAfiliado;
 use App\Traits\ModelAcessControllTrait;
 use App\Traits\ModelSearchTrait;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -35,7 +33,7 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $fillable = ['name', 'telephone', 'status', 'role', 'afiliado', 'pix', 'cpf', 'email', 'password'];
+    protected $fillable = ['name','uuid', 'telephone', 'status', 'role', 'afiliado', 'pix', 'cpf', 'email', 'password'];
 
     protected $hidden = [
         'password', 'remember_token',
@@ -61,7 +59,7 @@ class User extends Authenticatable
         if ($this->afiliado == false) {
             return 0;
         } else {
-            $total = GanhosAfiliado::where('afiliado_id', '=', $this->id)->sum('valor');
+            $total = AffiliateEarning::where('afiliado_id', '=', $this->id)->sum('valor');
 
             return $total;
         }
@@ -70,7 +68,7 @@ class User extends Authenticatable
     public function getUserSitesIds()
     {
         $ids = [];
-        foreach (Environment::select("id")->where("user_id", $this->id)->get() as $env) {
+        foreach (Site::select("id")->where("user_id", $this->id)->get() as $env) {
             $ids[] = $env->id;
         }
         return $ids;

@@ -131,7 +131,9 @@ function sendAjaxData(url, method, formData, callback, beforeCallback, alwaysCal
         dataType: "json",
         cache: false,
         success: function (response) {
+
             callback(response)
+
             processAjaxError(response);
 
         },
@@ -281,4 +283,7 @@ function isValidDate(dateString) {
 
     // Verifica se o timestamp é um número e se a data é futura
     return !isNaN(timestamp) && new Date(timestamp) <= new Date();
+}
+function completeCheckout(){
+
 }

@@ -44,7 +44,7 @@ class LiberarReservasExpiradas extends Command
         
         foreach ($reservas as $reserva) {
             $rifa = $reserva->rifa();
-            $participante = $reserva->participante();
+            $participante = $reserva->participant();
 
             $criacao = date('Y-m-d H:i:s', strtotime($participante->created_at));
             $minutosExpiracao = $rifa->expiracao;

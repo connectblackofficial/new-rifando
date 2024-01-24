@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\GanhosAfiliado;
+use App\Models\AffiliateEarning;
+use App\Models\AffiliateRaffle;
+use App\Models\AffiliateWithdrawalRequest;
 use App\Models\Product;
 use App\Models\User;
-use App\RifaAfiliado;
-use App\SolicitacaoAfiliado;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -39,11 +39,11 @@ class AfiliadoController extends Controller
 
 
         foreach ($rifas as $rifa) {
-            $afiliado = RifaAfiliado::siteOwner()->where('product_id', '=', $rifa->id)->where('afiliado_id', '=', $user->id)->get();
+            $afiliado = AffiliateRaffle::siteOwner()->where('product_id', '=', $rifa->id)->where('afiliado_id', '=', $user->id)->get();
 
             if ($afiliado->count() > 0) {
                 $rifa->checkAfiliado = true;
-                $af = RifaAfiliado::siteOwner()->where('product_id', '=', $rifa->id)->where('afiliado_id', '=', $user->id)->first();
+                $af = AffiliateRaffle::siteOwner()->where('product_id', '=', $rifa->id)->where('afiliado_id', '=', $user->id)->first();
                 $rifa->getAfiliadoToken = $af->token;
 
             } else {
@@ -123,7 +123,7 @@ class AfiliadoController extends Controller
 
     public function pagamentos()
     {
-        $ganhos = GanhosAfiliado::select('ganhos_afiliados.*')
+        $ganhos = AffiliateEarning::select('ganhos_afiliados.*')
             ->join('participant', 'participant.id', '=', 'ganhos_afiliados.participante_id')
             ->where('afiliado_id', '=', Auth::user()->id)
             ->where('participant.pagos', '>', 0)
@@ -143,7 +143,7 @@ class AfiliadoController extends Controller
 
     public function afiliar($idRifa)
     {
-        RifaAfiliado::create([
+        AffiliateRaffle::create([
             'product_id' => $idRifa,
             'afiliado_id' => Auth::user()->id,
             'token' => uniqid(),
@@ -158,17 +158,17 @@ class AfiliadoController extends Controller
         try {
             $afiliadoId = Auth::user()->id;
 
-            $ganhosPendentes = GanhosAfiliado::siteOwner()->where('afiliado_id', '=', $afiliadoId)->where('solicitacao_id', '=', null)->sum('valor');
+            $ganhosPendentes = AffiliateEarning::siteOwner()->where('afiliado_id', '=', $afiliadoId)->where('solicitacao_id', '=', null)->sum('valor');
             if ($ganhosPendentes == 0) {
                 return back()->withErrors('Você não tem nenhum valor disponível para saque!');
             }
 
-            $solicitacao = SolicitacaoAfiliado::create([
+            $solicitacao = AffiliateWithdrawalRequest::create([
                 'afiliado_id' => $afiliadoId,
                 'user_id' => getSiteOwnerId()
             ]);
 
-            GanhosAfiliado::siteOwner()->where('afiliado_id', '=', $afiliadoId)->update([
+            AffiliateEarning::siteOwner()->where('afiliado_id', '=', $afiliadoId)->update([
                 'solicitacao_id' => $solicitacao->id
             ]);
 

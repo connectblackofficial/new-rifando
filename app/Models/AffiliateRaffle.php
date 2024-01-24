@@ -1,11 +1,11 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class RifaAfiliado extends Model
+class AffiliateRaffle extends Model
 {
     use ModelSiteOwnerTrait;
 

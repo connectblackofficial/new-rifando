@@ -7,12 +7,12 @@ use App\Enums\FileUploadTypeEnum;
 use App\Exceptions\UserErrorException;
 use App\Helpers\FileUploadHelper;
 use App\Http\Requests\SiteProductStoreRequest;
-use App\Models\Premio;
+use App\Models\PrizeDraw;
 use App\Models\Product;
 use App\Models\Product as ModelsProduct;
 use App\Models\ProductDescription;
 use App\Models\ProductImage;
-use App\Models\Promocao;
+use App\Models\Promo;
 use App\Models\Raffle;
 use App\Services\ProductService;
 use Carbon\Carbon;
@@ -276,6 +276,7 @@ dd($request->file('images'));
 
         $product = DB::table('products')->insertGetId(
             [
+
                 'name' => $request->name,
                 'subname' => $rifa->subname,
                 'price' => $request->price,
@@ -296,9 +297,9 @@ dd($request->file('images'));
             ]
         );
 
-        // criando as promocoes
-        foreach ($rifa->promocoes() as $promocao) {
-            Promocao::create([
+        // criando as promos
+        foreach ($rifa->promos()->get() as $promocao) {
+            Promo::create([
                 'qtdNumeros' => $promocao->qtdNumeros,
                 'desconto' => $promocao->desconto,
                 'valor' => $promocao->valor,
@@ -307,8 +308,8 @@ dd($request->file('images'));
         }
 
         // Premios
-        foreach ($rifa->premios() as $premio) {
-            Premio::create([
+        foreach ($rifa->prizeDraws() as $premio) {
+            PrizeDraw::create([
                 'product_id' => $product,
                 'ordem' => $premio->id,
                 'descricao' => $premio->descricao,

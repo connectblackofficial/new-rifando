@@ -1,12 +1,11 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
-use App\Models\User;
 use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class SolicitacaoAfiliado extends Model
+class AffiliateWithdrawalRequest extends Model
 {
     use ModelSiteOwnerTrait;
 
@@ -16,14 +15,14 @@ class SolicitacaoAfiliado extends Model
         'user_id'
     ];
 
-    public function afiliado()
+    public function affiliate()
     {
         return $this->hasOne(User::class, 'id', 'afiliado_id')->first();
     }
 
-    public function valor()
+    public function value()
     {
-        $total = GanhosAfiliado::where('solicitacao_id', '=', $this->id)->sum('valor');
+        $total = AffiliateEarning::where('solicitacao_id', '=', $this->id)->sum('valor');
 
         return $total;
 

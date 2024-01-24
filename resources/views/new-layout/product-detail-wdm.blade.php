@@ -441,7 +441,7 @@
                         <h1 class="mt-3" id="ganhadores">
                             🎉 Ganhadores
                         </h1>
-                        @foreach ($productModel->premios()->where('descricao', '!=', '') as $premio)
+                        @foreach ($productModel->prizeDraws()->where('descricao', '!=', '') as $premio)
                             <div class="row mt-2 ">
                                 <div class="col-md-4">
                                     <label><strong>Prêmio {{ $premio->ordem }}:
@@ -488,7 +488,7 @@
                     @endif
 
                     {{-- Promoções --}}
-                    @if ($productModel->promocoes()->where('qtdNumeros', '>', 0)->count() > 0)
+                    @if ($productModel->promos()->where('qtdNumeros', '>', 0)->count() > 0)
                         <div class="card" style="border: none;border-radius: 10px;background-color: transparent;">
                             <div class="card-body"
                                 style="background-color: #f1f1f1;border: none;border-radius: 10px;margin-top: 20px;">
@@ -500,7 +500,7 @@
                                     </h1>
                                 </div>
                                 <div class="row">
-                                    @foreach ($productModel->promocoes()->where('qtdNumeros', '>', 0) as $promo)
+                                    @foreach ($productModel->promos()->where('qtdNumeros', '>', 0) as $promo)
                                         <div class="col-6" style="margin-bottom: 8px;" data-toggle="modal"
                                             data-target="#staticBackdrop"
                                             onclick="addQtd('{{ $promo->qtdNumeros }}', '{{ $promo->valorFormatted() }}')">
@@ -972,7 +972,7 @@
                         Estes são os prêmios disponíveis no sorteio <strong>{{ $productModel->name }}</strong>
                     </div>
                     <hr>
-                    @foreach ($productModel->premios()->where('descricao', '!=', '') as $premio)
+                    @foreach ($productModel->prizeDraws()->where('descricao', '!=', '') as $premio)
                         <div class="row mt-4">
                             <div class="col-md-12 text-center">
                                 <label><strong>Prêmio {{ $premio->ordem }}: </strong>{{ $premio->descricao }}</label>

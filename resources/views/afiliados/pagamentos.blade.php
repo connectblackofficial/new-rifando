@@ -79,7 +79,7 @@
                     @foreach ($ganhos as $ganho)
                         <tr>
                             <td>{{ $ganho->id }}</td>
-                            <td>{{ $ganho->participante()->name }}</td>
+                            <td>{{ $ganho->participant()->name }}</td>
                             <td>{{ $ganho->rifa()->name }}</td>
                             <td>{{ number_format($ganho->valor)}}</td>
                             <td>{!! $ganho->status() !!}</td>

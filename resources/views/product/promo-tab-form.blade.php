@@ -1,6 +1,6 @@
 <?php
 if (isset($product['id'])) {
-    $promos = $product->promocoes();
+    $promos = $product->promos();
 }
 if (!isset($product['id']) || !isset($promos) || count($promos) == 0) {
     for ($i = 1; $i <= 4; $i++) {

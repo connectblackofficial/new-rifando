@@ -2,10 +2,8 @@
 
 namespace App\Http\Middleware;
 
-use App\Enums\UserRolesEnum;
-use App\Environment;
+use App\Models\Site;
 use Closure;
-use Illuminate\Support\Facades\Auth;
 
 class SubdomainMiddleware
 {
@@ -22,7 +20,7 @@ class SubdomainMiddleware
             abort(404);
         }
         $host = $_SERVER['HTTP_HOST'];
-        $siteEnv = Environment::where('subdomain', $host)->where("active", 1)->first();
+        $siteEnv = Site::where('subdomain', $host)->where("active", 1)->first();
         if (!isset($siteEnv['id'])) {
             abort(404);
         }

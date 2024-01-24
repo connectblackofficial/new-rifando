@@ -82,7 +82,7 @@
                 style="background-image: url('{{ cdnImageAsset('bixos/' . $numero->number . '.png') }}'); background-size: 100%;background-repeat: no-repeat">
             </div>
         @else
-            <div title="{{ $numero->status }} por {{ $numero->participante()->name }}" onclick="info('{{ $numero->status }} por {{ $numero->participante()->name }}')" class="grupo-fazendinha {{ 'fazenda-'. $numero->statusFormated() }}" data-grupo="{{ $numero->grupoFazendinha() }}" id="{{ $numero->number }}"
+            <div title="{{ $numero->status }} por {{ $numero->participant()->name }}" onclick="info('{{ $numero->status }} por {{ $numero->participant()->name }}')" class="grupo-fazendinha {{ 'fazenda-'. $numero->statusFormated() }}" data-grupo="{{ $numero->grupoFazendinha() }}" id="{{ $numero->number }}"
                 style="background-image: url('{{ cdnImageAsset('bixos/' . $numero->number . '.png') }}'); background-size: 100%;background-repeat: no-repeat">
                 <div class="{{ $numero->statusFormated() }}"></div>
             </div>

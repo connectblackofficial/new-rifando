@@ -1,22 +1,23 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
-use App\Models\Participant;
 use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class AutoMessage extends Model
+class WhatsappMessage extends Model
 {
     use ModelSiteOwnerTrait;
-
     protected $fillable = [
-        'identificador',
-        'descricao',
-        'destinatario',
+        'titulo',
         'msg',
         'user_id'
     ];
+
+    public function clearBreak()
+    {
+        return str_replace("<br />", "", $this->msg);
+    }
 
     public function getMessage(Participant $participante)
     {
@@ -43,6 +44,35 @@ class AutoMessage extends Model
         }
 
         return $message;
+    }
+
+    public function generateLink(Participant $participante)
+    {
+        $variaveis = [
+            'id',
+            'nome',
+            'valor',
+            'total',
+            'cotas',
+            'sorteio',
+            'link'
+        ];
+
+        $link = $participante->linkWpp();
+
+        $link .= '&text=' . $this->msg;
+
+        $link = str_replace("<br />", "%0A", $link);
+
+        foreach ($variaveis as $variavel) {
+            $replace = $this->replaceKey($variavel, $participante);
+
+            $var = "{" . $variavel . "}";
+
+            $link = str_replace($var, $replace, $link);
+        }
+
+        return $link;
     }
 
     public function replaceKey($key, Participant $participante)

@@ -27,7 +27,7 @@ class PaymentService
 
     public function confirmPixPayment(PaymentPix $pixPayment)
     {
-        $participant = $pixPayment->participante();
+        $participant = $pixPayment->participant();
         $this->confirmPayment($participant);
         $pixPayment->status = "Aprovado";
         $pixPayment->saveOrFail();

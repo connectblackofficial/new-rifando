@@ -56,9 +56,9 @@
                             <tbody>
                                 @foreach ($solicitacoes as $solicitacao)
                                     <tr>
-                                        <td>{{ $solicitacao->afiliado()->name }}</td>
-                                        <td>{{ $solicitacao->afiliado()->pix }}</td>
-                                        <td>{{ number_format($solicitacao->valor())}}</td>
+                                        <td>{{ $solicitacao->affiliate()->name }}</td>
+                                        <td>{{ $solicitacao->affiliate()->pix }}</td>
+                                        <td>{{ number_format($solicitacao->value())}}</td>
                                         <td>{!! $solicitacao->status() !!}</td>
                                         <td>
                                             <div class="dropdown">

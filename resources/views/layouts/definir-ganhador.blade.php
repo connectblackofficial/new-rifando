@@ -6,7 +6,7 @@
     @csrf
     <input type="hidden" name="idRifa" value="{{ $rifa->id }}">
     <div class="row">
-        @foreach ($rifa->premios()->where('descricao', '!=', '') as $premio)
+        @foreach ($rifa->prizeDraws()->where('descricao', '!=', '') as $premio)
             <div class="col-md-12 mt-2">
                 <div class="input-group">
                     <div class="input-group-prepend">

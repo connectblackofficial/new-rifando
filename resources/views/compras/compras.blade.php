@@ -61,9 +61,9 @@
 
             <div class="col-md-12 text-center">
                 <h3>{{ $rifa->name }}</h3>
-                <h4>Participantes: {{ $rifa->participantes()->groupBy('customer_id')->count() }}</h4>
-                <h4>Total de Cotas: {{ $rifa->participantes()->sum('pagos') }}</h4>
-                <h4>Total: {{ formatMoney($rifa->participantes()->where('pagos', '>', 0)->sum('valor'))}}</h4>
+                <h4>Participantes: {{ $rifa->participants()->groupBy('customer_id')->count() }}</h4>
+                <h4>Total de Cotas: {{ $rifa->participants()->sum('pagos') }}</h4>
+                <h4>Total: {{ formatMoney($rifa->participants()->where('pagos', '>', 0)->sum('valor'))}}</h4>
             </div>
         </div>
 

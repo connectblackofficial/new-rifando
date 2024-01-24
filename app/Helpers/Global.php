@@ -1,9 +1,8 @@
 <?php
 
-use App\Environment;
 use App\Exceptions\UserErrorException;
+use App\Models\Site;
 use App\Models\User;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
 
 function getCrudData($crudName, $viewName, $routeGroup)
@@ -63,6 +62,19 @@ function getYesNoArr()
     return ['0' => 'no', '1' => 'yes'];
 }
 
+function phoneField($name, $label = "", $currentData = [])
+{
+    $fieldValue = "";
+    if (isset($currentData[$name])) {
+        $fieldValue = $currentData[$name];
+    }
+    if (empty($label)) {
+        $label = "Celular";
+    }
+
+    return view('crud.fields.phone-input', ['name' => $name, 'label' => $label, 'fieldValue' => $fieldValue])->render();
+}
+
 function inputField($name, $type, $currentData = [], $attrs = [])
 {
     $fieldValue = "";
@@ -70,6 +82,12 @@ function inputField($name, $type, $currentData = [], $attrs = [])
         $fieldValue = $currentData[$name];
     }
     return view('crud.fields.input', ['attrs' => $attrs, 'fieldValue' => $fieldValue, 'name' => $name, 'type' => $type, 'currentData' => $currentData])->render();
+}
+
+function inputText($name, $currentData = [], $attrs = [])
+{
+    $type = "text";
+    return inputField($name, $type, $currentData, $attrs);
 }
 
 function itemRowView($formatFieldsFn, $item, $index)
@@ -222,7 +240,7 @@ function getSiteOwnerUser()
 
 
 /**
- * @return Environment
+ * @return Site
  */
 function getSiteConfig()
 {
@@ -296,7 +314,7 @@ function getSiteJsRoutes()
         'product.site.numbers' => $hasNotParams,
         'cart.destroy' => $hasNotParams,
         'site.checkout' => $hasParam,
-        ''
+        "getCustomer"=>$hasNotParams
     ];
     return routesToJs($routes);
 }
@@ -319,7 +337,7 @@ function formatMoney($val, $showCurrency = true)
     }
 }
 
-function setSiteEnv(Environment $siteEnv)
+function setSiteEnv(Site $siteEnv)
 {
     Session::put('siteEnv', $siteEnv);
     Session::put('siteOwnerEnv', $siteEnv->user()->firstOrFail());

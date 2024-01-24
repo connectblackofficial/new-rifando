@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
         Carbon::setLocale('pt_BR');
 
         view()->composer('*', function ($view) use ($auth) {
-            $social = DB::table('consulting_environments')->where('id', 2)->first();
+            $social = DB::table('sites')->where('id', 2)->first();
             $user = User::find(23);
             $view->with('data', [
                 'social' => @$social,

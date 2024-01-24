@@ -1,15 +1,15 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class CompraAutomatica extends Model
+class ShoppingSuggestion extends Model
 {
     use ModelSiteOwnerTrait;
 
-    protected $table = 'compras_automaticas';
+    protected $table = 'shopping_suggestions';
 
     protected $fillable = [
         'product_id',

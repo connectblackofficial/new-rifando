@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Site;
 
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CompleteCheckoutRequest;
+use App\Http\Requests\GetCustomerRequest;
 use App\Models\Cart;
+use App\Models\Customer;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -23,8 +26,29 @@ class CheckoutController extends Controller
             'product' => $productResume['product'],
             'cart' => $cart,
             'numbers' => $cart->getNumbersAsArray(),
-            'qtd_zeros'=>$productData['qtd_zeros']
+            'qtd_zeros' => $productData['qtd_zeros'],
+            'config' => getSiteConfig()
         ];
         return view("site.checkout.index", $pageData);
+    }
+
+    public function step1(Request $request)
+    {
+        $rules = [
+            'cart_uuid' => 'required',
+            'phone' => 'required|min:8|max:15'
+        ];
+    }
+
+    public function completeCheckout(Request $request)
+    {
+
+        $rules = (new CompleteCheckoutRequest())->rules(getSiteConfig(), $request->customer_id);
+        $action = function () use ($request) {
+            $customer = Customer::siteOwner()->where('telephone', $request->phone)->first();
+            $response['customer'] = $customer;
+            return $response;
+        };
+        return $this->processAjaxResponse(['phone' => $request->phone], $rules, $action, true);
     }
 }

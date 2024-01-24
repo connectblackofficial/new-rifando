@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Site;
 
+use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Rules\ArrayOrIntRule;
 use App\Services\CartService;
@@ -35,8 +36,8 @@ class CartController extends Controller
     private function getBasicRules()
     {
         return [
-            'product_id' => 'required|integer',
-            'uuid' => 'required'
+            'product_uuid' => config("constants.product_uuid_rule"),
+            'cart_uuid' => config("constants.cart_uuid")
         ];
     }
 

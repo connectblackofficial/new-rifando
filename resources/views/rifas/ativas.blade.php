@@ -27,7 +27,7 @@
 @endif --}}
 
 {{-- Promoções --}}
-@if ($productModel->promocoes()->where('qtdNumeros', '>', 0)->count() > 0)
+@if ($productModel->promos()->where('qtdNumeros', '>', 0)->count() > 0)
     <div class="" style="">
         <h5 class="mt-1 title-promo {{ $config->tema }}">
             📣 Promoção
@@ -38,7 +38,7 @@
     <div class="card" style="border: none;border-radius: 10px;background-color: transparent; margin-top: -15px;">
         <div class="card-body body-promo {{ $config->tema }}">
             <div class="row">
-                @foreach ($productModel->promocoes()->where('qtdNumeros', '>', 0) as $promo)
+                @foreach ($productModel->promos()->where('qtdNumeros', '>', 0) as $promo)
                     @if ($productModel->type_raffles == 'manual')
                         <div class="col-6" style="margin-bottom: 8px;" onclick="infoPromo()">
                             <div class="bg-success" style="color: #fff;text-align: center;border-radius:6px;"><strong>

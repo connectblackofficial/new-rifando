@@ -18,7 +18,7 @@ class Raffle extends Model
         return $this->hasOne(Product::class, 'id', 'product_id')->first();
     }
 
-    public function participante()
+    public function participant()
     {
         return $this->hasOne(Participant::class, 'id', 'participant_id')->first();
     }

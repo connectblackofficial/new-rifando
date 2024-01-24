@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
             'password' => bcrypt('admin123@@#'),
         ]);
 
-        DB::table('consulting_environments')->insert([
+        DB::table('sites')->insert([
             [
                 'name' => 'Rifa Online',
                 'facebook' => 'teste',

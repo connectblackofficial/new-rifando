@@ -217,6 +217,7 @@ $subDomain = explode('.', request()->getHost());
 <script>
 
 </script>
+@include("site.layouts.modal-url")
 <script src="{{cdnAsset("js/site-footer-bundle.min.js")}}"></script>
 <script>
     $(document).ready(function () {

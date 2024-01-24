@@ -3,7 +3,7 @@
            id="popularCheck-{{ $product->id }}"
            value="{{ $product->getCompraMaisPopularFromCache() }}">
 
-    @foreach ($product->comprasAutoFromCache() as $compra)
+    @foreach ($product->shoppingSuggestionFromCache() as $compra)
         @if($compra->qty>0)
             <div class="col-md-6 mt-2">
                 <div class="input-group">

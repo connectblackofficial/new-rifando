@@ -64,7 +64,7 @@ class UpdateOldRaffles extends Command
                 
             }
 
-            foreach ($rifa->participantes() as $participante) {
+            foreach ($rifa->participants() as $participante) {
                 $arr = [];
 
                 $participanteNumbers = Raffle::where('participant_id', '=', $participante->id)->get();

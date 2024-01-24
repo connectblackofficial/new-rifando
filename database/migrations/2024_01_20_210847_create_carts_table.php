@@ -17,6 +17,7 @@ class CreateCartsTable extends Migration
             $table->bigIncrements('id');
             $table->integer('product_id')->unsigned();
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade')->onUpdate('cascade');
+
             $table->integer("random_numbers")->default(0);
             $table->json("numbers")->nullable();
             $table->decimal("total", 10)->default(0);

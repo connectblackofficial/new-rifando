@@ -49,7 +49,7 @@ class ExpiradasMiddleware
             }
         }
 
-        // $codeKeyPIX = DB::table('consulting_environments')
+        // $codeKeyPIX = DB::table('sites')
         //     ->select('key_pix')
         //     ->where('user_id', '=', getSiteOwner())
         //     ->first();

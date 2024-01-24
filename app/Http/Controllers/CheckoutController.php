@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Participant;
 use App\Models\PaymentPix;
-use App\Models\Premio;
+use App\Models\PrizeDraw;
 use App\Models\Product;
 use App\Models\Raffle;
 use App\Services\PaymentService;
@@ -73,7 +73,7 @@ class CheckoutController extends Controller
         $config = getSiteConfig();
 
         $products = Product::siteOwner()->isVisible()->orderBy('id', 'desc')->get();
-        $ganhadores = Premio::siteOwner()->winners()->get();
+        $ganhadores = PrizeDraw::siteOwner()->winners()->get();
 
         // $rifaDestaque = Product::where('status', '=', 'Ativo')->where('visible', '=', 1)->where('favoritar', '=', 1)->orderBy('id', 'desc')->first();
 
@@ -98,10 +98,8 @@ class CheckoutController extends Controller
             'telephoneConsulting' => $userOwner,
             'countRaffles' => $request->countRaffles,
             'priceUnic' => $request->priceUnic,
-            'codePIX' => $request->codePIX,
             'qrCode' => $request->qrCode,
             'codePIXID' => $request->codePIXID,
-            'rifa' => $rifa,
             'minutosRestantes' => $minutosRestantes,
             'config' => $config,
             'user' => getSiteOwnerUser(),
@@ -593,8 +591,8 @@ class CheckoutController extends Controller
         //METODO consultingReservationTelephone E consultingReservation SÃO IGUAIS SEMPRE DEIXAR OS DOIS PARECIDOS
 
         $product = DB::table('products')
-            ->select('products.id', 'products.name', 'consulting_environments.key_pix', 'products.price', 'products.draw_date')
-            ->join('consulting_environments', 'consulting_environments.user_id', '=', 'products.user_id')
+            ->select('products.id', 'products.name', 'sites.key_pix', 'products.price', 'products.draw_date')
+            ->join('sites', 'sites.user_id', '=', 'products.user_id')
             ->where('products.id', '=', $request->productID)
             ->first();
 
@@ -683,8 +681,8 @@ class CheckoutController extends Controller
         $resultTelephone = $ddd . $substr1 . $substr2;
 
         $product = DB::table('products')
-            ->select('products.id', 'products.name', 'consulting_environments.key_pix', 'products.price', 'products.draw_date')
-            ->join('consulting_environments', 'consulting_environments.user_id', '=', 'products.user_id')
+            ->select('products.id', 'products.name', 'sites.key_pix', 'products.price', 'products.draw_date')
+            ->join('sites', 'sites.user_id', '=', 'products.user_id')
             ->where('products.id', '=', $productID)
             ->first();
 

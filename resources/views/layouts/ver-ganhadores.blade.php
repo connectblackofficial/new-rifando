@@ -11,10 +11,10 @@
     </div>
 </div>
 
-@foreach ($rifa->premios()->where('descricao', '!=', '')->whereNotNull('participant_id')->get() as $premio)
+@foreach ($rifa->prizeDraws()->where('descricao', '!=', '')->whereNotNull('participant_id')->get() as $premio)
         <?php
-        /** @var \App\Models\Premio $premio */
-        $participante = $premio->participante();
+        /** @var \App\Models\PrizeDraw $premio */
+        $participante = $premio->participant();
         ?>
     <hr>
     <div class="row mt-2">

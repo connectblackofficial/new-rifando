@@ -10,7 +10,7 @@
 
 
         <div class="row d-flex justify-content-center">
-            @foreach ($productModel->comprasAutoFromCache() as $compra)
+            @foreach ($productModel->shoppingSuggestionFromCache() as $compra)
                 @if($compra->qtd>0)
                     <div class="col-6">
                         <div class="btn-auto btn-add-qtd {{ $config->tema }} {{ $compra->popular ? 'btn-popular' : '' }}"

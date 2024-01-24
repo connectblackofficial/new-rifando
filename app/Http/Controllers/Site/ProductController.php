@@ -37,10 +37,10 @@ class ProductController extends Controller
         }
         $user = getSiteOwnerUser();
 
-        $imagens = $productData->getAllImagesFromCache();
 
         $productResume = Product::getResumeCache($productData['id']);
         $productDetail = $productData;
+        $imagens = $productResume['images'];
 
         $productDescription = $productResume['description'];
 
@@ -73,18 +73,20 @@ class ProductController extends Controller
     public function numbers(Request $request)
     {
         $rules = [
-            'product_id' => 'required|integer',
+            'product_uuid' => config("constants.product_uuid_rule"),
             'page' => 'required|integer|min:1|max:10000'
         ];
         $action = function () use ($request) {
-            $productId = $request->product_id;
+            $prouctUuid = $request->product_uuid;
             $page = $request->page;
             $postData = $request->all();
+            $productData = Product::getByUuidWithSiteCheckOrFail($prouctUuid);
             if (isset($postData['cart_uuid'])) {
-                $cart = Cart::whereProductId($productId)->whereUuid($postData['cart_uuid'])->first();
+                $cart = Cart::whereProductId($productData->id)->whereUuid($postData['cart_uuid'])->first();
             }
+            $productId = $productData->id;
 
-            Product::getByIdWithSiteCheckOrFail($productId);
+
             $qtyPagesKey = CacheKeysEnum::getQtyPaginationPageKey($productId);
             if (!\Cache::has($qtyPagesKey)) {
                 throw  UserErrorException::pageNotFound();

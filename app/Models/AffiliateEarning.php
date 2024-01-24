@@ -1,13 +1,11 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
-use App\Models\Participant;
-use App\Models\Product;
 use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class GanhosAfiliado extends Model
+class AffiliateEarning extends Model
 {
     use ModelSiteOwnerTrait;
 
@@ -21,7 +19,7 @@ class GanhosAfiliado extends Model
         'user_id'
     ];
 
-    public function participante()
+    public function participant()
     {
         return $this->hasOne(Participant::class, 'id', 'participante_id')->first();
     }
@@ -31,14 +29,14 @@ class GanhosAfiliado extends Model
         return $this->hasOne(Product::class, 'id', 'product_id')->first();
     }
 
-    public function solicitacao()
+    public function affiliateRequest()
     {
-        return $this->hasOne(SolicitacaoAfiliado::class, 'id', 'solicitacao_id')->first();
+        return $this->hasOne(AffiliateWithdrawalRequest::class, 'id', 'solicitacao_id')->first();
     }
 
     public function status()
     {
-        $solicitacao = $this->solicitacao();
+        $solicitacao = $this->affiliateRequest();
         if($solicitacao != null){
             if($solicitacao->pago){
                 return '<span class="badge bg-success">RECEBIDO</span>';

@@ -106,8 +106,8 @@ class Controller extends BaseController
 
     public function updateFooter()
     {
-        DB::table('consulting_environments')
-            ->where('consulting_environments.id', 1)
+        DB::table('sites')
+            ->where('sites.id', 1)
             ->update(
                 [
                     'footer' => 'Marquinhos do paredão resultado pela loteria federal 🍀',

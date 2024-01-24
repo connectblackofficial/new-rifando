@@ -351,7 +351,7 @@
                                 {{-- <strong>Status</strong> --}}
                             </div>
                         </div>
-                        @foreach ($rifa->participantes() as $participante)
+                        @foreach ($rifa->participants() as $participante)
                             <div class="row body-resumo pt-2">
                                 <div class="col-md-3 d-flex align-items-center">
                                     <label>{{ $participante->name . ' | ' . date('d/m/Y H:i', strtotime($participante->updated_at)) }}  </label>

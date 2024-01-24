@@ -8,9 +8,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
 Route::get('/lista_product', function () {
-    $faker = Faker\Factory::create();
-    $productName = $faker->word;
-    echo $productName;
+ dd(config("constants.product_uuid_rule"));
 
 });
 Route::get('/lists', function () {

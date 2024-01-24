@@ -92,7 +92,7 @@ class RegisterController extends Controller
         if ($user['id']) {
 
             //CRIA AS CONFIGS DOS AMBIENTES NOME E INSTA
-            DB::table('consulting_environments')->insert([
+            DB::table('sites')->insert([
                 [
                     'name' => $data['work'],
                     'instagram' => $data['instagram'],

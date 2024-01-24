@@ -1,6 +1,6 @@
 <?php
 if (isset($product['id'])) {
-    $premios = $product->premios();
+    $premios = $product->prizeDraws();
 }
 if (!isset($product['id']) || !isset($premios) || count($premios) == 0) {
     for ($i = 1; $i <= 10; $i++){

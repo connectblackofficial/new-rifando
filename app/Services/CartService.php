@@ -46,7 +46,8 @@ class CartService
 
         $newQty = $this->getNewQty($reservationType, $qtyOrNumbers);
         $this->checkProductRules($newQty);
-        $price = $this->getPrice($newQty);
+        $priceData = $this->getPrice($newQty);
+        $price = $priceData['price'];
 
         if (ReservationTypeEnum::Manual == $reservationType) {
             $allowedNumbers = $productResume['free_numbers'];
@@ -64,6 +65,7 @@ class CartService
             $this->cartModel->random_numbers += $qtyOrNumbers;
         }
         $this->cartModel->total = safeMul($price, $newQty);
+        $this->cartModel->promo_id = $priceData['promoId'];
         $this->cartModel->saveOrFail();
         return $this->formatCartResponse();
     }
@@ -74,9 +76,11 @@ class CartService
         $productResume = $this->productResume;
         $price = $product['price'];
         $discount = 0;
+        $promoId = null;
         foreach ($productResume['promos'] as $promo) {
             if ($newQty >= $promo['qtdNumeros'] && $promo['valor'] > 0) {
                 $discount = $promo['valor'];
+                $promoId = $promo['id'];
             }
         }
         $newPrice = $price - $discount;
@@ -84,7 +88,7 @@ class CartService
             throw new UserErrorException("O valor da rifa não pode ser negativo.");
         }
 
-        return $price - $discount;
+        return ['price' => ($price - $discount), 'promoId' => $promoId];
 
     }
 

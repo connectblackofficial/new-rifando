@@ -16,7 +16,7 @@ class PaymentPix extends Model
     ];
 
     /** @return Participant */
-    public function participante(): Participant
+    public function participant(): Participant
     {
         return $this->hasOne(Participant::class, 'id', 'participant_id')->where('user_id', getSiteOwnerId())->first();
     }

@@ -13,7 +13,7 @@ class Participant extends Model
 
     protected $table = 'participant';
 
-    protected $fillable = ['user_id', 'customer_id', 'name', 'telephone', 'conferido', 'msg_pago_enviada', 'email', 'cpf', 'raffles_id', 'product_id', 'valor', 'numbers', 'pagos', 'reservados'];
+    protected $fillable = ['user_id','uuid', 'customer_id', 'name', 'telephone', 'conferido', 'msg_pago_enviada', 'email', 'cpf', 'raffles_id', 'product_id', 'valor', 'numbers', 'pagos', 'reservados'];
 
     public function reservados()
     {

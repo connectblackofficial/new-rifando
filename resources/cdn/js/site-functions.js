@@ -106,6 +106,38 @@ function prepareSitePhones() {
 
 }
 
+function initIntlInput() {
+    const inputs = document.querySelectorAll(".intl-input-phone");
+    inputs.forEach(function (input) {
+        window.intlTelInput(input, {
+            initIntlInput: "br",
+            utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/utils.js",
+        });
+    });
+}
+
+function loadUrlModal(title, url, size) {
+    loading();
+    var modalUrl = $("#modal_url");
+    if (size) {
+        modalUrl.find('.modal-dialog').addClass(size);
+    }
+    modalUrl.attr("data-title", title);
+    modalUrl.attr("data-url", url);
+    $("#modalMsgTitle").html(title);
+    modalUrl.removeData('.bs.modal');
+
+    $("#modalMsgBody").html('').load(url, function (response, status, xhr) {
+        if (status == "error") {
+            var errorMsg = "Erro: " + xhr.status + " " + xhr.statusText;
+            errorMsg("Houve um erro ao carregar o conteúdo: " + errorMsg);
+            $('#modal_url').modal('hide');
+        }
+        loading();
+    });
+    $('#modal_url').modal('show');
+}
+
 function openModalCheckout() {
     var raffleType = $('#raffleType').val();
     var modoJogo = $('#modoDeJogo').val();
@@ -124,6 +156,8 @@ function initSitePg() {
     $('[data-toggle="tooltip"]').tooltip();
     initAjaxSetup();
     prepareSitePhones();
+    initIntlInput();
+    loadUrlModal('Finalizr', 'https://new-rifando.10mb.com.br/site/checkout/cc7d3512-6b90-4edc-99b0-1a27cf846059')
 }
 
 function calPrices() {
@@ -304,7 +338,7 @@ function addQtd(e) {
         qty = -1;
     } else {
         qty = parseInt(e);
-        numerosAleatorio();
+
     }
     input.value = parseInt(input.value) + qty
     addRm(qty);
@@ -339,28 +373,6 @@ function calcDiscount(qtd) {
 
 }
 
-function numerosAleatorio() {
-
-    qtd = parseInt(document.getElementById('numbersA').value);
-    document.getElementById('qtdNumbers').value = qtd;
-    const value = productData.price;
-    total = clearMoneyVal(value) * qtd;
-    totalFomat = toLocaleMoneyString(total);
-
-    const productID = productData.id;
-
-    $('#promo').val(0)
-    var lDescontos = JSON.parse(descontos)
-    var percentDesconto = 0;
-
-    lDescontos.forEach(function (i) {
-        if (qtd >= parseInt(i.numeros)) {
-            percentDesconto = i.desconto
-        }
-    })
-
-
-}
 
 function productSetNumbersModal(totalFomat) {
     if (idExists('numberSelectedTotalModal')) {
@@ -596,7 +608,6 @@ function productDetailPageConfig() {
 function productDetailPage() {
 
 
-    numerosAleatorio();
     productDetailPageConfig();
     $(window).on('scroll', function () {
         if (idExists("paymentAutomatic")) {
@@ -628,12 +639,37 @@ function startLoading() {
     return loading();
 }
 
+function checkAttribute(jsonObject, attribute) {
+    // Function to recursively check if the attribute exists in any level of the object
+    function checkInnerObject(obj) {
+        if (typeof obj !== 'object' || obj === null) {
+            return false;
+        }
+
+        if (obj.hasOwnProperty(attribute)) {
+            return true;
+        }
+
+        for (let prop in obj) {
+            if (obj.hasOwnProperty(prop) && checkInnerObject(obj[prop])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    return checkInnerObject(jsonObject);
+}
+
+
 function hasCartId(obj) {
     if (obj && obj.data && typeof obj.data.id === 'number') {
         return true;
     }
     return false;
 }
+
 
 function hasTotalPages(obj) {
     if (obj && obj.data && typeof obj.data.total_pages === 'number') {
@@ -656,8 +692,8 @@ function processCartResponse(data) {
 function addRm(qtyOrList) {
     let url = ROUTES.cart_add_rm;
     let data = {
-        'product_id': productData.id,
-        'uuid': cartUuid,
+        'product_uuid': productData.uuid,
+        'cart_uuid': cartUuid,
         'qty_or_list': qtyOrList
     }
     var callback = function (data) {
@@ -669,8 +705,8 @@ function addRm(qtyOrList) {
 function showCart() {
     let url = ROUTES.cart_resume;
     let data = {
-        'product_id': productData.id,
-        'uuid': cartUuid,
+        'product_uuid': productData.uuid,
+        'cart_uuid': cartUuid,
     }
     var callback = function (data) {
         processCartResponse(data);
@@ -689,8 +725,8 @@ function processDestroyCart() {
 
     let url = ROUTES.cart_destroy;
     let data = {
-        'product_id': productData.id,
-        'uuid': cartUuid,
+        'product_uuid': productData.uuid,
+        'cart_uuid': cartUuid,
     }
     var callback = function (data) {
         location.reload();
@@ -736,7 +772,7 @@ function changeAjaxPage(page) {
         alwaysCallback = false;
     }
     let data = {
-        'product_id': productData.id,
+        'product_uuid': productData.uuid,
         'page': page,
         'cart_uuid': cartUuid
     }
@@ -745,40 +781,89 @@ function changeAjaxPage(page) {
     };
     return sendAjaxPostData(url, data, callback, beforeCallback, alwaysCallback);
 }
-function checkCustomer() {
-    var phone = $('#telephone1').val()
-    if (phone == null || phone == '') {
-        alert('Informe o telefone para continuar!');
-        $('#telephone1').focus();
-        return;
-    } else if (phone.length < 15) {
-        alert('Informe um telefone válido!');
-        $('#telephone1').select();
-        return;
-    }
 
-    loading()
-    $.ajax({
-        url: "{{ route('getCustomer') }}",
-        type: 'POST',
-        dataType: 'json',
-        data: {
-            "phone": phone,
-        },
-        success: function (response) {
-            loading()
-            if (response.customer == null) {
+$('input.keydown').on('keydown', function (e) {
+    var code = e.which || e.keyCode;
+
+    if (code == 13) {
+        event.preventDefault();
+        checkCustomer()
+    }
+});
+
+
+function checkCustomer() {
+
+    var phone = $('#telephone1').val();
+
+    var callback = function (response) {
+        console.log(checkAttribute(response, 'data'));
+        console.log(checkAttribute(response, 'customer'));
+
+        if (checkAttribute(response, 'data') && checkAttribute(response.data, 'customer')) {
+            if (response.data.customer == null) {
                 novoCliente(phone);
             } else {
-                findCustomer(response.customer)
+                findCustomer(response.data.customer)
             }
-        },
-        error: function (error) {
-            Swal.fire(
-                'Erro Desconhecido!',
-                '',
-                'error'
-            )
         }
-    })
+
+    }
+    return sendAjaxPostData(ROUTES.getCustomer, {'phone': phone}, callback)
+}
+
+function finalizarCompra() {
+    $('#form-checkout').submit();
+}
+
+function findCustomer(customer) {
+    document.getElementById('customer-name').innerHTML = customer.nome;
+    document.getElementById('customer-phone').innerHTML = customer.telephone;
+    document.getElementById('name').value = customer.nome;
+    document.getElementById('phone-cliente').value = customer.telephone;
+    if (idExists('cpf-cliente')) {
+        document.getElementById('cpf-cliente').value = customer.cpf;
+    }
+    if (idExists('email-cliente')) {
+        document.getElementById('email-cliente').value = customer.email;
+    }
+
+    document.getElementById('customer').value = customer.id;
+    document.getElementById('div-customer').classList.toggle('d-none');
+    document.getElementById('btn-checkout').innerHTML = 'Concluir reserva';
+    document.getElementById('btn-checkout-action').type = 'submit'
+    document.getElementById('btn-alterar').innerHTML = 'Alterar Conta';
+    document.getElementById('btn-alterar').classList.remove('d-none');
+    document.getElementById('div-info').classList.add('d-none');
+    document.getElementById('div-telefone').classList.add('d-none');
+}
+
+function clearModal() {
+    document.getElementById('telephone1').value = '';
+    document.getElementById('telephone1').disabled = false;
+    document.getElementById('div-nome').classList.add('d-none');
+    document.getElementById('info-footer').innerHTML = 'Informe seu telefone para continuar.';
+    document.getElementById('btn-checkout').innerHTML = 'Continuar';
+    document.getElementById('btn-checkout-action').setAttribute("onclick", "checkCustomer()")
+    document.getElementById('btn-alterar').classList.add('d-none');
+    document.getElementById('btn-checkout-action').type = 'button'
+    document.getElementById('phone-cliente').value = ''
+    document.getElementById('customer').value = 0;
+    document.getElementById('div-customer').classList.add('d-none');
+    document.getElementById('div-info').classList.remove('d-none');
+    document.getElementById('div-telefone').classList.remove('d-none');
+}
+
+function novoCliente(phone) {
+    document.getElementById('telephone1').disabled = true;
+    document.getElementById('div-nome').classList.toggle('d-none');
+    document.getElementById('info-footer').innerHTML = 'Informe os dados corretos para recebimento das premiações.';
+    document.getElementById('btn-checkout').innerHTML = 'Concluir cadastro e pagar';
+    document.getElementById('btn-checkout-action').setAttribute("onclick", "loading()")
+    document.getElementById('btn-checkout-action').type = 'submit'
+    document.getElementById('btn-alterar').classList.innerHTML = 'Alterar Telefone';
+    document.getElementById('btn-alterar').classList.toggle('d-none');
+    document.getElementById('phone-cliente').value = phone
+    document.getElementById('customer').value = 0;
+
 }

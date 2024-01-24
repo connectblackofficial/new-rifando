@@ -19,7 +19,7 @@
         <h1 class="mt-3" id="ganhadores">
             🎉 Ganhadores
         </h1>
-        @foreach ($productModel->premios()->where('descricao', '!=', '') as $premio)
+        @foreach ($productModel->prizeDraws()->where('descricao', '!=', '') as $premio)
             <div class="row mt-2 ">
                 <div class="col-md-4">
                     <label><strong>Prêmio {{ $premio->ordem }}:

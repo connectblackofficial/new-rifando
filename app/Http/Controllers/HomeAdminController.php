@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\AutoMessage;
-use App\Environment;
+use App\Models\AutoMessage;
 use App\Models\Customer;
 use App\Models\Participant;
 use App\Models\Product;
-use App\WhatsappMensagem;
+use App\Models\WhatsappMessage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -27,14 +26,14 @@ class HomeAdminController extends Controller
     public function wpp()
     {
 
-        if (WhatsappMensagem::siteOwner()->count() == 0) {
+        if (WhatsappMessage::siteOwner()->count() == 0) {
             for ($i = 0; $i < 6; $i++) {
-                WhatsappMensagem::create(['user_id' => getSiteOwnerId()]);
+                WhatsappMessage::create(['user_id' => getSiteOwnerId()]);
             }
         }
 
         $data = [
-            'msgs' => WhatsappMensagem::siteOwner()->get(),
+            'msgs' => WhatsappMessage::siteOwner()->get(),
             'autoMessages' => AutoMessage::siteOwner()->where('id', '>', 0)->where('destinatario', '=', 'cliente')->orderBy('destinatario')->get(),
             'config' => getSiteConfigId()
         ];
@@ -46,7 +45,7 @@ class HomeAdminController extends Controller
     public function wppSalvar(Request $request)
     {
         foreach ($request->id as $key => $value) {
-            $whatsappMensagem = WhatsappMensagem::getByIdWithSiteCheck($value);
+            $whatsappMensagem = WhatsappMessage::getByIdWithSiteCheck($value);
             if (isset($whatsappMensagem['id'])) {
                 $whatsappMensagem->update([
                     'titulo' => $request->titulo[$value],

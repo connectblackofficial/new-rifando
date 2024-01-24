@@ -38,6 +38,7 @@ let siteScriptsFooter = [
     `${resourceCdnDir}/js/shared-functions.js`,
     `${resourceCdnDir}/js/site-functions.js`
 ];
+///home/caique/sites/new-rifando/resources/cdn/js/intlTelInput.min.js
 ///home/caique/sites/new-rifando/resources/cdn/js/jquery/jquery.maskMoney.min.js
 //resources/assets/cdn/css/admin.scss
 mix.sass('resources/cdn/saas/site.scss', 'public/cdn/build').sass('resources/cdn/saas/admin.scss', 'public/cdn/build').combine([

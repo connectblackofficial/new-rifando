@@ -12,6 +12,7 @@ class Order extends Model
     protected $table = 'order';
 
     protected $fillable = [
+        'uuid',
         'key_pix',
         'participant_id',
         'dados',

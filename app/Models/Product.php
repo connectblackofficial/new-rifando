@@ -2,17 +2,10 @@
 
 namespace App\Models;
 
-use App\AutoMessage;
-use App\CompraAutomatica;
 use App\Enums\CacheExpiresInEnum;
-use App\Enums\CacheKeysEnum;
-use App\Environment;
-use App\RifaAfiliado;
 use App\Traits\HasEloquentCacheTrait;
 use App\Traits\ModelSiteOwnerTrait;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class Product extends Model
@@ -20,7 +13,8 @@ class Product extends Model
     use ModelSiteOwnerTrait;
     use HasEloquentCacheTrait;
 
-    protected $fillable = ['name', 'subname', 'parcial', 'expiracao', 'qtd_ranking', 'qtd_zeros', 'product', 'slug', 'price', 'ganho_afiliado', 'status', 'qtd', 'numbers', 'processado', 'type_raffles', 'favoritar', 'modo_de_jogo', 'minimo', 'maximo', 'user_id', 'draw_prediction', 'draw_date', 'winner', 'visible', 'gateway'];
+
+    protected $fillable = ['name','uuid', 'subname', 'parcial', 'expiracao', 'qtd_ranking', 'qtd_zeros', 'product', 'slug', 'price', 'ganho_afiliado', 'status', 'qtd', 'numbers', 'processado', 'type_raffles', 'favoritar', 'modo_de_jogo', 'minimo', 'maximo', 'user_id', 'draw_prediction', 'draw_date', 'winner', 'visible', 'gateway'];
 
     public function saveNumbers($numbersArray)
     {
@@ -34,7 +28,7 @@ class Product extends Model
 
     public function getCompraMaisPopular()
     {
-        $compras = $this->comprasAuto();
+        $compras = $this->shoppingSuggestion();
         if ($compras->where('popular', '=', true)->count() > 0) {
             return $compras->where('popular', '=', true)->first()->id;
         } else {
@@ -169,9 +163,9 @@ class Product extends Model
         }
     }
 
-    public function afiliados()
+    public function affiliates()
     {
-        return $this->hasMany(RifaAfiliado::class, 'product_id', 'id')->get();
+        return $this->hasMany(AffiliateRaffle::class, 'product_id', 'id')->get();
     }
 
 
@@ -200,7 +194,7 @@ class Product extends Model
     public function qtdNumerosReservados()
     {
         if ($this->modo_de_jogo == 'numeros') {
-            return $this->participantes()->sum('reservados');
+            return $this->participants()->sum('reservados');
         } else {
             return $this->hasMany(Raffle::class, 'product_id', 'id')->where('status', '=', 'Reservado')->count();
         }
@@ -210,7 +204,7 @@ class Product extends Model
     public function qtdNumerosPagos()
     {
         if ($this->modo_de_jogo == 'numeros') {
-            return $this->participantes()->sum('pagos');
+            return $this->participants()->sum('pagos');
         } else {
             return $this->hasMany(Raffle::class, 'product_id', 'id')->where('status', '=', 'Pago')->count();
         }
@@ -226,7 +220,7 @@ class Product extends Model
         return round($percentual, 2);
     }
 
-    public function participantes()
+    public function participants()
     {
         return $this->hasMany(Participant::class, 'product_id', 'id')->orderBy('id', 'desc')->get();
     }
@@ -244,12 +238,7 @@ class Product extends Model
 
     public function promos()
     {
-        return $this->hasMany(Promocao::class, 'product_id', 'id');
-    }
-
-    public function promocoes()
-    {
-        return $this->hasMany(Promocao::class, 'product_id', 'id')->orderBy('ordem', 'asc')->get();
+        return $this->hasMany(Promo::class, 'product_id', 'id');
     }
 
 
@@ -307,9 +296,9 @@ class Product extends Model
 
     public function promosAtivas()
     {
-        $promocoes = $this->promos()->where('qtdNumeros', '>', 0)->get();
+        $promos = $this->promos()->where('qtdNumeros', '>', 0)->get();
         $result = [];
-        foreach ($promocoes as $promocao) {
+        foreach ($promos as $promocao) {
             array_push($result, [
                 'numeros' => $promocao->qtdNumeros,
                 'desconto' => $promocao->desconto
@@ -321,7 +310,7 @@ class Product extends Model
 
     public function getWinnersQty()
     {
-        return Premio::whereProductId($this->id)->winners()->count();
+        return PrizeDraw::whereProductId($this->id)->winners()->count();
     }
 
     public function createProductImage($imageName)
@@ -336,7 +325,7 @@ class Product extends Model
     public function createPromos()
     {
         for ($i = 1; $i <= 4; $i++) {
-            Promocao::create([
+            Promo::create([
                 'product_id' => $this->id,
                 'ordem' => $i,
                 'user_id' => $this->user_id,
@@ -352,7 +341,7 @@ class Product extends Model
             if (isset($dados[$auxPremio])) {
                 $desc = $dados[$auxPremio];
             }
-            Premio::create([
+            PrizeDraw::create([
                 'product_id' => $this->id,
                 'ordem' => $i,
                 'descricao' => $desc,
@@ -363,13 +352,13 @@ class Product extends Model
         }
     }
 
-    public function premios()
+    public function prizeDraws()
     {
-        $premios = $this->hasMany(Premio::class, 'product_id', 'id')->orderBy('ordem', 'asc')->get();
+        $premios = $this->hasMany(PrizeDraw::class, 'product_id', 'id')->orderBy('ordem', 'asc')->get();
 
         if ($premios->count() === 0) {
             $this->createDefaultPremiums();
-            return $this->hasMany(Premio::class, 'product_id', 'id')->orderBy('ordem', 'asc')->get();
+            return $this->hasMany(PrizeDraw::class, 'product_id', 'id')->orderBy('ordem', 'asc')->get();
         } else {
             return $premios;
         }
@@ -386,7 +375,7 @@ class Product extends Model
                 }
                 break;
             case 'Finalizado':
-                if ($this->premios()->where('descricao', '!=', '')->where('ganhador', '!=', '')->count() == 0) {
+                if ($this->prizeDraws()->where('descricao', '!=', '')->where('ganhador', '!=', '')->count() == 0) {
                     $status = '<span class="badge mt-2 blink" style="color: #fff; background-color: rgba(0,0,0,.7);">Aguarde sorteio!</span>';
                 } else {
                     $status = '<span class="badge mt-2 bg-danger">Finalizado</span>';
@@ -402,25 +391,25 @@ class Product extends Model
     }
 
 
-    public function comprasAuto()
+    public function shoppingSuggestion()
     {
-        $compras = $this->hasMany(CompraAutomatica::class, 'product_id', 'id')->get();
+        $compras = $this->hasMany(ShoppingSuggestion::class, 'product_id', 'id')->get();
         if ($compras->count() == 0) {
-            $this->defaultComprasAuto();
-            $compras = $this->hasMany(CompraAutomatica::class, 'product_id', 'id')->get();
+            $this->defaultshoppingSuggestion();
+            $compras = $this->hasMany(ShoppingSuggestion::class, 'product_id', 'id')->get();
         }
 
         return $compras;
     }
 
-    public function defaultComprasAuto()
+    public function defaultshoppingSuggestion()
     {
-        $comprasAuto = [];
-        $comprasAuto[] = [
+        $shoppingSuggestion = [];
+        $shoppingSuggestion[] = [
             'qtd' => 0,
             'popular' => false
         ];
-        $comprasAuto[] = [
+        $shoppingSuggestion[] = [
             'qtd' => 0,
             'popular' => false
         ];
@@ -430,15 +419,15 @@ class Product extends Model
             if ($value == 50) {
                 $popular = true;
             }
-            $comprasAuto[] = [
+            $shoppingSuggestion[] = [
                 'qtd' => $value,
                 'popular' => $popular
             ];
         }
-        foreach ($comprasAuto as $compra) {
+        foreach ($shoppingSuggestion as $compra) {
             $compra['product_id'] = $this->id;
             $compra['user_id'] = $this->user_id;
-            CompraAutomatica::create($compra);
+            ShoppingSuggestion::create($compra);
         }
 
     }
@@ -520,7 +509,8 @@ class Product extends Model
             'numbers_qty' => $this->qtd,
             'type_raffles' => $this->type_raffles,
             'game_mode' => $this->modo_de_jogo,
-            'draw_prediction' => $this->draw_prediction
+            'draw_prediction' => $this->draw_prediction,
+            'uuid'=>$this->uuid
         ];
     }
 
@@ -536,7 +526,7 @@ class Product extends Model
 
     public static function getResumeCache($productId, $forceUpdate = false)
     {
-        $key = "product_resume_4_" . $productId;
+        $key = "product_resume_6_" . $productId;
         $callBack = function () use ($productId) {
             $product = Product::whereId($productId)->firstOrFail();
             $productAsArray = convertToArray($product);
@@ -546,10 +536,11 @@ class Product extends Model
                 'paid' => $product->qtdNumerosPagos(),
                 'free' => $product->qtdNumerosDisponiveis(),
                 'percentage' => $product->porcentagem(),
-                'promos' => $product->promocoes(),
+                'promos' => $product->promos()->get(),
                 'free_numbers' => $product->getFreeNumbers(),
                 'product' => $productAsArray,
-                'description'=>$product->descriptions()->select('description', 'video')->first()
+                'description'=>$product->descriptions()->select('description', 'video')->first(),
+                'images'=>$product->images()->get()
             ];
         };
 

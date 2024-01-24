@@ -14,6 +14,7 @@ class Customer extends Model
         'telephone',
         'email',
         'cpf',
-        'user_id'
+        'user_id',
+        'uuid'
     ];
 }

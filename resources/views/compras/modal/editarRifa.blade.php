@@ -183,7 +183,7 @@
                                              id="premios{{ $rifa->id }}" role="tabpanel"
                                              aria-labelledby="geral-tab">
                                             <div class="row">
-                                                @foreach ($rifa->premios() as $premio)
+                                                @foreach ($rifa->prizeDraws() as $premio)
                                                     <div class="col-md-6 mt-2">
                                                         <label>{{ $premio->ordem }}º Prêmio</label>
                                                         <input type="text" class="form-control"
@@ -340,7 +340,7 @@
                                              id="promocao{{ $rifa->id }}" role="tabpanel"
                                              aria-labelledby="promocao-tab">
 
-                                            @foreach ($rifa->promocoes() as $promo)
+                                            @foreach ($rifa->promos()->get() as $promo)
                                                 <div class="row text-center mt-2 promo">
                                                     <h5>Promoção {{ $promo->ordem }}</h5>
                                                     <div class="col-md-6">

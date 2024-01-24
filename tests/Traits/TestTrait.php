@@ -3,10 +3,9 @@
 namespace Tests\Traits;
 
 use App\Enums\PaymentGatewayEnum;
-use App\Environment;
+use App\Models\Site;
 use App\Models\User;
 use App\Services\ProductService;
-use Faker\Provider\ar_JO\Internet;
 use Illuminate\Http\UploadedFile;
 
 trait TestTrait
@@ -18,7 +17,7 @@ trait TestTrait
 
     public function getSiteConfig()
     {
-        return Environment::where('user_id', $this->getUser()->id)->first();
+        return Site::where('user_id', $this->getUser()->id)->first();
     }
 
     public function setSiteConfig()

@@ -67,7 +67,7 @@ if (isset($imagens[0])) {
             </div>
         </div>
 
-
+        @include("site.checkout.modal")
         @include('rifas.modal')
 
         @section("scripts-footer")

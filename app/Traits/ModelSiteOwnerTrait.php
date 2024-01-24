@@ -20,9 +20,20 @@ trait ModelSiteOwnerTrait
         return self::siteOwner()->whereId($id)->first();
     }
 
+    public static function getByUuidIdWithSiteCheck($uuid)
+    {
+        return self::siteOwner()->whereUuid($uuid)->first();
+    }
+
     public static function getByIdWithSiteCheckOrFail($id)
     {
 
         return self::siteOwner()->whereId($id)->firstOrFail();
+    }
+
+    public static function getByUuidWithSiteCheckOrFail($uuid)
+    {
+
+        return self::siteOwner()->whereUuid($uuid)->first();
     }
 }

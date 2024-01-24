@@ -25,7 +25,7 @@ class ProductServiceTest extends TestCase
         $this->assertTrue($product->hasImages());
         $this->assertNotEmpty($product->descricao());
         $this->assertGreaterThanOrEqual(1, $product->promos()->count());
-        $this->assertGreaterThanOrEqual(1, count($product->premios()));
+        $this->assertGreaterThanOrEqual(1, count($product->prizeDraws()));
         $this->assertGreaterThanOrEqual(1, count($product->numbers()));
         \Event::assertDispatched(ProductCreated::class);
     }

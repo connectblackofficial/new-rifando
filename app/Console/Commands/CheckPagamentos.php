@@ -40,7 +40,7 @@ class CheckPagamentos extends Command
      */
     public function handle()
     {
-        $codeKeyPIX = DB::table('consulting_environments')
+        $codeKeyPIX = DB::table('sites')
             ->select('key_pix')
             ->where('user_id', '=', getSiteOwnerId())
             ->first();

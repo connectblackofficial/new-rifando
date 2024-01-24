@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class Premio extends Model
+class PrizeDraw extends Model
 {
     use ModelSiteOwnerTrait;
 
@@ -26,7 +26,7 @@ class Premio extends Model
         return $this->hasOne(Product::class, 'id', 'product_id')->first();
     }
 
-    public function participante()
+    public function participant()
     {
         if ($this->participant_id != null) {
             return $this->hasOne(Participant::class, 'id', 'participant_id')->first();

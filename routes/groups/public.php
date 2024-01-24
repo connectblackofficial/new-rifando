@@ -1,14 +1,14 @@
 <?php
 
-use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\MySweepstakesController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RegulationController;
+use App\Http\Controllers\Site\CartController;
+use App\Http\Controllers\Site\ProductController as ProductSiteController;
 use App\Http\Controllers\TermsOfUse;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Site\ProductController as ProductSiteController;
 
 Route::get('home', function () {
     return redirect(route("home"));
@@ -29,7 +29,6 @@ Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 Route::get('ganhadores', 'ProductController@ganhadores')->name('ganhadores');
 
 Route::get('/pagar-reserva/{id}', [CheckoutController::class, 'pagarReserva'])->name('pagarReserva');
-Route::post('/get-customer', [CheckoutController::class, 'getCustomer'])->name('getCustomer');
 Route::get('/', [ProductController::class, 'index'])->name('inicio');
 Route::get('/sorteios', [ProductController::class, 'sorteios'])->name('sorteios');
 Route::get('sorteio/{id}/{tokenAfiliado?}', [ProductSiteController::class, 'details'])->name('product');
@@ -65,3 +64,6 @@ Route::delete('site/cart/destroy', [CartController::class, 'destroy'])->name('ca
 
 Route::get('site/checkout/{uuid}', [\App\Http\Controllers\Site\CheckoutController::class, 'index'])->name('site.checkout');
 
+Route::get('site/checkout/{uuid}/1', [\App\Http\Controllers\Site\CheckoutController::class, 'step1'])->name('site.checkout.step1');
+
+Route::post('/site/customer/get', [\App\Http\Controllers\Site\CustomerController::class, 'getCustomer'])->name('getCustomer');

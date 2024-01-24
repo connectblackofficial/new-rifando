@@ -101,7 +101,7 @@
                         onclick="selectFazendinha('{{ $numero->number }}')" id="{{ $numero->number }}">
                     </div>
                 @else
-                    <div class="le {{ $numero->statusFormated() }}" onclick="info('{{ $numero->status }} por {{ $numero->participante()->name }}')">
+                    <div class="le {{ $numero->statusFormated() }}" onclick="info('{{ $numero->status }} por {{ $numero->participant()->name }}')">
                     </div>
                 @endif
 
@@ -111,7 +111,7 @@
                         onclick="selectFazendinha('{{ $numero->numeroLD()->number }}')" id="{{ $numero->numeroLD()->number }}">
                     </div>
                 @else
-                    <div class="ld {{ $numero->numeroLD()->statusFormated() }}" onclick="info('{{ $numero->numeroLD()->status }} por {{ $numero->numeroLD()->participante()->name }}')">
+                    <div class="ld {{ $numero->numeroLD()->statusFormated() }}" onclick="info('{{ $numero->numeroLD()->status }} por {{ $numero->numeroLD()->participant()->name }}')">
                     </div>
                 @endif
             </div>

@@ -5,11 +5,11 @@ namespace App\Models;
 use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class Promocao extends Model
+class Promo extends Model
 {
     use ModelSiteOwnerTrait;
 
-    protected $table = 'promocoes';
+    protected $table = 'promos';
     protected $fillable = [
         'qtdNumeros',
         'ordem',

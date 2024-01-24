@@ -2,21 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\AutoMessage;
 use App\Exceptions\UserErrorException;
-use App\GanhosAfiliado;
 use App\Libs\AsaasLib;
 use App\Libs\MpLib;
 use App\Libs\PaggueLib;
+use App\Models\AffiliateEarning;
+use App\Models\AffiliateRaffle;
+use App\Models\AutoMessage;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Participant;
 use App\Models\PaymentPix;
-use App\Models\Premio;
+use App\Models\PrizeDraw;
 use App\Models\Product;
 use App\Models\Raffle;
-use App\RifaAfiliado;
-use App\Services\CartService;
 use App\Services\PaymentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -29,7 +28,7 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $ganhadores = Premio::siteOwner()->where('descricao', '!=', null)->where('ganhador', '!=', '')->get();
+        $ganhadores = PrizeDraw::siteOwner()->where('descricao', '!=', null)->where('ganhador', '!=', '')->get();
 
         $products = Product::siteOwner()->isVisible()->orderBy('id', 'desc')->get();
 
@@ -49,7 +48,7 @@ class ProductController extends Controller
 
     public function sorteios()
     {
-        $ganhadores = Premio::where('descricao', '!=', null)->where('ganhador', '!=', '')->get();
+        $ganhadores = PrizeDraw::where('descricao', '!=', null)->where('ganhador', '!=', '')->get();
 
         $products = Product::where('visible', '=', 1)->orderBy('id', 'desc')->get();
 
@@ -137,7 +136,7 @@ class ProductController extends Controller
         }
         $rifa = $productData;
         $numbers = $rifa->numbers();
-        foreach ($rifa->participantes() as $participante) {
+        foreach ($rifa->participants() as $participante) {
             $statusParticipante = $participante->pagos > 0 ? 'pago' : 'reservado';
             foreach ($participante->numbers() as $value) {
                 $numbers[] = $value . '-' . $statusParticipante . '-' . $participante->name;
@@ -172,7 +171,6 @@ class ProductController extends Controller
                     'nome' => $request->name,
                     'telephone' => $request->telephone,
                     'user_id' => getSiteOwnerId()
-
                 ]);
             } else {
                 $customer = Customer::getByIdWithSiteCheck($request->customer);
@@ -182,7 +180,7 @@ class ProductController extends Controller
             $prod = Product::siteOwner()->whereId($request->productID)->first();
 
             // Validando link de afiliado,
-            $afiliado = RifaAfiliado::siteOwner()->where('token', '=', $request->tokenAfiliado)->first();
+            $afiliado = AffiliateRaffle::siteOwner()->where('token', '=', $request->tokenAfiliado)->first();
 
             $path = 'numbers/' . $prod->id . '.json';
             //$jsonString = file_get_contents($path);
@@ -234,7 +232,7 @@ class ProductController extends Controller
                     $user = DB::table('users')
                         ->select('users.name', 'users.telephone', 'products.type_raffles')
                         ->leftJoin('products', 'products.user_id', 'users.id')
-                        ->leftJoin('consulting_environments', 'consulting_environments.user_id', 'users.id')
+                        ->leftJoin('sites', 'sites.user_id', 'users.id')
                         ->where('products.id', '=', $request->productID)
                         ->where('products.user_id', getSiteOwnerId())
                         ->first();
@@ -489,7 +487,7 @@ class ProductController extends Controller
 
                     if ($afiliado != null) {
                         $part = Participant::getByIdWithSiteCheck($participante);
-                        GanhosAfiliado::create([
+                        AffiliateEarning::create([
                             'product_id' => $prod->id,
                             'participante_id' => $participante,
                             'afiliado_id' => $afiliado->afiliado_id,
@@ -808,13 +806,13 @@ class ProductController extends Controller
     {
         try {
             $rifa = Product::getByIdWithSiteCheck($request->idRifa);
-            $premios = $rifa->premios();
+            $premios = $rifa->prizeDraws();
             $ganhadores = [];
 
 
             if ($rifa->modo_de_jogo == 'numeros') {
                 foreach ($request->cotas as $key => $cota) {
-                    foreach ($rifa->participantes() as $participante) {
+                    foreach ($rifa->participants() as $participante) {
                         $numbersParticipante = $participante->numbers();
                         $find = array_search($cota, $numbersParticipante);
                         if (is_int($find)) {
@@ -832,7 +830,7 @@ class ProductController extends Controller
             } else {
                 foreach ($request->cotas as $key => $cota) {
                     $numero = $rifa->numbers()->where('number', '=', $cota)->first();
-                    $participante = $numero->participante();
+                    $participante = $numero->participant();
                     $premios->where('ordem', '=', $key)->first()->update([
                         'ganhador' => $participante->name,
                         'telefone' => $participante->telephone,

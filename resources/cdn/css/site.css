@@ -584,3 +584,16 @@ img {
 .title-promo.dark {
     color: #fff !important;
 }
+.swal2-container {
+    z-index: 99999;
+}
+#modalMsgBody  .qty-numbers-zeros-7 .number-selected{
+    width: 10%;
+}
+#div-info{
+    margin-top: 5px;
+    margin-bottom: 5px;
+    background-color: #fff3cd;
+    padding: 10px;
+    border-radius: 10px; color: #664d03;
+}
