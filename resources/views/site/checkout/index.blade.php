@@ -1,7 +1,6 @@
 <form action="{{ route('bookProductManualy') }}" id="form-checkout" method="POST">
     {{ csrf_field() }}
 
-
     <div class="form-group">
         <input type="hidden" name="tokenAfiliado" value="{{ $tokenAfiliado }}">
 
@@ -19,14 +18,14 @@
             <h5 id="customer-phone">(11) 99999-6933</h5>
         </div>
     </div>
-
+<div class="row" id="div-telefone">
+    @include("site.customer.phone")
+</div>
     <div class="form-group" id="div-telefone">
         <label style="color: #000"><strong>Informe seu telefone</strong></label>
         <input type="text" class="form-control numbermask keydown"
                style="background-color: #fff; border: none; color: #333;" name="telephone" id="telephone1"
                placeholder="(00) 90000-0000" maxlength="15" required>
-        <input type="hidden" name="telephone" id="phone-cliente">
-        <input type="hidden" id="customer" name="customer">
     </div>
 
     <div class="form-group d-none" id="div-nome">
@@ -43,7 +42,6 @@
             <input type="text" class="form-control" style="background-color: #fff; border: none; color: #333;"
                    name="name"
                    id="name">
-
         </div>
 
         @if(isset($config['email_required']) && $config['email_required'] == 1)

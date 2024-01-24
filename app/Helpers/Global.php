@@ -314,7 +314,7 @@ function getSiteJsRoutes()
         'product.site.numbers' => $hasNotParams,
         'cart.destroy' => $hasNotParams,
         'site.checkout' => $hasParam,
-        "getCustomer"=>$hasNotParams
+        "getCustomer" => $hasNotParams
     ];
     return routesToJs($routes);
 }
@@ -348,5 +348,19 @@ function checkUserIdSite($userId)
     if ($userId != getSiteOwnerId()) {
         throw UserErrorException::pageNotFound();
     }
+
+}
+
+function getCountries()
+{
+    $callback = function () {
+        $countries = [];
+        foreach (\App\Models\Country::all() as $country) {
+            $countries[$country->dial_code] = $country['name'] . " " . $country->dial_code;
+        }
+        return $countries;
+    };
+    $key = "countries_with_ddi";
+    return getCacheOrCreate($key, null, $callback, \App\Enums\CacheExpiresInEnum::OneMonth, false);
 
 }

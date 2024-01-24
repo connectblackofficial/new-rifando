@@ -334,6 +334,7 @@ img {
 .btn-add-qtd:hover {
     cursor: pointer;
 }
+
 .duvida {
     background-color: #ffffff5e;
     border-radius: 10px;
@@ -421,3 +422,9 @@ img {
 .app-title.dark {
     color: #fff;
 }
+
+.phone-container label {
+    font-weight: bold !important;
+    text-color: red !important;
+}
+

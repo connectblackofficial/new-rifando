@@ -597,3 +597,9 @@ img {
     padding: 10px;
     border-radius: 10px; color: #664d03;
 }
+.phone-container label {
+    font-weight: bold !important;
+    color: #000;
+
+}
+
