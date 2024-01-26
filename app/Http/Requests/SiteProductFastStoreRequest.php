@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\GameModeEnum;
 use App\Enums\PaymentGatewayEnum;
 use App\Enums\ProductStatusEnum;
-use App\Enums\ReservationTypeEnum;
+use App\Enums\RaffleTypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SiteProductFastStoreRequest extends FormRequest

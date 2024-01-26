@@ -17,7 +17,7 @@ class CartController extends Controller
         $rules['qty_or_list'] = ['required', new ArrayOrIntRule()];
         $callback = function () use ($request) {
             $cartModel = Cart::getCartFromRequest($request);
-            return (new CartService($cartModel))->addRmNumbers($request->qty_or_list);
+            return (new CartService(getSiteConfig(), $cartModel))->addRmNumbers($request->qty_or_list);
         };
         return $this->processAjaxResponse($request->all(), $rules, $callback);
 
@@ -28,7 +28,7 @@ class CartController extends Controller
         $rules = $this->getBasicRules();
         $callback = function () use ($request) {
             $cartModel = Cart::getCartFromRequest($request);
-            return (new CartService($cartModel))->formatCartResponse();
+            return (new CartService(getSiteConfig(), $cartModel))->formatCartResponse();
         };
         return $this->processAjaxResponse($request->all(), $rules, $callback);
     }
@@ -47,7 +47,7 @@ class CartController extends Controller
         $callback = function () use ($request) {
             $cartModel = Cart::getCartFromRequest($request);
             $newCartModel = CartService::resetCart($cartModel);
-            return (new CartService($newCartModel))->formatCartResponse();
+            return (new CartService(getSiteConfig(), $newCartModel))->formatCartResponse();
         };
         return $this->processAjaxResponse($request->all(), $rules, $callback);
     }

@@ -1,11 +1,13 @@
 <div class="row justify-content-center">
     <div class="col-md-12 col-9" style="background-color: #fff; color: #000; border-radius: 10px;">
         <div class="container">
-            <div class="row">
-                <div class="col-12 text-center" style="width: 100%">
-                    @include("site.layouts.parts.number-selected",['numbers' => $numbers,'hasClickBtn' => true])
+            @if($game_mode==\App\Enums\GameModeEnum::Numbers)
+                <div class="row">
+                    <div class="col-12 text-center" style="width: 100%">
+                        @include("site.layouts.parts.number-selected",['numbers' => $numbers,'hasClickBtn' => true])
+                    </div>
                 </div>
-            </div>
+            @endif
             <div class="row"
                  style="text-align: center;background-color: #fff; margin-top: 5px; justify-content-center; margin-bottom: 10px;">
                 <div class="col-12 d-flex justify-content-center">

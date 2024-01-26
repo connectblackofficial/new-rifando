@@ -24,23 +24,10 @@ class CompleteCheckoutRequest extends FormRequest
      *
      * @return array
      */
-    public function rules(Site $config, $customerId)
+    public function rules()
     {
-        $rules = [
-            'cart_uuid' => config("constants.cart_uuid"),
-        ];
-        if (is_null($customerId)) {
-            $rules['name'] = 'required|min:10|max:255';
-            $rules['phone'] = config("constants.phone_rule");
-            if (isset($config['email_required']) && $config['email_required'] == 1) {
-                $rules['email'] = "email|required|max:255";
-            }
-            if (isset($config['cpf_required']) && $config['cpf_required'] == 1) {
-                $rules['cpf'] = ["required", new CpfValidation()];
-            }
-        }
-
-
+        $rules = (new PhoneRequest())->rules();
+        $rules['cart_uuid'] = config("constants.cart_uuid");
         return $rules;
     }
 

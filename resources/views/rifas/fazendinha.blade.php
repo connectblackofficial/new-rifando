@@ -78,7 +78,7 @@
     @foreach ($productModel->numbers() as $numero)
         @if ($numero->statusFormated() == 'disponivel')
             <div class="grupo-fazendinha {{ 'fazenda-'. $numero->statusFormated() }}" data-grupo="{{ $numero->grupoFazendinha() }}"
-                onclick="selectFazendinha('{{ $numero->number }}')" id="{{ $numero->number }}"
+                onclick="selectRaffles('{{ $numero->number }}')" id="{{ $numero->number }}"
                 style="background-image: url('{{ cdnImageAsset('bixos/' . $numero->number . '.png') }}'); background-size: 100%;background-repeat: no-repeat">
             </div>
         @else

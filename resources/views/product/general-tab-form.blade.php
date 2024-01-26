@@ -42,10 +42,13 @@ $baseLang = 'product';
 </div>
 
 <div class="row mt-4">
-    <div class="col-md-6">
+    <div class="col-md-4">
         <?= selectField('gateway', \App\Enums\PaymentGatewayEnum::getValuesAsSelect(), $product) ?>
     </div>
-    <div class="col-6">
+    <div class="col-md-4">
+        <?= selectField('pix_account_id', \App\Models\PixAccount::getAllAsSelect(), $product) ?>
+    </div>
+    <div class="col-4">
         <?= inputField('ganho_afiliado', 'number', $product) ?>
     </div>
 </div>

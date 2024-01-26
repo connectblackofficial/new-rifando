@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Traits\CrudTrait;
 use App\Http\Requests\SuperAdmin\UserStoreRequest;
 use App\Http\Requests\SuperAdmin\UserUpdateRequest;
+use Illuminate\Http\Request;
 
 class UsersController extends Controller
 {
@@ -31,10 +32,10 @@ class UsersController extends Controller
     }
 
 
-    public function update(UserUpdateRequest $request, $id)
+    public function update(Request $request, $id)
     {
-
-        return $this->processUpdate($request->validated(), $id);
+        $rule = UserUpdateRequest::class;
+        return $this->processUpdate($rule, $request->all(), $id);
     }
 
     public function beforeStore($requestData)

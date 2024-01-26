@@ -1,11 +1,14 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Admin;
 
+use App\Traits\TranslateAttrTrait;
 use Illuminate\Foundation\Http\FormRequest;
 
-class GetCustomerRequest extends FormRequest
+class CustomerRequest extends FormRequest
 {
+    use TranslateAttrTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -23,8 +26,16 @@ class GetCustomerRequest extends FormRequest
      */
     public function rules()
     {
+
         return [
-            'phone' => config('constants.phone_rule')
+            
+
+			'nome' => 'required|max:191',
+			'ddi' => 'required',
+			'telephone' => 'required|numeric',
+			'cpf' => 'nullable|max:191',
+			'email' => 'nullable|max:191'
+		
         ];
     }
 }

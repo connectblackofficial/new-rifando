@@ -1,224 +1,188 @@
 @extends('layouts.app')
-
-<link rel="manifest" href="/manifest.json">
-<script type="text/javascript" src="sw.js"></script>
-<style>
-    body {
-        background: #000 !important;
-    }
-
-    /* width */
-    #div-cotas::-webkit-scrollbar {
-        width: 10px;
-    }
-
-    /* Track */
-    #div-cotas::-webkit-scrollbar-track {
-        box-shadow: inset 0 0 5px grey;
-        border-radius: 10px;
-    }
-
-    /* Handle */
-    #div-cotas::-webkit-scrollbar-thumb {
-        background: #28a745 !important;
-        border-radius: 10px;
-    }
-
-    /* Handle on hover */
-    #div-cotas::-webkit-scrollbar-thumb:hover {
-        background: #28a745 !important;
-    }
-</style>
-
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"
-    integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
-<script>
-    $(function(e) {
-        // if (isIOS()) {
-        //     $('#app-main').attr('style', 'margin-top: 100px !important');
-        // }
-    })
-
-    function isIOS() {
-        var ua = navigator.userAgent.toLowerCase();
-
-        //Lista de dispositivos que acessar
-        var iosArray = ['iphone', 'ipod'];
-
-        var isApple = false;
-
-        if (ua.includes('iphone') || ua.includes('ipod')) {
-            isApple = true
+@section("scripts-top")
+    <style>
+        body {
+            background: #000 !important;
         }
 
-        return isApple;
-    }
+        /* width */
+        #div-cotas::-webkit-scrollbar {
+            width: 10px;
+        }
 
-    function duvidas() {
-        window.open('https://api.whatsapp.com/send?phone={{ $user->telephone }}', '_blank');
-    }
+        /* Track */
+        #div-cotas::-webkit-scrollbar-track {
+            box-shadow: inset 0 0 5px grey;
+            border-radius: 10px;
+        }
 
-    function verRifa(route) {
-        window.location.href = route
-    }
-</script>
+        /* Handle */
+        #div-cotas::-webkit-scrollbar-thumb {
+            background: #28a745 !important;
+            border-radius: 10px;
+        }
+
+        /* Handle on hover */
+        #div-cotas::-webkit-scrollbar-thumb:hover {
+            background: #28a745 !important;
+        }
+    </style>
 
 
-<style>
-    @media (max-width: 768px) {
+    <style>
+        @media (max-width: 768px) {
+            .app-main {
+                margin-top: 50px !important;
+            }
+        }
+
+        @media only screen and (-webkit-min-device-pixel-ratio: 1) {
+
+            ::i-block-chrome,
+            .app-main {
+                margin-top: 100px !important;
+            }
+        }
+
         .app-main {
-            margin-top: 50px !important;
-        }
-    }
-
-    @media only screen and (-webkit-min-device-pixel-ratio: 1) {
-
-        ::i-block-chrome,
-        .app-main {
-            margin-top: 100px !important;
-        }
-    }
-
-    .app-main {
-        border-top-right-radius: 20px;
-        border-top-left-radius: 20px;
-        max-width: 600px;
-        margin-top: 40px;
-        margin-bottom: 50px;
-        border-bottom-right-radius: 20px;
-        border-bottom-left-radius: 20px;
-    }
-
-    .app-main a {
-        text-decoration: none;
-    }
-
-    .app-main a:hover {
-        text-decoration: none;
-    }
-
-    .app-title {
-        display: flex;
-        align-items: self-end;
-        padding-bottom: 10px;
-    }
-
-    .app-title h1 {
-        color: rgba(0, 0, 0, .9);
-        padding-right: 5px;
-        font-weight: 600;
-        font-size: 1.3em;
-        margin: 0;
-        padding-top: 10px;
-    }
-
-    .app-title .app-title-desc {
-        color: rgba(0, 0, 0, .5);
-        padding-top: 6px;
-        font-size: .9em;
-    }
-
-
-    /* *************************************************************** */
-    /* Card Rifa em Destaque */
-    /* *************************************************************** */
-    .rifas {
-        background: #e4e4e4;
-        border-top-right-radius: 20px;
-        border-top-left-radius: 20px;
-        position: absolute;
-        border-bottom-right-radius: 20px;
-        border-bottom-left-radius: 20px;
-    }
-
-    .rifa-dark {
-        background-color: #383838;
-    }
-
-    .card-rifa-destaque .img-rifa-destaque img {
-        width: 100%;
-        height: 290px;
-        border-top-right-radius: 20px;
-        border-top-left-radius: 20px;
-    }
-
-    .card-rifa-destaque {
-        border-top-right-radius: 20px;
-        border-top-left-radius: 20px;
-        padding-bottom: 10px;
-        background: #fff;
-        margin-bottom: 10px;
-        border-bottom-right-radius: 20px;
-        border-bottom-left-radius: 20px;
-    }
-
-    .title-rifa-destaque {
-        padding-top: 5px;
-        padding-left: 10px;
-    }
-
-    .title-rifa-destaque h1 {
-        color: #202020;
-        -webkit-line-clamp: 2 !important;
-        margin-bottom: 1px;
-        font-weight: 500;
-        font-size: 1em;
-    }
-
-    .title-rifa-destaque p {
-        color: rgba(0, 0, 0, .7);
-        font-size: .75em;
-        max-width: 96%;
-        margin: 0;
-    }
-
-    /* *************************************************************** */
-
-
-    /* *************************************************************** */
-    /* Card Rifa Normal */
-    /* *************************************************************** */
-    .card-rifa img {
-        width: 100px;
-        height: 100px;
-        border-radius: 10px;
-    }
-
-    .card-rifa {
-        background: #fff;
-        padding: 5px;
-        margin-bottom: 10px;
-        border-radius: 10px;
-        display: flex
-    }
-
-    .title-rifa {
-        margin-left: 15px;
-        width: 100%;
-    }
-
-    .blink {
-        margin-top: 5px;
-        animation: animate 1.5s linear infinite;
-    }
-
-
-
-    @keyframes animate {
-        0% {
-            opacity: 0;
+            border-top-right-radius: 20px;
+            border-top-left-radius: 20px;
+            max-width: 600px;
+            margin-top: 40px;
+            margin-bottom: 50px;
+            border-bottom-right-radius: 20px;
+            border-bottom-left-radius: 20px;
         }
 
-        50% {
-            opacity: 0.7;
+        .app-main a {
+            text-decoration: none;
         }
 
-        100% {
-            opacity: 0;
+        .app-main a:hover {
+            text-decoration: none;
         }
-    }
-</style>
 
+        .app-title {
+            display: flex;
+            align-items: self-end;
+            padding-bottom: 10px;
+        }
+
+        .app-title h1 {
+            color: rgba(0, 0, 0, .9);
+            padding-right: 5px;
+            font-weight: 600;
+            font-size: 1.3em;
+            margin: 0;
+            padding-top: 10px;
+        }
+
+        .app-title .app-title-desc {
+            color: rgba(0, 0, 0, .5);
+            padding-top: 6px;
+            font-size: .9em;
+        }
+
+
+        /* *************************************************************** */
+        /* Card Rifa em Destaque */
+        /* *************************************************************** */
+        .rifas {
+            background: #e4e4e4;
+            border-top-right-radius: 20px;
+            border-top-left-radius: 20px;
+            position: absolute;
+            border-bottom-right-radius: 20px;
+            border-bottom-left-radius: 20px;
+        }
+
+        .rifa-dark {
+            background-color: #383838;
+        }
+
+        .card-rifa-destaque .img-rifa-destaque img {
+            width: 100%;
+            height: 290px;
+            border-top-right-radius: 20px;
+            border-top-left-radius: 20px;
+        }
+
+        .card-rifa-destaque {
+            border-top-right-radius: 20px;
+            border-top-left-radius: 20px;
+            padding-bottom: 10px;
+            background: #fff;
+            margin-bottom: 10px;
+            border-bottom-right-radius: 20px;
+            border-bottom-left-radius: 20px;
+        }
+
+        .title-rifa-destaque {
+            padding-top: 5px;
+            padding-left: 10px;
+        }
+
+        .title-rifa-destaque h1 {
+            color: #202020;
+            -webkit-line-clamp: 2 !important;
+            margin-bottom: 1px;
+            font-weight: 500;
+            font-size: 1em;
+        }
+
+        .title-rifa-destaque p {
+            color: rgba(0, 0, 0, .7);
+            font-size: .75em;
+            max-width: 96%;
+            margin: 0;
+        }
+
+        /* *************************************************************** */
+
+
+        /* *************************************************************** */
+        /* Card Rifa Normal */
+        /* *************************************************************** */
+        .card-rifa img {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+        }
+
+        .card-rifa {
+            background: #fff;
+            padding: 5px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            display: flex
+        }
+
+        .title-rifa {
+            margin-left: 15px;
+            width: 100%;
+        }
+
+        .blink {
+            margin-top: 5px;
+            animation: animate 1.5s linear infinite;
+        }
+
+
+        @keyframes animate {
+            0% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+    </style>
+@endsection
 
 @section('content')
     <style>
@@ -378,7 +342,8 @@
                             <i class="far fa-check-circle" id="payment-icon" style="color: #ffc107"></i>
                         </section>
                         <section class="title-payment-texts mt-3 ml-3">
-                            <h2 class="title-payment-text {{ $config->tema }}" id="payment-text">Aguardando Pagamento!</h2>
+                            <h2 class="title-payment-text {{ $config->tema }}" id="payment-text">Aguardando
+                                Pagamento!</h2>
                             <p class="title-payment-sub {{ $config->tema }}" id="payment-sub">Finalize o pagamento.</p>
                         </section>
                     </section>
@@ -390,9 +355,9 @@
                         <span id="cpminutes"></span>:<span id="cpseconds"></span>
                     </span>
                     <div class="progress" role="progressbar" aria-label="Animated striped example" aria-valuenow="100"
-                        aria-valuemin="0" aria-valuemax="100">
+                         aria-valuemin="0" aria-valuemax="100">
                         <div id="cpprogress" class="progress-bar progress-bar-striped progress-bar-animated"
-                            style="width: 100%"></div>
+                             style="width: 100%"></div>
                     </div>
                 </div>
 
@@ -402,10 +367,11 @@
                         <span id="qrclock">
                             <span id="qrminutes"></span> : <span id="qrseconds"></span>
                         </span>
-                        <div class="progress" role="progressbar" aria-label="Animated striped example" aria-valuenow="100"
-                            aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress" role="progressbar" aria-label="Animated striped example"
+                             aria-valuenow="100"
+                             aria-valuemin="0" aria-valuemax="100">
                             <div id="qrprogress" class="progress-bar progress-bar-striped progress-bar-animated"
-                                style="width: 100%"></div>
+                                 style="width: 100%"></div>
                         </div>
                     </div>
                 @endif
@@ -419,11 +385,12 @@
 
                     <div class="" style="display: flex;justify-content: center;">
                         <input type="text" readonly
-                            style="width: 100%; height: 40px;background-color: #fff;border: 1px solid #000;border-style: solid;border-radius: 5px;color: #000;"
-                            id="brcodepix" value="{{ $codePIX }}"></input>
+                               style="width: 100%; height: 40px;background-color: #fff;border: 1px solid #000;border-style: solid;border-radius: 5px;color: #000;"
+                               id="brcodepix" value="{{ $codePIX }}"></input>
                         <button type="button" id="clip_btn" class="btn blob bg-success"
-                            style="color: #fff;font-weight: bold;min-width: 130px;margin-left:5px; height: 40px;"
-                            data-toggle="tooltip" data-placement="top" title="COPIAR" onclick="copiar()">COPIAR</i></button>
+                                style="color: #fff;font-weight: bold;min-width: 130px;margin-left:5px; height: 40px;"
+                                data-toggle="tooltip" data-placement="top" title="COPIAR" onclick="copiar()">
+                            COPIAR</i></button>
                     </div>
 
                     <label class="mt-2">
@@ -544,7 +511,6 @@
                     </label>
                 </div>
 
-                
 
             </div>
         </div>
@@ -675,7 +641,7 @@
         });
 
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             let timerPix = setInterval(function checkPixSuccess() {
                 $.ajax({
                     url: "{{ route('findPixStatus', $codePIXID . '-' . $productID) }}",
@@ -691,7 +657,7 @@
 
                     },
 
-                    success: function(data) {
+                    success: function (data) {
                         if (data.status === true) {
                             document.getElementById("divCart").classList.add('d-none');
                             document.getElementById('payment-icon').style.color = 'green';

@@ -23,4 +23,9 @@ class Promo extends Model
     {
         return number_format($this->valor, 2, ",", ".");
     }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 }

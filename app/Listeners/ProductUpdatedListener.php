@@ -4,10 +4,11 @@ namespace App\Listeners;
 
 use App\Events\ProductUpdated;
 use App\Models\Product;
+use App\Services\ProductService;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class UpdateProductCache
+class ProductUpdatedListener
 {
     /**
      * Create the event listener.
@@ -27,7 +28,8 @@ class UpdateProductCache
      */
     public function handle(ProductUpdated $event)
     {
-        $product = $event->product;
+        $product=$event->product->refresh();
         Product::getResumeCache($product['id'], true);
+        ProductService::processRafflePages($product);
     }
 }

@@ -92,6 +92,7 @@
                         </table>
 
                     </div>
+                    {{ $rifas->links() }}
 
                 </div>
 

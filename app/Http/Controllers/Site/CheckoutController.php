@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CompleteCheckoutRequest;
-use App\Http\Requests\GetCustomerRequest;
+use App\Http\Requests\PhoneRequest;
 use App\Models\Cart;
 use App\Models\Customer;
 use App\Models\Product;

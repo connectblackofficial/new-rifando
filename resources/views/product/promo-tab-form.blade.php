@@ -1,18 +1,5 @@
-<?php
-if (isset($product['id'])) {
-    $promos = $product->promos();
-}
-if (!isset($product['id']) || !isset($promos) || count($promos) == 0) {
-    for ($i = 1; $i <= 4; $i++) {
-        $promos[] = [
-            'ordem' => $i,
-            'qtdNumeros' => 0,
-            'desconto' => 0
-        ];
-    }
-}
-?>
-@foreach($promos as $promo)
+
+@foreach($product->getFormatedPromos() as $promo)
     <div class="row text-center mt-2 promo">
         <h5>Promoção {{ $promo['ordem'] }}</h5>
         <div class="col-md-6">

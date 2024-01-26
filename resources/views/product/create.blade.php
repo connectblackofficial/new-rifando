@@ -20,9 +20,8 @@
                     <?= selectField('gateway', \App\Enums\PaymentGatewayEnum::getValuesAsSelect(), $product) ?>
                 </div>
             </div>
-
             <div class="col-md-4">
-                <?= inputField('price', 'numeric', $product, ['onclick' => 'return maskMoney(this)']) ?>
+                <?= selectField('pix_account_id', \App\Models\PixAccount::getAllAsSelect(), $product) ?>
             </div>
         </div>
         <div class="row">

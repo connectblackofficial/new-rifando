@@ -8,8 +8,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
 Route::get('/lista_product', function () {
- dd(config("constants.product_uuid_rule"));
-
+    return removePhoneMask('(11) 91605-9141');
 });
 Route::get('/lists', function () {
     $product = \App\Models\Product::whereId(103)->first();

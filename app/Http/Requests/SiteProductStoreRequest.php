@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use App\Enums\PaymentGatewayEnum;
 use App\Enums\ProductStatusEnum;
-use App\Enums\ReservationTypeEnum;
+use App\Enums\RaffleTypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SiteProductStoreRequest extends FormRequest
@@ -27,7 +27,7 @@ class SiteProductStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'tipo_reserva' => 'required|' . ReservationTypeEnum::getRule(),
+            'tipo_reserva' => 'required|' . RaffleTypeEnum::getRule(),
             'name' => 'required|max:255',
             'subname' => 'required|max:255',
             'price' => 'required|numeric|min:0',

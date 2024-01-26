@@ -11,7 +11,7 @@
     "php": ">=7.4",
     "ext-json": "*",
     "bensampo/laravel-enum": "^1.38",
-    "doctrine/dbal": "^3.7",
+    "doctrine/dbal": "2.*",
     "dompdf/dompdf": "^2.0",
     "fideloper/proxy": "~4.0",
     "guzzlehttp/guzzle": "^7.5",

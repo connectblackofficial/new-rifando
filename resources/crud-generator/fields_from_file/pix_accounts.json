@@ -1,0 +1,45 @@
+{
+  "fields": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "beneficiary_name",
+      "type": "string"
+    },
+    {
+      "name": "key_type",
+      "type": "select",
+      "options": {
+        "email": "email",
+        "cpf": "cpf",
+        "phone": "phone",
+        "cnpj": "cnpj",
+        "random": "random"
+      }
+    },
+    {
+      "name": "key_value",
+      "type": "string"
+    }
+  ],
+  "validations": [
+    {
+      "field": "name",
+      "rules": "required|max:191"
+    },
+    {
+      "field": "beneficiary_name",
+      "rules": "required|max:191"
+    },
+    {
+      "field": "key_type",
+      "rules": "required|in:email,cpf,cnpj,phone,random"
+    },
+    {
+      "field": "key_value",
+      "rules": "required|max:191"
+    }
+  ]
+}

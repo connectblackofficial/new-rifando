@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\CacheExpiresInEnum;
+use App\Enums\RaffleTypeEnum;
 use App\Traits\HasEloquentCacheTrait;
 use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +15,7 @@ class Product extends Model
     use HasEloquentCacheTrait;
 
 
-    protected $fillable = ['name','uuid', 'subname', 'parcial', 'expiracao', 'qtd_ranking', 'qtd_zeros', 'product', 'slug', 'price', 'ganho_afiliado', 'status', 'qtd', 'numbers', 'processado', 'type_raffles', 'favoritar', 'modo_de_jogo', 'minimo', 'maximo', 'user_id', 'draw_prediction', 'draw_date', 'winner', 'visible', 'gateway'];
+    protected $fillable = ['name', 'pix_account_id', 'uuid', 'subname', 'parcial', 'expiracao', 'qtd_ranking', 'qtd_zeros', 'product', 'slug', 'price', 'ganho_afiliado', 'status', 'qtd', 'numbers', 'processado', 'type_raffles', 'favoritar', 'modo_de_jogo', 'minimo', 'maximo', 'user_id', 'draw_prediction', 'draw_date', 'winner', 'visible', 'gateway'];
 
     public function saveNumbers($numbersArray)
     {
@@ -52,7 +53,7 @@ class Product extends Model
             $numbersRifa = explode(",", $this->numbers);
             return $numbersRifa;
         } else {
-            return $this->hasMany(Raffle::class, 'product_id', 'id')->where('user_id', getSiteOwnerId())->get();
+            return $this->hasMany(Raffle::class, 'product_id', 'id')->where('user_id', $this->user_id)->get();
         }
     }
 
@@ -510,7 +511,8 @@ class Product extends Model
             'type_raffles' => $this->type_raffles,
             'game_mode' => $this->modo_de_jogo,
             'draw_prediction' => $this->draw_prediction,
-            'uuid'=>$this->uuid
+            'uuid' => $this->uuid,
+
         ];
     }
 
@@ -526,7 +528,7 @@ class Product extends Model
 
     public static function getResumeCache($productId, $forceUpdate = false)
     {
-        $key = "product_resume_6_" . $productId;
+        $key = "product_resume_7_" . $productId;
         $callBack = function () use ($productId) {
             $product = Product::whereId($productId)->firstOrFail();
             $productAsArray = convertToArray($product);
@@ -537,15 +539,114 @@ class Product extends Model
                 'free' => $product->qtdNumerosDisponiveis(),
                 'percentage' => $product->porcentagem(),
                 'promos' => $product->promos()->get(),
-                'free_numbers' => $product->getFreeNumbers(),
+                'free_numbers' => convertToArray($product->getFreeNumbers()),
                 'product' => $productAsArray,
-                'description'=>$product->descriptions()->select('description', 'video')->first(),
-                'images'=>$product->images()->get()
+                'description' => $product->descriptions()->select('description', 'video')->first(),
+                'images' => $product->images()->get()
             ];
         };
 
         return getCacheOrCreate($key, null, $callBack, CacheExpiresInEnum::OneWeek, $forceUpdate);
 
 
+    }
+
+    public static function withInputsNames(Product $product)
+    {
+        $requestData = convertToArray($product);
+        $aliases = [
+            'cadastrar_ganhador' => 'winner',
+            'favoritar_rifa' => 'favoritar',
+            'data_sorteio' => 'draw_date',
+            'tipo_reserva' => 'type_raffles'
+        ];
+        foreach ($aliases as $k => $v) {
+            $requestData[$k] = $product[$v];
+        }
+        $requestData['description'] = $product->descricao();
+        $promos = $product->getFormatedPromos();
+        foreach ($promos as $p) {
+            $ordem = $p['ordem'];
+            $requestData['valPromocao'][$ordem] = $p['desconto'];
+            $requestData['numPromocao'][$p['ordem']] = $p['qtdNumeros'];
+        }
+        $requestData['popularCheck'] = $product->getCompraMaisPopular();
+        foreach ($product->shoppingSuggestion() as $sug) {
+            $requestData['compra'][$sug->id] = $sug->qtd;
+        }
+        foreach ($product->getFormatedPrizeDraws() as $premio) {
+            $requestData['descPremio'][$premio['ordem']] = $premio['descricao'];
+        }
+        return $requestData;
+    }
+
+    public function getFormatedPromos()
+    {
+        $product = $this;
+        if (isset($product['id'])) {
+            $promos = $product->promos()->get();
+        }
+        if (!isset($product['id']) || !isset($promos) || count($promos) == 0) {
+            for ($i = 1; $i <= 4; $i++) {
+                $promos[] = [
+                    'ordem' => $i,
+                    'qtdNumeros' => 0,
+                    'desconto' => 0
+                ];
+            }
+        }
+        return $promos;
+    }
+
+    public function getFormatedPrizeDraws()
+    {
+        if (isset($product['id'])) {
+            $premios = $product->prizeDraws();
+        }
+        if (!isset($product['id']) || !isset($premios) || count($premios) == 0) {
+            for ($i = 1; $i <= 10; $i++) {
+                $premios[] = [
+                    'ordem' => $i,
+                    'descricao' => ''
+                ];
+            }
+        }
+        return $premios;
+
+    }
+
+    public function intToFormatedNum($n)
+    {
+        return str_pad($n, $this->qtd_zeros + 1, '0', STR_PAD_LEFT);
+    }
+
+    public function sortNum()
+    {
+        return $this->intToFormatedNum(rand(0, $this->qtd));
+    }
+
+    public function sortNumQty($qty)
+    {
+        $nums = [];
+        for ($i = 0; $i <= $qty; $i++) {
+            $nums[] = $this->sortNum();
+        }
+        return $nums;
+    }
+
+    public function canAddAutoNum()
+    {
+        if ($this->type_raffles == RaffleTypeEnum::Automatic || $this->type_raffles == RaffleTypeEnum::Merged) {
+            return true;
+        }
+        return false;
+    }
+
+    public function canAddManualNum()
+    {
+        if ($this->type_raffles == RaffleTypeEnum::Manual || $this->type_raffles == RaffleTypeEnum::Merged) {
+            return true;
+        }
+        return false;
     }
 }

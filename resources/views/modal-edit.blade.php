@@ -128,7 +128,7 @@
                                         <div class="col">
                                             <div class="form-group">
                                                 <?php
-                                                echo selectField('tipo_reserva', \App\Enums\ReservationTypeEnum::getValues(), ['tipo_reserva' => $product->type_raffles]);
+                                                echo selectField('tipo_reserva', \App\Enums\RaffleTypeEnum::getValues(), ['tipo_reserva' => $product->type_raffles]);
                                                 ?>
                                             </div>
                                         </div>
@@ -144,21 +144,23 @@
                                                     <option value="numero" {{$product->type_raffles == "numero" ? "selected='selected'" : ''}}>
                                                         Números
                                                     </option>
-                                                    <option value="fazendinha" {{$product->type_raffles == "fazendinha" ? "selected='selected'" : ''}}>Fazendinha</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                </div>
+                                                    <option value="fazendinha" {{$product->type_raffles == "fazendinha" ? "selected='selected'" : ''}}>
+                                                        Fazendinha
+                                                    </option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
                         </div>
-                            </form>
-                        <div class="modal-footer">
-                            <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancelar">
-                            <input type="submit" class="btn btn-info" value="Salvar">
-                        </div>                       
                     </div>
                 </div>
+        </div>
+        </form>
+        <div class="modal-footer">
+            <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancelar">
+            <input type="submit" class="btn btn-info" value="Salvar">
+        </div>
+    </div>
+</div>

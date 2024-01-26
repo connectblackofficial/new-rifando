@@ -217,99 +217,13 @@ function showNumbersFazendinha(status) {
 }
 
 function selectFazendinha(id) {
-    const x = document.getElementById(id);
+    if (idExists(id)) {
+        const x = document.getElementById(id);
 
-    console.log(x);
-
-    if (x.classList.contains('selected-group')) {
-
-        x.classList.remove("selected-group");
-
-        numbersManual.splice(numbersManual.indexOf(x.id), 1);
-
-        // document.getElementById('numberSelected').innerHTML = numbersManual;
-        $('#selected-' + x.id).remove()
-        // document.getElementById('numberSelectedModal').innerHTML = numbersManual;
-        document.getElementById('numberSelectedInput').value = numbersManual;
-        document.getElementById('qtdManual').value = numbersManual.length;
-
-        total = valuePrices.toString().replace(",", ".") * numbersManual.length;
-        totalFomat = total.toLocaleString('pt-br', {
-            style: 'currency',
-            currency: 'BRL'
-        });
-
-        productSetNumbersModal(totalFomat)
-
-
-        if (numbersManual.length == 0) {
-            if (productData.type_raffles == 'manual') {
-                document.getElementById("payment").style.display = "none";
-                document.getElementById("paymentAutomatic").style.display = "block";
-
-            } else if (productData.type_raffles == 'mesclado') {
-                document.getElementById("payment").style.display = "none";
-                document.getElementById("paymentAutomatic").style.display = "block";
-            }
-
-            const value = productData.price;
-
-            total = value.toString().replace(",", ".") * 1;
-            totalFomat = total.toLocaleString('pt-br', {
-                style: 'currency',
-                currency: 'BRL'
-            });
-
-            document.getElementById('qtdNumbers').value = 1;
-            document.getElementById('numbersA').value = 1;
-
-
-            productSetNumbersModal(totalFomat);
-
-        }
-    } else {
-        if (productData.type_raffles == 'mesclado') {
-            document.getElementById('qtdNumbers').value = null;
-            document.getElementById("paymentAutomatic").style.display = "none";
-
-        }
-
-        x.classList.add("selected-group");
-
-        numbersManual.push(x.id);
-
-        // document.getElementById('numberSelected').innerHTML = numbersManual;
-
-        var teste = document.createElement('div');
-        var texto = document.createTextNode(x.dataset.grupo);
-        teste.classList = 'number-selected fazendinha';
-        teste.id = 'selected-' + x.id
-        teste.appendChild(texto)
-        document.getElementById('numberSelected').appendChild(teste)
-
-        //document.getElementById('numberSelectedModal').innerHTML = numbersManual;
-        document.getElementById('numberSelectedInput').value = numbersManual;
-
-        const productID = productData.id;
-
-        if (numbersManual.length == 10 && productID == 12) {
-            total = 120;
-            totalFomat = total.toLocaleString('pt-br', {
-                style: 'currency',
-                currency: 'BRL'
-            });
-        } else {
-            total = valuePrices.toString().replace(",", ".") * numbersManual.length;
-            totalFomat = total.toLocaleString('pt-br', {
-                style: 'currency',
-                currency: 'BRL'
-            });
-        }
-        productSetNumbersModal(totalFomat);
-        document.getElementById('qtdManual').value = numbersManual.length;
-        document.getElementById("payment").style.display = "";
-
+        addRm([id]);
     }
+    return false;
+
 }
 
 function validaMaxMin(operacao) {
@@ -698,8 +612,27 @@ function addRm(qtyOrList) {
     }
     var callback = function (data) {
         processCartResponse(data);
+        updateNumbersFazendinha(data)
     };
     return sendAjaxPostData(url, data, callback);
+}
+
+function updateNumbersFazendinha(data) {
+
+    if (checkAttribute(data, 'numbers')) {
+        let numbers = data.data.numbers;
+        if (productData.game_mode == "fazendinha-meio" || productData.game_mode == "fazendinha-completa") {
+            var elements = document.querySelectorAll('.selected-group');
+            elements.forEach(function(element) {
+                element.classList.remove('selected-group');
+            });
+
+            $.each(numbers, function (index) {
+                $("#" + index).addClass("selected-group");
+            })
+        }
+    }
+
 }
 
 function showCart() {
@@ -710,6 +643,7 @@ function showCart() {
     }
     var callback = function (data) {
         processCartResponse(data);
+        updateNumbersFazendinha(data);
     };
     return sendAjaxPostData(url, data, callback);
 }
@@ -759,6 +693,10 @@ function processNumberAjaxPageResponse(response) {
 }
 
 function changeAjaxPage(page) {
+    if (productData.game_mode != "numeros") {
+        return false;
+    }
+
     let url = ROUTES.product_site_numbers;
     if (page == 1) {
         beforeCallback = function () {
@@ -796,6 +734,8 @@ function checkCustomer() {
 
     var phone = $('#telephone1').val();
 
+    var ddi = $('#DDI').val();
+
     var callback = function (response) {
         console.log(checkAttribute(response, 'data'));
         console.log(checkAttribute(response, 'customer'));
@@ -809,7 +749,7 @@ function checkCustomer() {
         }
 
     }
-    return sendAjaxPostData(ROUTES.getCustomer, {'phone': phone}, callback)
+    return sendAjaxPostData(ROUTES.getCustomer, {'phone': phone, 'ddi': ddi}, callback)
 }
 
 function finalizarCompra() {
@@ -841,6 +781,8 @@ function findCustomer(customer) {
 function clearModal() {
     document.getElementById('telephone1').value = '';
     document.getElementById('telephone1').disabled = false;
+    document.getElementById('DDI').disabled = false;
+
     document.getElementById('div-nome').classList.add('d-none');
     document.getElementById('info-footer').innerHTML = 'Informe seu telefone para continuar.';
     document.getElementById('btn-checkout').innerHTML = 'Continuar';
@@ -856,6 +798,7 @@ function clearModal() {
 
 function novoCliente(phone) {
     document.getElementById('telephone1').disabled = true;
+    document.getElementById('DDI').disabled = true;
     document.getElementById('div-nome').classList.toggle('d-none');
     document.getElementById('info-footer').innerHTML = 'Informe os dados corretos para recebimento das premiações.';
     document.getElementById('btn-checkout').innerHTML = 'Concluir cadastro e pagar';

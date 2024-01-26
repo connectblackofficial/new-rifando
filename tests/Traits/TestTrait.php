@@ -2,9 +2,16 @@
 
 namespace Tests\Traits;
 
+use App\Enums\GameModeEnum;
 use App\Enums\PaymentGatewayEnum;
+use App\Enums\RaffleTypeEnum;
+use App\Events\ProductUpdated;
+use App\Models\Cart;
+use App\Models\Product;
+use App\Models\Promo;
 use App\Models\Site;
 use App\Models\User;
+use App\Services\CartService;
 use App\Services\ProductService;
 use Illuminate\Http\UploadedFile;
 
@@ -32,18 +39,23 @@ trait TestTrait
         return [
             'name' => $name,
             'subname' => $name,
-            'price' => rand(1, 999),
+            'slug' => createSlug($name),
+            'price' => 1000,
             'gateway' => PaymentGatewayEnum::MP,
-            'modo_de_jogo' => 'numeros',
+            'modo_de_jogo' => GameModeEnum::Numbers,
             'numbers' => 9999,
             'description' => 'Descrição do produto teste',
             'minimo' => 1,
             'maximo' => 100,
             'expiracao' => 3600,
-            'images' => $this->getRandomImages()
+            'images' => $this->getRandomImages(),
+            'type_raffles' => RaffleTypeEnum::Merged
         ];
+    }
 
-
+    public function getSmallDecimal()
+    {
+        return safeDiv(rand(1, 99), 100);
     }
 
     public function getRandomImages()
@@ -60,9 +72,104 @@ trait TestTrait
 
     public function getRandomProduct()
     {
-        $service = new ProductService();
+        $service = new ProductService($this->getSiteConfig());
         $productData = $this->getRandomProductData();
         return $service->processAddProduct($productData, $productData['images']);
 
     }
+
+    public function createCustomPromo()
+    {
+        Promo::where("product_id", $this->product->id)->delete();
+        $price = $this->product['price'];
+        $base = 10;
+        for ($i = 1; $i <= 4; $i++) {
+            $intDiscount = $base * $i;
+            $percent = safeDiv($intDiscount, 100);
+            Promo::create([
+                'qtdNumeros' => $i * 2,
+                'ordem' => $i,
+                'desconto' => $intDiscount,
+                'valor' => safeMul($percent, $price),
+                'user_id' => $this->product['user_id'],
+                'product_id' => $this->product->id
+            ]);
+        }
+        $product = $this->product->refresh();
+        event(new ProductUpdated($product));
+    }
+
+    public function cartRandomAdd($afterAddCallBack, $afterRemoveCallback, $autoQty = 0, $numsQty = 0)
+    {
+
+        $cartService = new CartService($this->site, $this->cart);
+        $randomNumbers = [];
+        if ($numsQty > 0 && $this->product->canAddManualNum()) {
+            $randomNumbers = $this->product->sortNumQty($numsQty);
+            $cartService->addRmNumbers($randomNumbers);
+        }
+        if ($autoQty <> 0 && $this->product->canAddAutoNum()) {
+            $cartService->addRmNumbers($autoQty);
+        }
+        $expectedQty = count($randomNumbers) + $autoQty;
+        $cart = $this->cart->refresh();
+        $this->assertEquals($expectedQty, $cart->getNumbersQty());
+        $afterAddCallBack($cart);
+        $totalAfterAdd = $cart->total;
+        $qtyAfterAdd = $cart->getNumbersQty();
+
+        if ($numsQty > 0) {
+            $cartService->addRmNumbers($randomNumbers);
+        }
+        for ($i = 1; $i <= $cart->random_numbers; $i++) {
+            $cartService->addRmNumbers(-1);
+        }
+        $cart = $this->cart->refresh();
+
+        $this->assertEquals(0, $cart->getNumbersQty());
+        $this->assertEquals(0, $cart->total);
+
+
+    }
+
+    public function cartT(int $autoQty, array $manualNums, int $expectedQty, float $expectedTotal): Cart
+    {
+        if ($autoQty <> 0) {
+            $this->cartService->addRmNumbers($autoQty);
+        }
+        if (count($manualNums) > 0) {
+            $this->cartService->addRmNumbers($manualNums);
+
+        }
+        $cart = $this->cart->refresh();
+        $this->assertEquals($expectedQty, $cart->getNumbersQty());
+        $this->assertEquals($expectedTotal, $cart->total);
+        return $cart;
+
+    }
+
+    public function adRmToCart(array $manualNums, $sortNums, $expectedQty = false, $price = null)
+    {
+        if (is_null($price)) {
+            $price = $this->product->price;
+        }
+        $qty = 0;
+        if ($this->product->canAddManualNum() && count($manualNums) > 0) {
+            $this->cartService->addRmNumbers($manualNums);
+            $qty += count($manualNums);
+        }
+        if ($this->product->canAddManualNum() && $sortNums > 0) {
+            $this->cartService->addRmNumbers($manualNums);
+            $qty += $sortNums;
+        }
+        if (!$expectedQty) {
+            $expectedQty = $qty;
+        }
+        $expectedPrice = safeMul($expectedQty, $price);
+        $this->cart->refresh();
+        $this->assertEquals($this->cart->total, $expectedPrice);
+        $this->assertEquals($this->cart->getNumbersQty(), $expectedQty);
+        return $this->cart->refresh();
+    }
+
 }

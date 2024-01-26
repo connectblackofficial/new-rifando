@@ -12,4 +12,6 @@ final class PaymentGatewayEnum extends Enum
     const MP = "mp";
     const ASAAS = "asaas";
     const PAGGUE = "paggue";
+
+    const MANUAL_PIX = "pix";
 }

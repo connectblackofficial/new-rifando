@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Events\ProductCreated;
 use App\Events\ProductUpdated;
-use App\Listeners\UpdateProductCache;
+use App\Listeners\ProductCreatedListener;
+use App\Listeners\ProductUpdatedListener;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
@@ -19,7 +21,10 @@ class EventServiceProvider extends ServiceProvider
             'App\Listeners\EventListener',
         ],
         ProductUpdated::class => [
-            UpdateProductCache::class
+            ProductUpdatedListener::class,
+        ],
+        ProductCreated::class => [
+            ProductCreatedListener::class,
         ]
     ];
 

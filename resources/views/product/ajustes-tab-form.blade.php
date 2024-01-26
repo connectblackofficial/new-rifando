@@ -42,7 +42,13 @@ $baseLang = 'product';
 <div class="row mt-3">
     <div class="col">
         <div class="form-group">
-            <?= selectField('favoritar_rifa', getYesNoArr(), $product) ?>
+            <?php
+            $favoritar =[];
+            if (isset($product['favoritar'])) {
+                $favoritar = ['favoritar_rifa'=>$product['favoritar']];
+            }
+            ?>
+            <?= selectField('favoritar_rifa', getYesNoArr(), $favoritar) ?>
 
         </div>
     </div>
@@ -52,7 +58,7 @@ $baseLang = 'product';
     <div class="col">
         <div class="form-group">
 
-            <?= selectField('tipo_reserva', \App\Enums\ReservationTypeEnum::getValuesAsSelect(), $product) ?>
+            <?= selectField('tipo_reserva', \App\Enums\RaffleTypeEnum::getValuesAsSelect(), $product) ?>
         </div>
     </div>
 </div>

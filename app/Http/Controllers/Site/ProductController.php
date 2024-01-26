@@ -47,6 +47,7 @@ class ProductController extends Controller
         $productModel = $productData;
         $cart = CartService::currentCart($productData['id']);
         $config = getSiteConfig();
+
         $activePromo = $productModel->promosAtivasFromCache();
         $arrayProducts = [
             'tokenAfiliado' => $tokenAfiliado,
@@ -84,6 +85,7 @@ class ProductController extends Controller
             if (isset($postData['cart_uuid'])) {
                 $cart = Cart::whereProductId($productData->id)->whereUuid($postData['cart_uuid'])->first();
             }
+            $currentCart=CartService::currentCart($productData->id);
             $productId = $productData->id;
 
 
@@ -101,7 +103,7 @@ class ProductController extends Controller
                 throw  UserErrorException::pageNotFound();
             }
 
-            $productService = new ProductService();
+            $productService = new ProductService(getSiteConfig(),$currentCart);
             $rows = [\Cache::store('file')->get($pageKey)];
             $links = $productService->getPagination($rows, $qtyPages, 1, $page);
             $response = ['html_page' => $links . $rows[0] . $links, 'current_page' => $page, 'total_pages' => $qtyPages];

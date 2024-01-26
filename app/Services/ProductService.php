@@ -5,8 +5,9 @@ namespace App\Services;
 use App\Enums\CacheExpiresInEnum;
 use App\Enums\CacheKeysEnum;
 use App\Enums\FileUploadTypeEnum;
+use App\Enums\GameModeEnum;
 use App\Enums\PaymentGatewayEnum;
-use App\Enums\ReservationTypeEnum;
+use App\Enums\RaffleTypeEnum;
 use App\Events\ProductCreated;
 use App\Events\ProductUpdated;
 use App\Exceptions\UserErrorException;
@@ -18,10 +19,11 @@ use App\Models\Raffle;
 use App\Models\ShoppingSuggestion;
 use App\Models\Site;
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
+use Illuminate\Http\Testing\File;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
+use Illuminate\Http\UploadedFile;
 
 class ProductService
 {
@@ -29,9 +31,9 @@ class ProductService
     private $siteConfig;
 
 
-    public function __construct()
+    public function __construct(Site $site)
     {
-        $this->siteConfig = getSiteConfig();
+        $this->siteConfig = $site;
     }
 
     public function validateGateways($gatewayName)
@@ -83,6 +85,7 @@ class ProductService
                 $uploadHelper = new FileUploadHelper($imageUpload, FileUploadTypeEnum::Image);
                 $imageUrl = $uploadHelper->upload();
                 $productImage = $product->createProductImage($imageUrl);
+
                 if (!isset($productImage['id'])) {
                     throw UserErrorException::uplaodError();
                 }
@@ -91,13 +94,18 @@ class ProductService
         } catch (UserErrorException $exception) {
             throw new UserErrorException($exception->getMessage());
         } catch (\Exception $exception) {
-            throw UserErrorException::uplaodError();
+            throw new UserErrorException(parseExceptionMessage($exception));
         }
 
     }
 
     function create(array $productData): Product
     {
+        $raffleType = RaffleTypeEnum::Merged;
+        if ($productData['modo_de_jogo'] != GameModeEnum::Numbers) {
+            $raffleType = RaffleTypeEnum::Manual;
+        }
+
         return Product::create([
             'uuid' => Uuid::uuid4(),
             'name' => $productData['name'],
@@ -107,9 +115,9 @@ class ProductService
             'expiracao' => $productData['expiracao'],
             'processado' => true,
             'status' => 'Ativo',
-            'type_raffles' => 'automatico',
+            'type_raffles' => $raffleType,
             'slug' => createSlug($productData['name']),
-            'user_id' => getSiteOwnerId(),
+            'user_id' => $this->siteConfig->user_id,
             'visible' => 0,
             'minimo' => $productData['minimo'],
             'maximo' => $productData['maximo'],
@@ -167,8 +175,12 @@ class ProductService
             $product->saveOrFail();
         }
         $limitRaffle = 10000;
-        if ($product->qtd >= $limitRaffle && $request['tipo_reserva'] != ReservationTypeEnum::Automatic) {
+        if ($product->qtd >= $limitRaffle && $request['tipo_reserva'] != RaffleTypeEnum::Automatic) {
             throw new UserErrorException("Rifas com mais de $limitRaffle números não podem ser manuais ou mescladas.");
+        }
+        $tipoReserva = $request['tipo_reserva'];
+        if ($product->modo_de_jogo != GameModeEnum::Numbers) {
+            $tipoReserva = RaffleTypeEnum::Manual;
         }
         $updated = $product->update(
             [
@@ -179,7 +191,6 @@ class ProductService
                 'expiracao' => $request['expiracao'],
                 'parcial' => $request['parcial'],
                 'slug' => $request['slug'],
-                'user_id' => getSiteOwnerId(),
                 'visible' => $request['visible'],
                 'favoritar' => $request['favoritar_rifa'],
                 'winner' => $request['cadastrar_ganhador'],
@@ -268,10 +279,10 @@ class ProductService
     }
 
 
-    function updatePremium(Product $product, Request $request)
+    function updatePremium(Product $product, array $requestData)
     {
         foreach ($product->prizeDraws() as $premio) {
-            $descPremio = $request->descPremio;
+            $descPremio = $requestData['descPremio'];
             if (isset($descPremio[$premio->ordem])) {
                 $premio->descricao = $descPremio[$premio->ordem];
                 $premio->saveOrFail();

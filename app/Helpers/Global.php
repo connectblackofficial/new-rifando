@@ -4,6 +4,7 @@ use App\Exceptions\UserErrorException;
 use App\Models\Site;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Validator;
 
 function getCrudData($crudName, $viewName, $routeGroup)
 {
@@ -179,7 +180,7 @@ function getCacheOrCreate($cacheKey, $instance, $callback, $timeInMinutes = 3600
 function parseExceptionMessage(\Exception $e)
 {
     $debugMessage = "{$e->getMessage()}:{$e->getFile()}:{$e->getLine()}";
-    if (env("APP_ENV") == 'local') {
+    if (env("APP_ENV") == 'local' || env("APP_ENV") == 'testing') {
         return $debugMessage;
     }
     if ($e instanceof UserErrorException) {
@@ -242,7 +243,7 @@ function getSiteOwnerUser()
 /**
  * @return Site
  */
-function getSiteConfig()
+function getSiteConfig(): Site
 {
     return \Session::get('siteEnv');
 }
@@ -363,4 +364,119 @@ function getCountries()
     $key = "countries_with_ddi";
     return getCacheOrCreate($key, null, $callback, \App\Enums\CacheExpiresInEnum::OneMonth, false);
 
+}
+
+function validateOrFails(array $rules, array $requestData)
+{
+
+    $validator = Validator::make($requestData, $rules);
+    if ($validator->fails()) {
+        throw new UserErrorException($validator->errors()->first());
+    }
+    return $validator->validated();
+}
+
+function validarDocumento($documento)
+{
+    // Remove possíveis máscaras
+    $documento = preg_replace('/[^0-9]/', '', $documento);
+
+    // Verifica se é CPF ou CNPJ
+    if (strlen($documento) == 11) {
+        return validarCPF($documento);
+    } elseif (strlen($documento) == 14) {
+        return validarCNPJ($documento);
+    }
+
+    return false;
+}
+
+
+function validarTelefone($telefone)
+{
+    // Verifica se é um número de telefone internacional com '+'
+    if (preg_match('/^\+[0-9]+$/', $telefone)) {
+        return true;
+    }
+
+    // Verifica se é um número de telefone brasileiro (com 10 ou 11 dígitos numéricos)
+    if (preg_match('/^([0-9]{10,11})$/', $telefone)) {
+        return true;
+    }
+
+    return false;
+}
+
+function validarChaveAleatoriaPix($chave)
+{
+    // Verifica se a chave tem exatamente 32 caracteres
+    if (strlen($chave) != 32) {
+        return false;
+    }
+
+    // Verifica se a chave contém apenas caracteres permitidos (letras, números, caracteres especiais)
+    return preg_match('/^[0-9a-zA-Z\!\@\#\$\%\^\&\*\(\)\[\]\{\}\:\;\'\"\,\<\.\>\/\?\`\~\-\_\+\=\|]+$/', $chave) === 1;
+}
+
+function validarCPF($cpf)
+{
+    // Verifica se o número de dígitos informados é igual a 11
+    if (strlen($cpf) != 11) {
+        return false;
+    }
+
+    // Verifica se nenhuma das sequências inválidas abaixo foi informada
+    if (preg_match('/(\d)\1{10}/', $cpf)) {
+        return false;
+    }
+
+    // Calcula e confere primeiro dígito verificador
+    for ($t = 9; $t < 11; $t++) {
+        for ($d = 0, $c = 0; $c < $t; $c++) {
+            $d += $cpf[$c] * (($t + 1) - $c);
+        }
+        $d = ((10 * $d) % 11) % 10;
+        if ($cpf[$c] != $d) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function validarCNPJ($cnpj)
+{
+    // Verifica se o número de dígitos informados é igual a 14
+    if (strlen($cnpj) != 14) {
+        return false;
+    }
+
+    // Verifica se a sequência é toda igual
+    if (preg_match('/(\d)\1{13}/', $cnpj)) {
+        return false;
+    }
+
+    // Calcula e confere primeiro dígito verificador
+    for ($t = 12; $t < 14; $t++) {
+        for ($d = 0, $c = 0; $c < $t; $c++) {
+            $d += $cnpj[$c] * (($t + 1) - $c);
+        }
+        $d = ((10 * $d) % 11) % 10;
+        if ($cnpj[$c] != $d) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function getOnlyNumbers($string)
+{
+    // Remove tudo que não é número
+    return preg_replace('/\D/', '', $string);
+}
+
+function removePhoneMask($phone)
+{
+    return getOnlyNumbers($phone);
 }

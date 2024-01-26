@@ -20,13 +20,11 @@
     </div>
 <div class="row" id="div-telefone">
     @include("site.customer.phone")
+
+    <input type="hidden" name="telephone" id="phone-cliente">
+    <input type="hidden" id="customer" name="customer">
 </div>
-    <div class="form-group" id="div-telefone">
-        <label style="color: #000"><strong>Informe seu telefone</strong></label>
-        <input type="text" class="form-control numbermask keydown"
-               style="background-color: #fff; border: none; color: #333;" name="telephone" id="telephone1"
-               placeholder="(00) 90000-0000" maxlength="15" required>
-    </div>
+
 
     <div class="form-group d-none" id="div-nome">
 

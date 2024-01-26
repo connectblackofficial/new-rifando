@@ -1,9 +1,9 @@
 <div class="row mt-4">
     <input type="hidden" name="popularCheck"
            id="popularCheck-{{ $product->id }}"
-           value="{{ $product->getCompraMaisPopularFromCache() }}">
+           value="{{ $product->getCompraMaisPopular() }}">
 
-    @foreach ($product->shoppingSuggestionFromCache() as $compra)
+    @foreach ($product->shoppingSuggestion() as $compra)
         @if($compra->qty>0)
             <div class="col-md-6 mt-2">
                 <div class="input-group">

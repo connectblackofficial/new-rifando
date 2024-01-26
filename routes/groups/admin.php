@@ -1,11 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\CustomersController;
+use App\Http\Controllers\Admin\PixAccountsController;
 use App\Http\Controllers\SuperAdmin\UsersController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeAdminController;
 use App\Http\Controllers\ProductAdminController;
 use App\Http\Controllers\MySweepstakesController;
-use App\Http\Controllers\TestController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Admin\ProductController as ProductAdmController;
 
@@ -33,7 +34,6 @@ Route::post('remover-reservas', [MySweepstakesController::class, 'removeReserved
 Route::post('altera-status-produto', [ProductAdminController::class, 'alterStatusProduct'])->name('alterStatusProduct');
 Route::post('altera-winner-produto', [ProductAdminController::class, 'alterWinnerProduct'])->name('alterWinnerProduct');
 Route::post('altera-tipo-produto', [ProductAdminController::class, 'alterTypeRafflesProduct'])->name('alterTypeRafflesProduct');
-Route::get('participants', [TestController::class, 'index'])->name('test');
 Route::post('favoritar-produto', [ProductAdminController::class, 'favoritarRifa'])->name('favoritarRifa');
 Route::patch('edit-product/{id}', [MySweepstakesController::class, 'updateProduct'])->name('updateProduct');
 Route::post('add-foto-rifa', [ProductAdminController::class, 'addFoto'])->name('addFoto');
@@ -105,3 +105,20 @@ Route::get('super-admin/users/{pk}', [UsersController::class, 'show'])->name('su
 Route::get('super-admin/users/{pk}/edit', [UsersController::class, 'edit'])->name('super-admin.users.edit');
 Route::put('super-admin/users/{pk}', [UsersController::class, 'update'])->name('super-admin.users.update');
 Route::delete('super-admin/users/{pk}', [UsersController::class, 'destroy'])->name('super-admin.users.destroy');
+
+
+Route::get('admin/pix-accounts', [PixAccountsController::class, 'index'])->name('admin.pixaccounts.index');
+Route::get('admin/pix-accounts/create', [PixAccountsController::class, 'create'])->name('admin.pixaccounts.create');
+Route::post('admin/pix-accounts', [PixAccountsController::class, 'store'])->name('admin.pixaccounts.store');
+Route::get('admin/pix-accounts/{pk}', [PixAccountsController::class, 'show'])->name('admin.pixaccounts.show');
+Route::get('admin/pix-accounts/{pk}/edit', [PixAccountsController::class, 'edit'])->name('admin.pixaccounts.edit');
+Route::put('admin/pix-accounts/{pk}', [PixAccountsController::class, 'update'])->name('admin.pixaccounts.update');
+Route::delete('admin/pix-accounts/{pk}', [PixAccountsController::class, 'destroy'])->name('admin.pixaccounts.destroy');
+
+Route::get('admin/customers', [CustomersController::class, 'index'])->name('admin.customers.index');
+Route::get('admin/customers/create', [CustomersController::class, 'create'])->name('admin.customers.create');
+Route::post('admin/customers', [CustomersController::class, 'store'])->name('admin.customers.store');
+Route::get('admin/customers/{pk}', [CustomersController::class, 'show'])->name('admin.customers.show');
+Route::get('admin/customers/{pk}/edit', [CustomersController::class, 'edit'])->name('admin.customers.edit');
+Route::put('admin/customers/{pk}', [CustomersController::class, 'update'])->name('admin.customers.update');
+Route::delete('admin/customers/{pk}', [CustomersController::class, 'destroy'])->name('admin.customers.destroy');

@@ -75,14 +75,14 @@ class HomeAdminController extends Controller
     {
         if ($request->search) {
             $search = $request->search;
-            $clientes = Customer::siteOwner()->where(function (Builder $query) use($search){
-                $query->orWhere('nome', 'like', '%' .$search. '%');
-                $query->orWhere('telephone', 'like', '%' .$search. '%');
-                $query->orWhere('cpf', 'like', '%' .$search. '%');
-                $query->orWhere('email	', 'like', '%' .$search. '%');
-            })->get();
+            $clientes = Customer::siteOwner()->where(function (Builder $query) use ($search) {
+                $query->orWhere('nome', 'like', '%' . $search . '%');
+                $query->orWhere('telephone', 'like', '%' . $search . '%');
+                $query->orWhere('cpf', 'like', '%' . $search . '%');
+                $query->orWhere('email	', 'like', '%' . $search . '%');
+            })->paginate(10);
         } else {
-            $clientes = Customer::siteOwner()->get();
+            $clientes = Customer::siteOwner()->paginate(10);
         }
 
         $data = [

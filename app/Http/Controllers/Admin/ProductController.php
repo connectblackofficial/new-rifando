@@ -42,8 +42,8 @@ class ProductController extends Controller
 
         $rules = (new SiteProductFastStoreRequest())->rules();
         $update = function () use ($request) {
-            $productService = new ProductService();
-            $productService->processAddProduct($request->all(),$request->file('images'));
+            $productService = new ProductService(getSiteConfig());
+            $productService->processAddProduct($request->all(), $request->file('images'));
             return true;
         };
 
@@ -56,7 +56,7 @@ class ProductController extends Controller
         $rules = (new SiteProductUpdateRequest())->rules();
         $update = function () use ($id, $request) {
             $product = Product::getByIdWithSiteCheckOrFail($id);
-            $productService = new ProductService();
+            $productService = new ProductService(getSiteConfig());
             $productService->update($product, $request);
             return true;
 
@@ -69,7 +69,7 @@ class ProductController extends Controller
     public function destroyPhoto($id)
     {
         $destroyPhoto = function () use ($id) {
-            $productService = new ProductService();
+            $productService = new ProductService(getSiteConfig());
             $productService->destroyPhoto($id);
             return true;
         };
@@ -79,7 +79,7 @@ class ProductController extends Controller
     public function destroy($id)
     {
         $destroyProduct = function () use ($id) {
-            $productService = new ProductService();
+            $productService = new ProductService(getSiteConfig());
             $productService->destroyProduct($id);
             return true;
         };
@@ -92,7 +92,13 @@ class ProductController extends Controller
     {
 
         $search = $request->get('search');
-        $rifas = $query->search($search)->orderBy('id', 'desc')->get();
+        if (!empty($search)) {
+            $rifas = $query->search($search)->orderBy('id', 'desc');
+        } else {
+            $rifas = $query->orderBy('id', 'desc');
+
+        }
+        $rifas = $rifas->paginate(10);
         return view('product.index', [
             'rifas' => $rifas,
             'pageTitle' => $title

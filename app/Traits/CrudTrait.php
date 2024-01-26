@@ -69,6 +69,32 @@ trait CrudTrait
         return false;
     }
 
+    public function denyEdit()
+    {
+        $this->alloweds['edit'] = false;
+    }
+
+    public function denyCreate()
+    {
+        $this->alloweds['create'] = false;
+    }
+
+    public function denyList()
+    {
+        $this->alloweds['list'] = false;
+    }
+
+    public function denyDestroy()
+    {
+        $this->alloweds['destroy'] = false;
+    }
+
+    public function denyShow()
+    {
+        $this->alloweds['show'] = false;
+    }
+
+
     private function hasPermissionOrFail($action)
     {
         if (!$this->hasPermission($action)) {
@@ -288,12 +314,20 @@ trait CrudTrait
     }
 
 
-    private function processUpdate(array $requestData, $id)
+    private function processUpdate($validationRule, array $requestData, $id)
     {
-        $currentData = $this->modelClass::find($id);
+        $currentData = $this->modelClass::findOrFail($id);
+
+
         $processUpdateFn = function (self $instance) use ($requestData, $id, $currentData) {
             $instance->hasPermissionOrFail('edit');
-
+            $currentData = convertToArray($currentData);
+            foreach ($currentData as $k => $v) {
+                $areEquals = isset($currentData[$v]) && isset($requestData[$v]) && $currentData[$v] == $requestData[$v];
+                if (!in_array($k, $this->hashFields) && $areEquals) {
+                    unset($requestData[$v]);
+                }
+            }
             $requestData = $instance->parseHashFields($requestData);
             $requestData = $instance->beforeUpdate($requestData, $id);
             $currentData->update($requestData);
@@ -301,6 +335,23 @@ trait CrudTrait
             return redirect(route($instance->getRouteIndex()))->with('success', htmlLabel($instance->crudNameSingular . ' updated'));
         };
         return $this->processResponse($processUpdateFn);
+    }
+
+    public function canIgnoreField($k, $currentData, $requestData)
+    {
+        return !in_array($k, $this->hashFields) && isset($currentData[$k]) && isset($requestData[$k]) && $currentData[$k] == $requestData[$k];
+    }
+
+    public function getCleanRulesAndData($class, $currentData, $requestData)
+    {
+        $rules = (new $class)->rules();
+        foreach ($requestData as $k => $v) {
+            if ($this->canIgnoreField($k, $currentData, $requestData)) {
+                unset($rules[$k]);
+                unset($requestData[$k]);
+            }
+        }
+        return ['rules'=>$rules,'requestData'=>$requestData];
     }
 
     private function parseHashFields($requestData)
@@ -322,7 +373,11 @@ trait CrudTrait
 
             $requestData = $instance->parseHashFields($requestData);
             $requestData = $instance->beforeStore($requestData);
+            $fillable = (new $this->modelClass)->getFillable();
 
+            if (in_array('user_id', $fillable)) {
+                $requestData['user_id'] = getSiteOwnerId();
+            }
             $this->modelClass::create($requestData);
             $instance->afterStore();
             return redirect(route($instance->getRouteIndex()))->with('success', htmlLabel($instance->crudNameSingular . ' added'));
@@ -393,8 +448,8 @@ trait CrudTrait
     public function index(Request $request)
     {
         $showPageIndex = function (self $instance) use ($request) {
-
             $instance->hasPermissionOrFail('list');
+
             $perPage = $instance->pagination;
             $requestData = $request->query();
             if ($instance->hasSearchFields($request)) {
@@ -406,15 +461,16 @@ trait CrudTrait
                 if (isset($requestData['orderType']) && !empty($requestData['orderType']) && in_array($requestData['orderType'], ['desc', 'asc'])) {
                     $orderDir = $requestData['orderType'];
                 }
-                $rows = $instance->modelClass::search($request)->orderBy($orderCol, $orderDir)->paginate($perPage);
+                $rows = $instance->modelClass::siteOwner()->search($request)->orderBy($orderCol, $orderDir)->paginate($perPage);
 
                 $pageData[$instance->crudName] = $rows;
             } else {
-                $pageData[$instance->crudName] = $instance->modelClass::latest()->paginate($perPage);
+                $pageData[$instance->crudName] = $instance->modelClass::siteOwner()->latest()->paginate($perPage);
             }
 
             $view = $instance->getGroup() . '.' . $instance->crudName . '.index';
             $pageData['pgTitle'] = htmlLabel($instance->crudName . '_index');;
+
             return $this->parseViewCi($view, $pageData);
 
         };
@@ -447,7 +503,8 @@ trait CrudTrait
             $instance->beforeRenderShowPage($id);
             $view = $instance->getGroup() . '.' . $this->crudName . '.show';
             $pageData = [];
-            $pageData[$this->crudNameSingular] = $this->modelClass::findOrFail($id);
+
+            $pageData[$this->crudNameSingular] = $this->modelClass::siteOwner()->where($instance->getPkModelCol(), $id)->firstOrFail();
             $pageData['pgTitle'] = htmlLabel($instance->crudName . '_show');;
 
             return $this->parseViewCi($view, $pageData);
@@ -464,7 +521,7 @@ trait CrudTrait
             $instance->beforeRenderEditPage($id);
             $view = $instance->getGroup() . '.' . $this->crudName . '.edit';
             $pageData = [];
-            $pageData[$this->crudNameSingular] = $this->modelClass::findOrFail($id);
+            $pageData[$this->crudNameSingular] = $this->modelClass::siteOwner()->where($instance->getPkModelCol(), $id)->firstOrFail();
             $pageData['pgTitle'] = htmlLabel($instance->crudName . '_edit');;
             return $this->parseViewCi($view, $pageData);
         };

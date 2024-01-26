@@ -5,7 +5,7 @@ namespace App\Enums;
 use App\Traits\EnumTrait;
 use BenSampo\Enum\Enum;
 
-final class ReservationTypeEnum extends Enum
+final class RaffleTypeEnum extends Enum
 {
     use EnumTrait;
 

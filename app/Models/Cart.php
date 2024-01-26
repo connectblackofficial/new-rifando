@@ -11,7 +11,11 @@ class Cart extends Model
     use ModelSiteOwnerTrait;
 
     protected $fillable = [
-        'product_id', 'participant_id', 'random_numbers', 'uuid', 'numbers', 'total', 'promo_id'
+        'id', 'product_id', 'participant_id', 'random_numbers', 'uuid', 'numbers', 'total', 'promo_id'
+    ];
+
+    protected $casts = [
+        'total' => 'float',
     ];
 
     public function getNumbersQty()
@@ -38,6 +42,22 @@ class Cart extends Model
         $uuid = $request->cart_uuid;
         $product = Product::where("uuid", $productUuid)->select("id")->firstOrFail();
         return Cart::whereProductId($product['id'])->whereUuid($uuid)->first();
+    }
+
+    public function clear()
+    {
+        $this->total = 0;
+        $this->random_numbers = 0;
+        $this->numbers = null;
+        $this->promo_id = null;
+        $this->participant_id = null;
+        $this->saveOrFail();
+        $this->refresh();
+    }
+
+    public function alreadyOnCart()
+    {
+
     }
 
 }

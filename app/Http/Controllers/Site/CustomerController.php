@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\GetCustomerRequest;
+use App\Http\Requests\PhoneRequest;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Services\ProductService;
@@ -13,13 +13,14 @@ class CustomerController extends Controller
 {
     public function getCustomer(Request $request)
     {
-        $rules = (new GetCustomerRequest())->rules();
+
+        $rules = (new PhoneRequest())->rules();
         $action = function () use ($request) {
-            $customer = Customer::siteOwner()->where('telephone', $request->phone)->first();
+            $customer = Customer::siteOwner()->phoneFromRequest($request)->first();
             $response['customer'] = $customer;
             return $response;
         };
 
-        return $this->processAjaxResponse(['phone' => $request->phone], $rules, $action, true);
+        return $this->processAjaxResponse(['phone' => $request->phone,'ddi'=>$request->ddi], $rules, $action, true);
     }
 }
