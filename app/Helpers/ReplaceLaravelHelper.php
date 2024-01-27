@@ -8,7 +8,11 @@ function checkAutoTrans($key, $autoCreate = true)
         $transArr = json_decode($json, true);
         if (!isset($transArr[$key])) {
             $transArr[$key] = $key;
-           file_put_contents($fileDir, json_encode($transArr));
+            $newKey = str_replace("+", "", $key);
+            if (is_numeric($newKey)) {
+                return false;
+            }
+            file_put_contents($fileDir, json_encode($transArr));
         }
     }
 }

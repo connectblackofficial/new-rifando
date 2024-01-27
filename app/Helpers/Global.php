@@ -351,7 +351,19 @@ function checkUserIdSite($userId)
     }
 
 }
+function getCountriesDdi()
+{
+    $callback = function () {
+        $countries = [];
+        foreach (\App\Models\Country::all() as $country) {
+            $countries[$country->dial_code] =$country->dial_code;
+        }
+        return $countries;
+    };
+    $key = "countries_ddi";
+    return getCacheOrCreate($key, null, $callback, \App\Enums\CacheExpiresInEnum::OneMonth, false);
 
+}
 function getCountries()
 {
     $callback = function () {
@@ -480,3 +492,9 @@ function removePhoneMask($phone)
 {
     return getOnlyNumbers($phone);
 }
+
+function allowedDdiAsList()
+{
+    return implode(",", array_keys(getCountries()));
+}
+

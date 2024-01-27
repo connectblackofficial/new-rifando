@@ -2,9 +2,9 @@
 
 namespace DummyNamespace;
 
+use App\Http\Requests\Admin\PixAccountRequest;
 use DummyRootNamespaceHttp\Requests;
 use DummyRootNamespaceHttp\Controllers\Controller;
-
 use DummyRootNamespace{{modelNamespace}}{{modelName}};
 use Illuminate\Http\Request;
 use App\Traits\CrudTrait;
@@ -26,14 +26,15 @@ class DummyClass extends Controller
     public function store({{validationRequestName}} $request)
     {
 
-        return $this->processStore($request);
+        return $this->processStore($request->all());
     }
 
-    public function update({{validationRequestName}} $request, $id)
-    {
 
-        return $this->processUpdate($request,$id);
-    }
+        public function update(Request $request, $id)
+{
+    $rule = {{validationRequestName}}::class;
+    return $this->processUpdate($rule, $request->all(), $id);
+}
 
 
 

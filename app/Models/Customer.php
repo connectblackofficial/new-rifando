@@ -16,6 +16,7 @@ class Customer extends Model
     use ModelAcessControllTrait;
 
     protected $fillable = [
+        'id',
         'nome',
         'telephone',
         'email',
@@ -52,7 +53,7 @@ class Customer extends Model
     public static function getEnumFields()
     {
         return [
-            'ddi' => getCountries()
+            'ddi' => getCountriesDdi()
         ];
     }
 }

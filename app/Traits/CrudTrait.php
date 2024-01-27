@@ -3,10 +3,14 @@
 namespace App\Traits;
 
 use App\Exceptions\UserErrorException;
+use App\Models\Customer;
 use App\Models\User;
+use App\Rules\ValidatePixKey;
+use Cassandra\Custom;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 trait CrudTrait
 {
@@ -26,9 +30,11 @@ trait CrudTrait
     private $pkModelCol;
 
     private $modelInstance;
-    private $removedFromAdvancedSearch = [];
+    private $removedFromAdvancedSearch = ['user_id','uuid'];
     private $hashFields = ['password'];
     private $uniqueFields = ['email'];
+    private $currentUpdateData = [];
+
 
     private function getModelFields()
     {
@@ -317,17 +323,21 @@ trait CrudTrait
     private function processUpdate($validationRule, array $requestData, $id)
     {
         $currentData = $this->modelClass::findOrFail($id);
+        $this->currentUpdateData = $currentData;
+        $cleanData = $this->getCleanRulesAndData($validationRule, $requestData);
+        if (count($cleanData['requestData']) <= 2) {
+            return redirect(route($this->getRouteIndex()))->with('success', htmlLabel($this->crudNameSingular . ' updated'));
+        }
+        $requestData = $cleanData['requestData'];
+        $rules = $cleanData['rules'];
 
+        $validator = Validator::make($requestData, $rules);
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator);
+        }
 
         $processUpdateFn = function (self $instance) use ($requestData, $id, $currentData) {
             $instance->hasPermissionOrFail('edit');
-            $currentData = convertToArray($currentData);
-            foreach ($currentData as $k => $v) {
-                $areEquals = isset($currentData[$v]) && isset($requestData[$v]) && $currentData[$v] == $requestData[$v];
-                if (!in_array($k, $this->hashFields) && $areEquals) {
-                    unset($requestData[$v]);
-                }
-            }
             $requestData = $instance->parseHashFields($requestData);
             $requestData = $instance->beforeUpdate($requestData, $id);
             $currentData->update($requestData);
@@ -342,8 +352,9 @@ trait CrudTrait
         return !in_array($k, $this->hashFields) && isset($currentData[$k]) && isset($requestData[$k]) && $currentData[$k] == $requestData[$k];
     }
 
-    public function getCleanRulesAndData($class, $currentData, $requestData)
+    public function getCleanRulesAndData($class, $requestData)
     {
+        $currentData = $this->currentUpdateData;
         $rules = (new $class)->rules();
         foreach ($requestData as $k => $v) {
             if ($this->canIgnoreField($k, $currentData, $requestData)) {
@@ -351,7 +362,7 @@ trait CrudTrait
                 unset($requestData[$k]);
             }
         }
-        return ['rules'=>$rules,'requestData'=>$requestData];
+        return ['rules' => $rules, 'requestData' => $requestData];
     }
 
     private function parseHashFields($requestData)
@@ -543,5 +554,23 @@ trait CrudTrait
         return $this->modelClass;
     }
 
+    private function validatePhoneOnUpdate($requestData)
+    {
 
+        if (isset($requestData['ddi'])) {
+            $ddi = $requestData['ddi'];
+        } elseif (isset($this->currentUpdateData['ddi'])) {
+            $ddi = $this->currentUpdateData['ddi'];
+        } else {
+            throw new UserErrorException("DDI  inválido.");
+        }
+        if (isset($requestData['telephone'])) {
+            $phone = $requestData['telephone'];
+        } else {
+            $phone = $this->currentUpdateData['telephone'];
+        }
+        if (Customer::siteOwner()->where("ddi", $ddi)->whereTelephone(removePhoneMask($phone))->count() >= 1) {
+            throw new UserErrorException("Este telefone já esta sendo utilizado por outro usuário.");
+        }
+    }
 }

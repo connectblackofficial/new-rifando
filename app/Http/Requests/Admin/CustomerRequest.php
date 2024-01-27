@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Rules\CpfValidation;
 use App\Traits\TranslateAttrTrait;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -28,14 +29,12 @@ class CustomerRequest extends FormRequest
     {
 
         return [
-            
+            'nome' => 'required|max:191',
+            'ddi' => 'required|in:' . allowedDdiAsList(),
+            'telephone' => 'required|numeric',
+            'cpf' => ['nullable','max:191',new CpfValidation()],
+            'email' => 'nullable|max:191'
 
-			'nome' => 'required|max:191',
-			'ddi' => 'required',
-			'telephone' => 'required|numeric',
-			'cpf' => 'nullable|max:191',
-			'email' => 'nullable|max:191'
-		
         ];
     }
 }

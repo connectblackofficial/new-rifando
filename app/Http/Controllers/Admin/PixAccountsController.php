@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exceptions\UserErrorException;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 
@@ -43,16 +44,37 @@ class PixAccountsController extends Controller
 
     public function beforeUpdate($requestData, $id)
     {
-        validateOrFails(['key_value' => ['required', new ValidatePixKey($requestData['key_type'])]], ['key_value' => $requestData['key_value']]);
+        $this->validatePixKeys($requestData);
         return $requestData;
 
     }
 
     public function beforeStore($requestData)
     {
+
         validateOrFails(['key_value' => ['required', new ValidatePixKey($requestData['key_type'])]], ['key_value' => $requestData['key_value']]);
+
         return $requestData;
 
     }
+
+    private function validatePixKeys($requestData)
+    {
+
+            if (isset($requestData['key_type'])) {
+                $keyType = $requestData['key_type'];
+            } elseif (isset($this->currentUpdateData['key_type'])) {
+                $keyType = $this->currentUpdateData['key_type'];
+            } else {
+                throw new UserErrorException("Tipo  inválido.");
+            }
+            if (isset($requestData['key_value'])) {
+                $keyVal = $requestData['key_value'];
+            } else {
+                $keyVal = $this->currentUpdateData['key_value'];
+            }
+            validateOrFails(['key_value' => ['required', new ValidatePixKey($keyType)]], ['key_value' =>$keyVal]);
+        }
+
 
 }

@@ -19,6 +19,7 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
+    public $siteConfig;
     public $fieldsRifa = [
         'id',
         'maximo',

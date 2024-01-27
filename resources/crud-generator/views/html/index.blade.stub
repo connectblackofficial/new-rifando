@@ -20,7 +20,7 @@
                         <tbody>
                         @foreach($%%crudName%% as $item)
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $item->id }}</td>
                             %%formBodyHtml%%
                             <td>
                                 @include("crud.layout.actions")

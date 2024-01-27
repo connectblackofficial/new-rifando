@@ -2,19 +2,21 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\Admin\PixAccountRequest;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
-
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Traits\CrudTrait;
-use App\Http\Requests\Admin\\CustomerRequest;
+use App\Http\Requests\Admin\CustomerRequest;
+
 class CustomersController extends Controller
 {
     use CrudTrait;
-    private $crudName="customers";
-    private $routeGroup="admin/";
-    private $crudNameSingular="customer";
+
+    private $crudName = "customers";
+    private $routeGroup = "admin/";
+    private $crudNameSingular = "customer";
 
     public function __construct()
     {
@@ -22,21 +24,18 @@ class CustomersController extends Controller
     }
 
 
-
     public function store(CustomerRequest $request)
     {
 
-        return $this->processStore($request);
+        return $this->processStore($request->all());
     }
 
-    public function update(CustomerRequest $request, $id)
+
+    public function update(Request $request, $id)
     {
-
-        return $this->processUpdate($request,$id);
+        $rule = CustomerRequest::class;
+        return $this->processUpdate($rule, $request->all(), $id);
     }
-
-
-
 
 
 }

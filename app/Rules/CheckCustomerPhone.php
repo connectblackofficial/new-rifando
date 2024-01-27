@@ -2,19 +2,24 @@
 
 namespace App\Rules;
 
+use App\Models\Customer;
 use App\Models\Site;
 use Illuminate\Contracts\Validation\Rule;
 
 class CheckCustomerPhone implements Rule
 {
+    private $site;
+    private $ddi;
+
     /**
      * Create a new rule instance.
      *
      * @return void
      */
-    public function __construct(Site $site)
+    public function __construct(Site $site, $ddi)
     {
-        //
+        $this->site = $site;
+        $this->ddi = $ddi;
     }
 
     /**
@@ -26,7 +31,7 @@ class CheckCustomerPhone implements Rule
      */
     public function passes($attribute, $value)
     {
-        //
+
     }
 
     /**
