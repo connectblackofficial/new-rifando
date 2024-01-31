@@ -12,6 +12,7 @@ use App\Events\ProductCreated;
 use App\Events\ProductUpdated;
 use App\Exceptions\UserErrorException;
 use App\Helpers\FileUploadHelper;
+use App\Models\PixAccount;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\Promo;
@@ -65,6 +66,7 @@ class ProductService
         $this->processImages($product, $images);
         $this->saveNumbers($product, $gameMode, $qtdNumbers, $zerosQtd);
         $product->createOrUpdateDescription($productData['description']);
+        $product->defaultshoppingSuggestion();
         event(new ProductCreated($product));
         return $product;
     }
@@ -105,8 +107,7 @@ class ProductService
         if ($productData['modo_de_jogo'] != GameModeEnum::Numbers) {
             $raffleType = RaffleTypeEnum::Manual;
         }
-
-        return Product::create([
+        $newproductData = [
             'uuid' => Uuid::uuid4(),
             'name' => $productData['name'],
             'subname' => $productData['subname'],
@@ -124,10 +125,19 @@ class ProductService
             'modo_de_jogo' => $productData['modo_de_jogo'],
             'gateway' => $productData['gateway'],
             'qtd_zeros' => strlen((string)$productData['numbers'])
-        ]);
+        ];
+        if (isset($productData['pix_account_id'])) {
+            $this->validatePixGateway($productData['gateway'], $productData['pix_account_id'], $this->siteConfig->user_id);
+            $newproductData['pix_account_id'] = $productData['pix_account_id'];
+        }
+        $product = Product::create($newproductData);
+        $product->slug = $product->slug . "-" . $product->id;
+        $product->saveOrFail();
+        return $product;
     }
 
     private
+
     function saveNumbers(Product $product, $gameMode, $qtdNumbers, $zerosQtd = null)
     {
         if (str_starts_with($gameMode, 'fazendinha')) {
@@ -163,63 +173,74 @@ class ProductService
         }
         for ($x = 0; $x < $qtdNumbers; $x++) {
             $nbr = str_pad($x, $qtdZeros, '0', STR_PAD_LEFT);
-            array_push($arr, $nbr);
+            $arr[$nbr] = $nbr;
         }
-        return implode(",", $arr);
+        return json_encode($arr);
     }
 
-    public function update(Product $product, $request)
+    public function update(Product $product, array $updateData)
     {
-        if ($request['favoritar_rifa'] && $product->favoritar == 1) {
+        if ($updateData['favoritar_rifa'] && $product->favoritar == 1) {
             $product->favoritar = 0;
             $product->saveOrFail();
         }
         $limitRaffle = 10000;
-        if ($product->qtd >= $limitRaffle && $request['tipo_reserva'] != RaffleTypeEnum::Automatic) {
+        if ($product->qtd >= $limitRaffle && $updateData['tipo_reserva'] != RaffleTypeEnum::Automatic) {
             throw new UserErrorException("Rifas com mais de $limitRaffle números não podem ser manuais ou mescladas.");
         }
-        $tipoReserva = $request['tipo_reserva'];
+        $tipoReserva = $updateData['tipo_reserva'];
         if ($product->modo_de_jogo != GameModeEnum::Numbers) {
             $tipoReserva = RaffleTypeEnum::Manual;
         }
-        $updated = $product->update(
-            [
-                'name' => $request['name'],
-                'subname' => $request['subname'],
-                'price' => $request['price'],
-                'status' => $request['status'],
-                'expiracao' => $request['expiracao'],
-                'parcial' => $request['parcial'],
-                'slug' => $request['slug'],
-                'visible' => $request['visible'],
-                'favoritar' => $request['favoritar_rifa'],
-                'winner' => $request['cadastrar_ganhador'],
-                'draw_date' => date("Y-m-d H:i:s", strtotime($request['data_sorteio'])),
-                'maximo' => $request['maximo'],
-                'minimo' => $request['minimo'],
-                'qtd_ranking' => $request['qtd_ranking'],
-                'ganho_afiliado' => $request['ganho_afiliado'],
-                'gateway' => $request['gateway'],
-                'type_raffles' => $request['tipo_reserva'],
-            ]
-        );
+        $newUpdateData = [
+            'name' => $updateData['name'],
+            'subname' => $updateData['subname'],
+            'price' => $updateData['price'],
+            'status' => $updateData['status'],
+            'expiracao' => $updateData['expiracao'],
+            'parcial' => $updateData['parcial'],
+            'slug' => $updateData['slug'],
+            'visible' => $updateData['visible'],
+            'favoritar' => $updateData['favoritar_rifa'],
+            'winner' => $updateData['cadastrar_ganhador'],
+            'draw_date' => date("Y-m-d H:i:s", strtotime($updateData['data_sorteio'])),
+            'maximo' => $updateData['maximo'],
+            'minimo' => $updateData['minimo'],
+            'qtd_ranking' => $updateData['qtd_ranking'],
+            'ganho_afiliado' => $updateData['ganho_afiliado'],
+            'gateway' => $updateData['gateway'],
+            'type_raffles' => $tipoReserva,
+        ];
+        if (isset($updateData['pix_account_id'])) {
+            $this->validatePixGateway($updateData['gateway'], $updateData['pix_account_id'], $product['user_id']);
+            $newUpdateData['pix_account_id'] = $updateData['pix_account_id'];
+        }
+        $updated = $product->update($newUpdateData);
         if (!$updated) {
             throw new UserErrorException("Falha ao atualizar o produto");
         }
 
         $productDesc = $product->descriptions()->first();
         if (isset($productDesc['id'])) {
-            $productDesc->description = $request['description'];
+            $productDesc->description = $updateData['description'];
             $productDesc->saveOrFail();
         }
-        $this->updateOrCreatePromos($product, $request['numPromocao'], $request['valPromocao']);
-        $this->updateAutoBuy($product, $request);
-        $this->updatePremium($product, $request);
+        $this->updateOrCreatePromos($product, $updateData['numPromocao'], $updateData['valPromocao']);
+        $this->updateAutoBuy($product, $updateData);
+        $this->updatePremium($product, $updateData);
 
         event(new ProductUpdated($product));
         return $product;
     }
 
+    private function validatePixGateway($gateway, $pixAccountId, $ownerUserId)
+    {
+        if ($gateway == PaymentGatewayEnum::MANUAL_PIX) {
+            if (PixAccount::whereId($pixAccountId)->whereUserId($ownerUserId)->count() == 0) {
+                throw new UserErrorException("Chave inválida.");
+            }
+        }
+    }
 
     public
     function updateOrCreatePromos(Product $product, array $numPromocao, array $valPromocao)
@@ -258,7 +279,7 @@ class ProductService
     }
 
 
-    function updateAutoBuy(Product $product, $productData)
+    function updateAutoBuy(Product $product, array $productData)
     {
         foreach ($productData['compra'] as $key => $qtd) {
             $autoBuy = ShoppingSuggestion::whereProductId($product->id)->whereId($key)->first();
@@ -325,10 +346,9 @@ class ProductService
     }
 
 
-    public
     function getRandomFreeNumbers(Product $product, $qty)
     {
-        $numbers = explode(",", $product['numbers']);
+        $numbers = $product->getFreeNumbers();
         $chavesAleatorias = array_rand($numbers, $qty);
         $valoresSorteados = [];
         foreach ($chavesAleatorias as $chave) {

@@ -36,6 +36,14 @@ a {
     z-index: 9999999;
 }
 .separator-20{
-    height: 20px;
-    display: block;
+    height: 20px !important;
+    display: block !important;
+}
+.separator-10{
+    height: 10px !important;
+    display: block !important;
+}
+.separator-5{
+    height: 5px !important;
+    display: block !important;
 }

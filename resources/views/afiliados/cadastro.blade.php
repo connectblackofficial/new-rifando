@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+<?php
 
+$siteConfig = getSiteConfig();
+?>
 <head>
-    <title><?php echo @$data['social']->name; ?> @yield('title')</title>
+    <title><?php echo $siteConfig->name; ?> @yield('title')</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--===============================================================================================-->
@@ -43,8 +46,8 @@
                     @endif
                     <span class="login100-form-title">
                         Afiliado - Novo Cadastro <br>
-                        @if (@$data['social']->logo)
-                            <img src="{{imageAsset(@$data['social']->logo)}}" alt="" width="100"
+                        @if ($siteConfig->logo)
+                            <img src="{{imageAsset($siteConfig->logo)}}" alt="" width="100"
                                 height="50">
                         @else
                             HD Produtora
@@ -112,7 +115,7 @@
 
                     <div class="text-center p-t-12">
                         <a class="txt2" href="{{ route('afiliado.home') }}">
-                            Já possiui cadastro ? Faça Login
+                            Já possui cadastro ? Faça Login
                             <i class="fa fa-long-arrow-right m-l-5" aria-hidden="true"></i>
                         </a>
                     </div>

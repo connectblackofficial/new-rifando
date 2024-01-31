@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Enums\CacheExpiresInEnum;
+use App\Enums\ProductStatusEnum;
 use App\Enums\RaffleTypeEnum;
 use App\Traits\HasEloquentCacheTrait;
+use App\Traits\ModelSearchTrait;
 use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -13,23 +15,20 @@ class Product extends Model
 {
     use ModelSiteOwnerTrait;
     use HasEloquentCacheTrait;
+    use ModelSearchTrait;
 
 
     protected $fillable = ['name', 'pix_account_id', 'uuid', 'subname', 'parcial', 'expiracao', 'qtd_ranking', 'qtd_zeros', 'product', 'slug', 'price', 'ganho_afiliado', 'status', 'qtd', 'numbers', 'processado', 'type_raffles', 'favoritar', 'modo_de_jogo', 'minimo', 'maximo', 'user_id', 'draw_prediction', 'draw_date', 'winner', 'visible', 'gateway'];
 
     public function saveNumbers($numbersArray)
     {
-        $stringNumbers = implode(",", $numbersArray);
-
-        $this->update([
-            'numbers' => $stringNumbers
-        ]);
-
+        $this->numbers = json_encode($numbersArray);
+        $this->saveOrFail();
     }
 
     public function getCompraMaisPopular()
     {
-        $compras = $this->shoppingSuggestion();
+        $compras = $this->shoppingSuggestions();
         if ($compras->where('popular', '=', true)->count() > 0) {
             return $compras->where('popular', '=', true)->first()->id;
         } else {
@@ -40,8 +39,7 @@ class Product extends Model
     public function getFreeNumbers()
     {
         if ($this->modo_de_jogo == 'numeros') {
-            $numbersRifa = explode(",", $this->numbers);
-            return $numbersRifa;
+            return json_decode($this->numbers, true);
         } else {
             return Raffle::select("number")->whereProductId($this->id)->where("status", "Disponível")->get()->pluck("number");
         }
@@ -50,8 +48,7 @@ class Product extends Model
     public function numbers()
     {
         if ($this->modo_de_jogo == 'numeros') {
-            $numbersRifa = explode(",", $this->numbers);
-            return $numbersRifa;
+            return json_decode($this->numbers, true);
         } else {
             return $this->hasMany(Raffle::class, 'product_id', 'id')->where('user_id', $this->user_id)->get();
         }
@@ -213,6 +210,7 @@ class Product extends Model
 
     public function porcentagem()
     {
+        return 25;
         $numerosUtilizados = $this->qtdNumerosReservados() + $this->qtdNumerosPagos();
         $totalDaRifa = $this->qtd;
 
@@ -248,6 +246,11 @@ class Product extends Model
         return $this->hasOne(ProductImage::class, 'product_id', 'id')->first();
     }
 
+    public function pixAccount()
+    {
+        return $this->hasOne(PixAccount::class, 'product_id', 'id');
+
+    }
 
     public function fotos()
     {
@@ -352,7 +355,11 @@ class Product extends Model
             ]);
         }
     }
+    public function prizeDraws2()
+    {
+        return  $this->hasMany(PrizeDraw::class, 'product_id', 'id')->orderBy('ordem', 'asc');
 
+    }
     public function prizeDraws()
     {
         $premios = $this->hasMany(PrizeDraw::class, 'product_id', 'id')->orderBy('ordem', 'asc')->get();
@@ -391,17 +398,12 @@ class Product extends Model
         return $status;
     }
 
-
-    public function shoppingSuggestion()
+    public function shoppingSuggestions()
     {
-        $compras = $this->hasMany(ShoppingSuggestion::class, 'product_id', 'id')->get();
-        if ($compras->count() == 0) {
-            $this->defaultshoppingSuggestion();
-            $compras = $this->hasMany(ShoppingSuggestion::class, 'product_id', 'id')->get();
-        }
+        return $this->hasMany(ShoppingSuggestion::class, 'product_id', 'id');
 
-        return $compras;
     }
+
 
     public function defaultshoppingSuggestion()
     {
@@ -433,23 +435,6 @@ class Product extends Model
 
     }
 
-    public static function scopeSearch($query, $q)
-    {
-        if (!empty($q)) {
-            return $query->where(function ($query) use ($q) {
-                $query->orWhere('name', 'like', '%' . $q . '%');
-                $query->orWhere('subname', 'like', '%' . $q . '%');
-                $query->orWhere('product', 'like', '%' . $q . '%');
-                $query->orWhere('status', 'like', '%' . $q . '%');
-                $query->orWhere('gateway', 'like', '%' . $q . '%');
-                $query->orWhere('winner', 'like', '%' . $q . '%');
-                $query->orWhere('slug', 'like', '%' . $q . '%');
-            });
-        } else {
-            return $query;
-        }
-
-    }
 
     public static function scopeHasFinished($query)
     {
@@ -528,7 +513,7 @@ class Product extends Model
 
     public static function getResumeCache($productId, $forceUpdate = false)
     {
-        $key = "product_resume_7_" . $productId;
+        $key = "product_resume_13_" . $productId;
         $callBack = function () use ($productId) {
             $product = Product::whereId($productId)->firstOrFail();
             $productAsArray = convertToArray($product);
@@ -542,7 +527,10 @@ class Product extends Model
                 'free_numbers' => convertToArray($product->getFreeNumbers()),
                 'product' => $productAsArray,
                 'description' => $product->descriptions()->select('description', 'video')->first(),
-                'images' => $product->images()->get()
+                'images' => $product->images()->get(),
+                'shopping_suggestions' => $product->shoppingSuggestions()->get(),
+                'prizeDraws' => $product->prizeDraws2()->where('descricao', '!=', '')->get(),
+                'cache_date' => date("Y-m-d H:i:s")
             ];
         };
 
@@ -571,7 +559,7 @@ class Product extends Model
             $requestData['numPromocao'][$p['ordem']] = $p['qtdNumeros'];
         }
         $requestData['popularCheck'] = $product->getCompraMaisPopular();
-        foreach ($product->shoppingSuggestion() as $sug) {
+        foreach ($product->shoppingSuggestions()->get() as $sug) {
             $requestData['compra'][$sug->id] = $sug->qtd;
         }
         foreach ($product->getFormatedPrizeDraws() as $premio) {
@@ -648,5 +636,12 @@ class Product extends Model
             return true;
         }
         return false;
+    }
+
+    public static function getEnumFields()
+    {
+        return [
+            'status' => ProductStatusEnum::getValuesAsSelect()
+        ];
     }
 }

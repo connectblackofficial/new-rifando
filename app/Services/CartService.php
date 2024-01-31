@@ -69,11 +69,12 @@ class CartService
         $allowedNumbers = $this->productResume['free_numbers'];
         $cartNewItens = [];
         foreach ($qtyOrNumbers as $item) {
-            if (!in_array($item, $allowedNumbers,true)) {
+            if (!isset($allowedNumbers[$item])) {
                 throw new UserErrorException("O item '$item' não está disponível.");
-            } else {
+            }else{
                 $cartNewItens[$item] = $item;
             }
+
         }
         return $cartNewItens;
     }
@@ -178,7 +179,7 @@ class CartService
             'random_numbers' => $this->cartModel->random_numbers,
             'numbers' => $this->cartModel->getNumbersAsArray(),
             "qtd_zeros" => $this->productResume['product']['qtd_zeros'],
-            'game_mode'=>$this->productResume['product']['modo_de_jogo']
+            'game_mode' => $this->productResume['product']['modo_de_jogo']
         ];
         $cartData['view'] = view("site.cart.index", $cartData)->render();
         return $cartData;

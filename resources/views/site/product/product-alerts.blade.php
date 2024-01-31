@@ -5,7 +5,7 @@
              aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content" style="border: none;">
-                    <div class="modal-header" style="background-color: #020f1e;color: #fff;">
+                    <div class="modal-header secondary-bg-color">
                         <h5 class="modal-title" id="exampleModalLabel"><i class="bi bi-info-circle"></i> Aviso
                         </h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"
@@ -13,10 +13,10 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body" style="background-color: #020f1e;color: #fff;">
+                    <div class="modal-body secondary-bg-color" >
                         <div style="text-align: center;">{{ $error }}</div>
                     </div>
-                    <div class="modal-footer" style="background-color: #020f1e;color: #fff;">
+                    <div class="modal-footer secondary-bg-color" >
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
                     </div>
                 </div>

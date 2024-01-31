@@ -19,4 +19,14 @@ class Order extends Model
         'valor',
         'user_id'
     ];
+
+    public function participant()
+    {
+        return $this->hasOne(Participant::class, 'id', 'participant_id');
+    }
+
+    public function getData()
+    {
+        return json_decode($this->dados);
+    }
 }

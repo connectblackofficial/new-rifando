@@ -1,0 +1,23 @@
+{
+  "fields": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "subname",
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "type": "string"
+    }
+
+  ],
+  "validations": [
+    {
+      "field": "name",
+      "rules": "required|max:191"
+    }
+  ]
+}

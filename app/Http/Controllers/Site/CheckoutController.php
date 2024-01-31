@@ -8,7 +8,12 @@ use App\Http\Requests\CompleteCheckoutRequest;
 use App\Http\Requests\PhoneRequest;
 use App\Models\Cart;
 use App\Models\Customer;
+use App\Models\Order;
+use App\Models\Participant;
+use App\Models\PrizeDraw;
 use App\Models\Product;
+use App\Models\Raffle;
+use App\Services\CheckoutService;
 use Illuminate\Http\Request;
 
 
@@ -43,12 +48,26 @@ class CheckoutController extends Controller
     public function completeCheckout(Request $request)
     {
 
-        $rules = (new CompleteCheckoutRequest())->rules(getSiteConfig(), $request->customer_id);
+        $rules = (new CompleteCheckoutRequest())->rules();
         $action = function () use ($request) {
-            $customer = Customer::siteOwner()->where('telephone', $request->phone)->first();
+            $customer = Customer::siteOwner()->phoneFromRequest($request)->first();
             $response['customer'] = $customer;
             return $response;
         };
-        return $this->processAjaxResponse(['phone' => $request->phone], $rules, $action, true);
+        return $this->processAjaxResponse(['phone' => $request->phone, 'ddi' => $request->ddi], $rules, $action, true);
     }
+
+    public function payment($orderuuid, Request $request)
+    {
+
+        $page = function () use ($orderuuid) {
+            $site = getSiteConfig();
+            $order = Order::siteOwner()->whereUuid($orderuuid)->first();
+            return CheckoutService::paymentPage($site, $order);
+        };
+
+
+        return $this->catchJsonResponse($page);
+    }
+
 }

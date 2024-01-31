@@ -26,6 +26,7 @@ class SiteProductStoreRequest extends FormRequest
      */
     public function rules()
     {
+
         return [
             'tipo_reserva' => 'required|' . RaffleTypeEnum::getRule(),
             'name' => 'required|max:255',
@@ -33,11 +34,12 @@ class SiteProductStoreRequest extends FormRequest
             'price' => 'required|numeric|min:0',
             'images' => 'required|max:3',
             'numbers' => 'required|min:1|max:7',
-            'description' => env('REQUIRED_DESCRIPTION') ? 'required|max:50000' : 'nullable|max:50000',
+            'description' => 'required|max:50000',
             'minimo' => 'required|integer|min:0',
             'maximo' => 'required|integer|min:1|max:9999999999',
             'expiracao' => 'required|integer|min:0|max:9999999999',
             'gateway' => 'required|' . PaymentGatewayEnum::getRule(),
+            'pix_account_id' => 'required_if:gateway,pix|integer',
             'data_sorteio' => 'required|date',
             'visible' => 'required|in:0,1',
             'favoritar_rifa' => 'required|in:0,1',

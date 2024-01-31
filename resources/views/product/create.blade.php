@@ -17,10 +17,10 @@
 
             <div class="col-md-4">
                 <div class="form-group">
-                    <?= selectField('gateway', \App\Enums\PaymentGatewayEnum::getValuesAsSelect(), $product) ?>
+                    <?= selectField('gateway', \App\Enums\PaymentGatewayEnum::getValuesAsSelect(), $product,['onchange'=>'updateGatewayPix()']) ?>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 pix-account-container" style="display: none">
                 <?= selectField('pix_account_id', \App\Models\PixAccount::getAllAsSelect(), $product) ?>
             </div>
         </div>

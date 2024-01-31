@@ -2,12 +2,17 @@
 
 namespace App\Libs;
 
+use App\Exceptions\UserErrorException;
+
 class MpLib
 {
     private $token;
 
     public function __construct($token)
     {
+        if (empty($token)) {
+            throw new UserErrorException("Token de configuração mercado pago inválido.");
+        }
         $this->token = $token;
     }
 

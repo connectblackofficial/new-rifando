@@ -5,15 +5,13 @@ namespace App\Enums;
 use App\Traits\EnumTrait;
 use BenSampo\Enum\Enum;
 
-/**
- * @method static static OptionOne()
- * @method static static OptionTwo()
- * @method static static OptionThree()
- */
 final class ProductStatusEnum extends Enum
 {
     use EnumTrait;
-    const Active =   'Ativo';
-    const Inactive =   'Inativo';
-    const Finished = 'Finalizado';
+
+    const Scheduled = "Agendado";
+    const Finished = "Finalizado";
+    const Active = "Ativo";
+    const Inactive = "Inativo";
+
 }

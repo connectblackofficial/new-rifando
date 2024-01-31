@@ -13,7 +13,12 @@ use Tests\Traits\TestTrait;
 class ProductServiceTest extends TestCase
 {
     use TestTrait;
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->basicSetup();
 
+    }
     public function testProductCanBeCreated()
     {
         $this->setSiteConfig();
@@ -30,6 +35,8 @@ class ProductServiceTest extends TestCase
         $this->assertGreaterThanOrEqual(1, $product->promos()->count());
         $this->assertGreaterThanOrEqual(1, count($product->prizeDraws()));
         $this->assertGreaterThanOrEqual(1, count($product->numbers()));
+        $this->assertGreaterThanOrEqual(1, $product->shoppingSuggestions()->count());
+        $this->assertGreaterThanOrEqual(1, $product->descriptions()->count());
 
     }
 

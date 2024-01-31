@@ -6,7 +6,7 @@
     <div class="tab-pane fade show active"
          id="geral{{ $product->id }}" role="tabpanel"
          aria-labelledby="geral-tab">
-        @include("product.general-tab-form")
+        @include("admin.products.parts.general-tab-form")
 
 
         <div class="row mt-3">

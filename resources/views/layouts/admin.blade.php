@@ -1,5 +1,8 @@
 <!-- Stored in resources/views/layouts/master.blade.php -->
+<?php
 
+$configSite = getSiteConfig();
+?>
 <html style="height: auto;">
 
 <head>
@@ -11,7 +14,7 @@
     <meta name="googlebot" content="noindex">
 
     <link href="{{ cdnAsset('css/admin.css') }}" rel="stylesheet">
-    <title><?php echo @$data['social']->name; ?> @if(isset($pgTitle))
+    <title><?php echo $configSite->name; ?> @if(isset($pgTitle))
             - {{$pgTitle}}
         @endif</title>
     <script>
@@ -137,7 +140,7 @@
                                     <p>Tutoriais</p>
                                 </a>
                             </li>
-                            @if (env('AFILIADOS'))
+                            @if ($configSite->enable_affiliates==1)
                                 <li class="nav-item">
                                     <a href="{{ route('afiliados') }}"
                                        class="nav-link {{ request()->is('lista-afiliados*') ? 'active' : '' }}"

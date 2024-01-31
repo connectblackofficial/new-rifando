@@ -46,7 +46,7 @@
                                 </div>
                                 <div class="col ps-2"><small
                                             class="compra-data font-xss opacity-50">{{ date('d/m/Y H:i', strtotime($reserva->created_at)) }}</small>
-                                    <div class="compra-title font-weight-500">{{ $reserva->rifa()->name }}</div>
+                                    <div class="compra-title font-weight-500">{{ $rifa->name }}</div>
                                     <small
                                             class="font-xss opacity-75 text-uppercase">{{ $reserva->status() }}
                                         ({{ $reserva->pagos + $reserva->reservados }} COTAS)</small>
@@ -66,13 +66,9 @@
                                         </div>
                                     @else
                                         <div class="compra-cotas font-xs" style="max-height: 200px;overflow: auto;">
-                                            @if ($rifa->type_raffles == 'automatico')
-                                                Números serão gerados após o pagamento!
-                                            @else
                                                 @foreach ($reserva->reservados() as $numRes)
                                                     <span class="badge bg-success me-1">{{ $numRes }}</span>
                                                 @endforeach
-                                            @endif
 
 
                                         </div>

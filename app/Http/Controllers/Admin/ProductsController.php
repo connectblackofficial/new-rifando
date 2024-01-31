@@ -9,10 +9,26 @@ use App\Http\Requests\SiteProductUpdateRequest;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Services\ProductService;
+use App\Traits\CrudTrait;
 use Illuminate\Http\Request;
 
-class ProductController extends Controller
+class ProductsController extends Controller
 {
+
+    use CrudTrait {
+        index as pgIndex;
+    }
+
+
+    private $crudName = "products";
+    private $routeGroup = "admin/";
+    private $crudNameSingular = "product";
+
+    public function __construct()
+    {
+        $this->modelClass = Product::class;
+    }
+
     public function edit($id)
     {
         $product = Product::getByIdWithSiteCheckOrFail($id);
@@ -21,14 +37,42 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-
-        return $this->showIndex(Product::siteOwner(), 'Meus Sorteios', $request);
+        $this->modelFields = ['id', 'name', 'subname', 'price', 'status'];
+        return $this->pgIndex($request, "my_products");
     }
 
     public function activeProducts(Request $request)
     {
+        $this->indexExtraWhere = ['status' => 'Ativo'];
+        return $this->pgIndex($request, "products_actives");
+    }
 
-        return $this->showIndex(Product::siteOwner()->where('status', 'Ativo'), 'Rifas Ativas', $request);
+
+    public function store(Request $request)
+    {
+        $rules = (new SiteProductFastStoreRequest())->rules();
+        $update = function () use ($request) {
+            $productService = new ProductService(getSiteConfig());
+            $productService->processAddProduct($request->all(), $request->file('images'));
+            return true;
+        };
+        return $this->processAjaxResponseWithTrans($request->all(), $rules, $update);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $rules = (new SiteProductUpdateRequest())->rules();
+        $postData = $request->all();
+        $postData['slug'] = createSlug($postData['slug']);
+        $update = function () use ($id, $request,$postData) {
+            $product = Product::getByIdWithSiteCheckOrFail($id);
+            $productService = new ProductService(getSiteConfig());
+            $productService->update($product, $postData);
+            return true;
+        };
+
+
+        return $this->processAjaxResponseWithTrans($postData, $rules, $update);
     }
 
     public function create()
@@ -37,34 +81,6 @@ class ProductController extends Controller
         return view('product.create', ['product' => []]);
     }
 
-    public function store(Request $request)
-    {
-
-        $rules = (new SiteProductFastStoreRequest())->rules();
-        $update = function () use ($request) {
-            $productService = new ProductService(getSiteConfig());
-            $productService->processAddProduct($request->all(), $request->file('images'));
-            return true;
-        };
-
-
-        return $this->processAjaxResponseWithTrans($request->all(), $rules, $update);
-    }
-
-    public function update(Request $request, $id)
-    {
-        $rules = (new SiteProductUpdateRequest())->rules();
-        $update = function () use ($id, $request) {
-            $product = Product::getByIdWithSiteCheckOrFail($id);
-            $productService = new ProductService(getSiteConfig());
-            $productService->update($product, $request);
-            return true;
-
-        };
-
-
-        return $this->processAjaxResponseWithTrans($request->all(), $rules, $update);
-    }
 
     public function destroyPhoto($id)
     {
@@ -76,17 +92,6 @@ class ProductController extends Controller
         return $this->processAjaxResponse(['id' => $id], [], $destroyPhoto, true);
     }
 
-    public function destroy($id)
-    {
-        $destroyProduct = function () use ($id) {
-            $productService = new ProductService(getSiteConfig());
-            $productService->destroyProduct($id);
-            return true;
-        };
-        return $this->processAjaxResponse(['id' => $id], [], $destroyProduct, true);
-
-
-    }
 
     public function showIndex($query, $title, Request $request)
     {
@@ -99,10 +104,15 @@ class ProductController extends Controller
 
         }
         $rifas = $rifas->paginate(10);
-        return view('product.index', [
+        return view('admin.products.index', [
             'rifas' => $rifas,
-            'pageTitle' => $title
+            'pgTitle' => $title
         ]);
+    }
+
+    public function beforeUpdate()
+    {
+
     }
 
 }

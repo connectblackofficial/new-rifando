@@ -2,6 +2,9 @@
 
 namespace App\Traits;
 
+use App\Models\Participant;
+use App\Models\User;
+
 trait ModelSiteOwnerTrait
 {
     public function scopeSiteOwner($query)
@@ -35,5 +38,10 @@ trait ModelSiteOwnerTrait
     {
 
         return self::siteOwner()->whereUuid($uuid)->first();
+    }
+
+    public function owner()
+    {
+        return $this->hasOne(User::class, 'id', 'user_id');
     }
 }

@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-footer="true">
+<?php
 
+$siteConfig = getSiteConfig();
+?>
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <title><?php echo @$data['social']->name; ?> @yield('title')</title>
+    <title><?php echo $siteConfig->name; ?> @yield('title')</title>
     <meta name="description"
         content="Home screen that contains stats, charts, call to action buttons and various listing elements." />
 
@@ -49,11 +52,11 @@
                 <div class="logo position-relative">
                     <a href="">
                         <!-- Logo can be added directly -->
-                        @if (@$data['social']->logo)
-                            <img src="{{imageAsset(@$data['social']->logo)}}" alt="" width="100"
+                        @if ($siteConfig->logo)
+                            <img src="{{imageAsset($siteConfig->logo)}}" alt="" width="100"
                                 height="50">
                         @else
-                            Agency Rauen
+                            Site
                         @endif
                     </a>
                 </div>
@@ -189,7 +192,7 @@
                     <div class="row">
                         <div class="col-12 col-sm-12 text-center">
                             @if (env('APP_NAME') == 'Laravel')
-                                <p class="mb-0 text-muted text-medium">Desenvolvido por <a target="_blank" href="https://agencyrauen.com">Agency Rauen</a> | &copy; Copyright. Todos os direitos reservados.</p>
+                                <p class="mb-0 text-muted text-medium">Desenvolvido por <a target="_blank" href="https://agencyrauen.com">Site</a> | &copy; Copyright. Todos os direitos reservados.</p>
                             @else
                                 <p class="mb-0 text-muted text-medium">&copy; Copyright. Todos os direitos reservados.</p>
                             @endif

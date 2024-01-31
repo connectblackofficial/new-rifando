@@ -6,14 +6,29 @@ trait EnumTrait
 {
     public static function getRule()
     {
-        return 'in:' . implode(",", self::getValues());
+        return 'in:' . self::valuesSeparatedByCommas();
+    }
+
+    public static function valuesSeparatedByCommas()
+    {
+        return implode(",", self::getValues());
     }
 
     public static function getValuesAsSelect(): array
     {
         $values = [];
         foreach (self::getValues() as $v) {
-            $values[$v] = $v;
+            $values[$v] = strtolower($v);
+        }
+        return $values;
+    }
+
+    public static function getValueAsSelectedNew(): array
+    {
+        $values = [];
+        foreach (self::toSelectArray() as $k => $v) {
+
+            $values[$k] = strtolower($v);
         }
         return $values;
     }

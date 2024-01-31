@@ -8,7 +8,7 @@ use App\Http\Controllers\HomeAdminController;
 use App\Http\Controllers\ProductAdminController;
 use App\Http\Controllers\MySweepstakesController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\Admin\ProductController as ProductAdmController;
+use App\Http\Controllers\Admin\ProductsController as ProductAdmController;
 
 Route::get('/clientes/{search?}', [HomeAdminController::class, 'clientes'])->name('clientes');
 Route::get('/clientes/editar/{id}', [HomeAdminController::class, 'editarCliente'])->name('clientes.editar');
@@ -76,6 +76,8 @@ Route::post('/resumo-pendentes-search', [MySweepstakesController::class, 'resumo
 Route::get('/resumo-ranking', [MySweepstakesController::class, 'resumoRanking'])->name('resumo.ranking');
 Route::post('/resumo-ranking/selected', [MySweepstakesController::class, 'resumoRankingSelect'])->name('resumo.rankingSelect');
 
+
+
 Route::get('lista-afiliados', [MySweepstakesController::class, 'listaAfiliados'])->name('afiliados');
 Route::get('solicitacao-pagamento', [MySweepstakesController::class, 'solicitacaoPgto'])->name('painel.solicitacaoAfiliados');
 Route::get('confirmar-pgto-afiliado/{solicitacaoId}', [MySweepstakesController::class, 'confirmarPgtoAfiliado'])->name('painel.confirmarPgtoAfiliado');
@@ -122,3 +124,11 @@ Route::get('admin/customers/{pk}', [CustomersController::class, 'show'])->name('
 Route::get('admin/customers/{pk}/edit', [CustomersController::class, 'edit'])->name('admin.customers.edit');
 Route::put('admin/customers/{pk}', [CustomersController::class, 'update'])->name('admin.customers.update');
 Route::delete('admin/customers/{pk}', [CustomersController::class, 'destroy'])->name('admin.customers.destroy');
+
+Route::get('admin/products', [\App\Http\Controllers\Admin\ProductsController::class, 'index'])->name('admin.products.index');
+Route::get('admin/products/create', [\App\Http\Controllers\Admin\ProductsController::class, 'create'])->name('admin.products.create');
+Route::post('admin/products', [\App\Http\Controllers\Admin\ProductsController::class, 'store'])->name('admin.products.store');
+Route::get('admin/products/{pk}', [\App\Http\Controllers\Admin\ProductsController::class, 'show'])->name('admin.products.show');
+Route::get('admin/products/{pk}/edit', [\App\Http\Controllers\Admin\ProductsController::class, 'edit'])->name('admin.products.edit');
+Route::put('admin/products/{pk}', [\App\Http\Controllers\Admin\ProductsController::class, 'update'])->name('admin.products.update');
+Route::delete('admin/products/{pk}', [\App\Http\Controllers\Admin\ProductsController::class, 'destroy'])->name('admin.products.destroy');

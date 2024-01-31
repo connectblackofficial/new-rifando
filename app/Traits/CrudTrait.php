@@ -5,8 +5,6 @@ namespace App\Traits;
 use App\Exceptions\UserErrorException;
 use App\Models\Customer;
 use App\Models\User;
-use App\Rules\ValidatePixKey;
-use Cassandra\Custom;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -30,10 +28,12 @@ trait CrudTrait
     private $pkModelCol;
 
     private $modelInstance;
-    private $removedFromAdvancedSearch = ['user_id','uuid'];
+    private $removedFromAdvancedSearch = ['user_id', 'uuid'];
     private $hashFields = ['password'];
     private $uniqueFields = ['email'];
     private $currentUpdateData = [];
+    private $indexExtraWhere = [];
+    private $rowsLimit = 100;
 
 
     private function getModelFields()
@@ -157,6 +157,7 @@ trait CrudTrait
                 "routeCreate" => "{$routeGroup}.{$viewName}.create",
                 "routeStore" => "{$routeGroup}.{$viewName}.store",
                 'routeUpdate' => "{$routeGroup}.{$viewName}.update",
+                'viewCreateBtn' => "{$routeGroup}.{$viewName}.parts.create-btn",
                 'formatFieldsFn' => $this->formatFieldsFn(),
                 'advancedFields' => $this->advancedSearchFields(),
                 'baseLang' => strtolower($this->getModelName()),
@@ -250,8 +251,10 @@ trait CrudTrait
         if (isset($pageData[$this->crudNameSingular])) {
             $pageData['row'] = $pageData[$this->crudNameSingular];
         }
+
         $crudData = $this->getCrudData();
         $pageData = array_merge($pageData, $crudData);
+
         return view($view, $pageData);
     }
 
@@ -456,13 +459,14 @@ trait CrudTrait
         return false;
     }
 
-    public function index(Request $request)
+    public function index(Request $request, $pgTtitle = "")
     {
-        $showPageIndex = function (self $instance) use ($request) {
+        $showPageIndex = function (self $instance) use ($request, $pgTtitle) {
             $instance->hasPermissionOrFail('list');
 
             $perPage = $instance->pagination;
             $requestData = $request->query();
+
             if ($instance->hasSearchFields($request)) {
                 $orderCol = $instance->getPkModelCol();
                 $orderDir = "desc";
@@ -472,16 +476,27 @@ trait CrudTrait
                 if (isset($requestData['orderType']) && !empty($requestData['orderType']) && in_array($requestData['orderType'], ['desc', 'asc'])) {
                     $orderDir = $requestData['orderType'];
                 }
-                $rows = $instance->modelClass::siteOwner()->search($request)->orderBy($orderCol, $orderDir)->paginate($perPage);
+                $searchModel = $instance->modelClass::siteOwner();
+                if (count($this->indexExtraWhere) > 0) {
+                    $searchModel = $searchModel->where($this->indexExtraWhere);
+                }
+                $rows = $searchModel->search($request)->orderBy($orderCol, $orderDir)->paginate($perPage);
 
                 $pageData[$instance->crudName] = $rows;
             } else {
-                $pageData[$instance->crudName] = $instance->modelClass::siteOwner()->latest()->paginate($perPage);
+                $searchModel = $instance->modelClass::siteOwner();
+                if (count($this->indexExtraWhere) > 0) {
+                    $searchModel = $searchModel->where($this->indexExtraWhere);
+                }
+                $pageData[$instance->crudName] = $searchModel->latest()->paginate($perPage);
             }
 
             $view = $instance->getGroup() . '.' . $instance->crudName . '.index';
-            $pageData['pgTitle'] = htmlLabel($instance->crudName . '_index');;
 
+            $pageData['pgTitle'] = htmlLabel($instance->crudName . '_index');;
+            if (!empty($pgTtitle)) {
+                $pageData['pgTitle'] = htmlLabel($pgTtitle);
+            }
             return $this->parseViewCi($view, $pageData);
 
         };

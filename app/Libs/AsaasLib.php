@@ -2,6 +2,7 @@
 
 namespace App\Libs;
 
+use App\Exceptions\UserErrorException;
 use App\Models\Product;
 
 class AsaasLib
@@ -12,6 +13,9 @@ class AsaasLib
 
     public function __construct($token)
     {
+        if (empty($token)) {
+            throw new UserErrorException("Token de configuração asaas inválido.");
+        }
         $this->token = $token;
         $this->client = new \GuzzleHttp\Client([
             'headers' => [
@@ -24,6 +28,9 @@ class AsaasLib
 
     public function getOrCreateClienteAsaas($nome, $email, $cpf, $telefone)
     {
+        if (!validarCPF($cpf)) {
+            throw new UserErrorException("CPF inválido.");
+        }
         $clientURL = $this->baseUrl . '/customers';
 
         $params = [
@@ -75,7 +82,7 @@ class AsaasLib
 
     }
 
-     function getPix(Product $product, $idCliente, $resultPricePIX, $desc, $externalReferencee)
+    function getPix(Product $product, $idCliente, $resultPricePIX, $desc, $externalReferencee)
     {
         $responsePix = $this->createPayment($product, $idCliente, $resultPricePIX, $desc, $externalReferencee);
         return $this->getQrcodeUrl($responsePix->id);

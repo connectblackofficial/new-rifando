@@ -26,7 +26,7 @@ Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm'
 Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail');
 Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm');
 Route::post('password/reset', 'Auth\ResetPasswordController@reset');
-Route::get('ganhadores', 'ProductController@ganhadores')->name('ganhadores');
+Route::get('ganhadores', 'ProductsController@ganhadores')->name('ganhadores');
 
 Route::get('/pagar-reserva/{id}', [CheckoutController::class, 'pagarReserva'])->name('pagarReserva');
 Route::get('/', [ProductController::class, 'index'])->name('inicio');
@@ -44,7 +44,10 @@ Route::post('pagamento-credito', [CheckoutController::class, 'paymentCredit'])->
 Route::post('pesquisa-numeros', [ProductController::class, 'searchNumbers'])->name('searchNumbers');
 Route::post('pesquisa-pix', [ProductController::class, 'searchPIX'])->name('searchPIX');
 Route::get('checkout', [CheckoutController::class, 'index'])->name('checkout');
+
 Route::get('checkout-manualy', [CheckoutController::class, 'checkoutManualy'])->name('checkoutManualy');
+
+
 Route::get('checkout-pixsuccess', [CheckoutController::class, 'checkPixPaymment'])->name('checkPixPaymment');
 Route::any('checkout-success/{id}', [CheckoutController::class, 'findPixStatus'])->name('findPixStatus');
 Route::any('checkout-visualizar-pedidos/{id}', [CheckoutController::class, 'findPedidoStatus'])->name('findPedidoStatus');
@@ -62,8 +65,8 @@ Route::post('site/cart/add_rmo', [CartController::class, 'addRm'])->name('cart.a
 Route::post('site/cart/resume', [CartController::class, 'index'])->name('cart.resume');
 Route::delete('site/cart/destroy', [CartController::class, 'destroy'])->name('cart.destroy');
 
+Route::get('site/checkout/{uuid}/pay', [\App\Http\Controllers\Site\CheckoutController::class, 'payment'])->name('site.checkout.pay');
 Route::get('site/checkout/{uuid}', [\App\Http\Controllers\Site\CheckoutController::class, 'index'])->name('site.checkout');
-
 Route::get('site/checkout/{uuid}/1', [\App\Http\Controllers\Site\CheckoutController::class, 'step1'])->name('site.checkout.step1');
-
 Route::post('/site/customer/get', [\App\Http\Controllers\Site\CustomerController::class, 'getCustomer'])->name('getCustomer');
+

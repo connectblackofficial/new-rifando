@@ -34,7 +34,7 @@ if (isset($imagens[0])) {
                 <div class="col-md-6 rifa-content {{ $config->tema }}">
                     <input type="hidden" id="raffleType" value="{{ $productModel->type_raffles }}">
                     <input type="hidden" id="modoDeJogo" value="{{ $productModel->modo_de_jogo }}">
-                    @include('rifas.common')
+                    @include('site.product.common')
                     @if ($product->status == 'Finalizado')
                         @include('rifas.finalizada')
                     @else
@@ -49,10 +49,8 @@ if (isset($imagens[0])) {
                             @if ($type_raffles == 'automatico' || $type_raffles == 'mesclado')
                                 @include('rifas.automatico')
                             @endif
-
                             @if ($type_raffles == 'manual' || $type_raffles == 'mesclado')
                                 @include('rifas.manual')
-
                             @endif
                         @endif
                     @endif

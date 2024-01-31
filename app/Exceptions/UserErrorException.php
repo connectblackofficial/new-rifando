@@ -46,9 +46,15 @@ class UserErrorException extends Exception
 
     }
 
-    public static function pageNotFound()
+    public static function createFailed()
     {
-        return new self("Página não encontrada.");
+        return new self("Ocorreu um erro ao adicionar  um registro.");
+
+    }
+
+    public static function pageNotFound($id = null)
+    {
+        return new self("#$id Página não encontrada.");
 
     }
 }

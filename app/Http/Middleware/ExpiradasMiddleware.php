@@ -18,36 +18,8 @@ class ExpiradasMiddleware
      */
     public function handle($request, Closure $next)
     {
-        $participantes = Participant::where('reservados', '>', 0)->get();
-        foreach ($participantes as $participante) {
-            $rifa = $participante->firstProduct();
 
-            $criacao = date('Y-m-d H:i:s', strtotime($participante->created_at));
-            $minutosExpiracao = $rifa->expiracao;
-            $dataDeExpiracao = date('Y-m-d H:i:s', strtotime("+" . $minutosExpiracao . " minutes", strtotime($criacao)));
 
-            if ($minutosExpiracao > 0 && $dataDeExpiracao <= date('Y-m-d H:i:s')) {
-                if ($rifa->modo_de_jogo == 'numeros') {
-                    $numbersParticipante = $participante->numbers();
-                    $rifaNumbers = $rifa->numbers();
-
-                    foreach ($numbersParticipante as $number) {
-                        array_push($rifaNumbers, $number);
-                    }
-
-                    $rifa->saveNumbers($rifaNumbers);
-                } else {
-                    Raffle::where('participant_id', '=', $participante->id)->update([
-                        'status' => 'Disponível',
-                        'participant_id' => null
-                    ]);
-                }
-
-                Participant::find($participante->id)->delete();
-
-                DB::table('payment_pix')->where('participant_id', '=', $participante->id)->delete();
-            }
-        }
 
         // $codeKeyPIX = DB::table('sites')
         //     ->select('key_pix')

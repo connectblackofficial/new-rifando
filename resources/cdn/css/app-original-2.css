@@ -668,7 +668,7 @@ button.btn.btn-success.description:focus {
 }
 
 .progress_reserva {
-    background: #0e051cfa;
+    background: var(--secondary-bg-color);
     padding: 10px 20px;
     border-radius: 4px;
     margin-bottom: 20px;

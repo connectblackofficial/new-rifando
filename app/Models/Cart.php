@@ -60,4 +60,22 @@ class Cart extends Model
 
     }
 
+    public function sortAutoNumbers()
+    {
+        $productResume = Product::getResumeCache($this->product_id);
+        $randomNumbers = $this->random_numbers;
+        if ($randomNumbers <= 0) {
+            return [];
+        }
+        $limit = ($randomNumbers - 1);
+        $freeNumbers = $productResume['free_numbers'];
+        shuffle($freeNumbers);
+        return array_slice($freeNumbers, 0, $limit);
+
+    }
+
+    public function getAllCartNumbers()
+    {
+        return array_merge($this->sortAutoNumbers(), array_values($this->getNumbersAsArray()));
+    }
 }

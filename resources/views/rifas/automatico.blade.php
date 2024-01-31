@@ -8,24 +8,24 @@
             <span style="">O site escolhe números aleatórios para você.</span><br>
         </div>
 
-
-        <div class="row d-flex justify-content-center">
-            @foreach ($productModel->shoppingSuggestionFromCache() as $compra)
-                @if($compra->qtd>0)
-                    <div class="col-6">
-                        <div class="btn-auto btn-add-qtd {{ $config->tema }} {{ $compra->popular ? 'btn-popular' : '' }}"
-                             onclick="addQtd('{{ $compra->qtd }}')">
-                            <span style="font-weight: 900">+  {{ $compra->qtd < 10 ? '0' : '' }}{{ $compra->qtd }}</span><br>
-                            <span style="font-size: 14px;font-weight: bold;">SELECIONAR</span>
-                            @if ($compra->popular)
-                                <span class="badge bg-success text-popular">MAIS POPULAR</span>
-                            @endif
+        @if(isset($productResume['shopping_suggestions']) && !empty($productResume['shopping_suggestions']))
+            <div class="row d-flex justify-content-center">
+                @foreach ($productResume['shopping_suggestions'] as $compra)
+                    @if($compra->qtd>0)
+                        <div class="col-6">
+                            <div class="btn-auto btn-add-qtd {{ $config->tema }} {{ $compra->popular ? 'btn-popular' : '' }}"
+                                 onclick="addQtd('{{ $compra->qtd }}')">
+                                <span style="font-weight: 900">+  {{ $compra->qtd < 10 ? '0' : '' }}{{ $compra->qtd }}</span><br>
+                                <span style="font-size: 14px;font-weight: bold;">SELECIONAR</span>
+                                @if ($compra->popular)
+                                    <span class="badge bg-success text-popular">MAIS POPULAR</span>
+                                @endif
+                            </div>
                         </div>
-                    </div>
-                @endif
-            @endforeach
-        </div>
-
+                    @endif
+                @endforeach
+            </div>
+        @endif
         <div class="" style="margin-top: 20px;margin-bottom: 20px;text-align: center;">
             <div class="amount">
                 <div class="form-group"

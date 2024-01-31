@@ -53,7 +53,7 @@ class PixAccount extends Model
         $rows = [];
         $accounts = self::siteOwner()->get();
         foreach ($accounts as $account) {
-            $rows[$account->id] = $account->key_value;
+            $rows[$account->id] = __($account->key_type) . ":" . $account->key_value;
         }
 
         return $rows;

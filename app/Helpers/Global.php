@@ -109,7 +109,8 @@ function itemRowView($formatFieldsFn, $item, $index)
 
 function createSlug($string)
 {
-
+    $chars = [":", " "];
+    $string = str_replace($chars,"-",$string);
     $table = array(
         'Š' => 'S', 'š' => 's', 'Đ' => 'Dj', 'đ' => 'dj', 'Ž' => 'Z', 'ž' => 'z', 'Č' => 'C', 'č' => 'c', 'Ć' => 'C', 'ć' => 'c',
         'À' => 'A', 'Á' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 'Å' => 'A', 'Æ' => 'A', 'Ç' => 'C', 'È' => 'E', 'É' => 'E',
@@ -221,6 +222,9 @@ function imageAsset($image)
 function getSiteOwnerId()
 {
     $siteEnv = \Session::get('siteEnv');
+    if (!isset($siteEnv['user_id'])) {
+        return null;
+    }
     return $siteEnv['user_id'];
 }
 
@@ -325,6 +329,11 @@ function isOnlyIntegers($str)
     return preg_match('/^-?\d+$/', $str) === 1;
 }
 
+function routeAsDivId()
+{
+    return str_replace(["_", "."], "-", Route::currentRouteName());
+}
+
 function formatMoney($val, $showCurrency = true)
 {
     if (!is_numeric($val)) {
@@ -351,12 +360,13 @@ function checkUserIdSite($userId)
     }
 
 }
+
 function getCountriesDdi()
 {
     $callback = function () {
         $countries = [];
         foreach (\App\Models\Country::all() as $country) {
-            $countries[$country->dial_code] =$country->dial_code;
+            $countries[$country->dial_code] = $country->dial_code;
         }
         return $countries;
     };
@@ -364,16 +374,17 @@ function getCountriesDdi()
     return getCacheOrCreate($key, null, $callback, \App\Enums\CacheExpiresInEnum::OneMonth, false);
 
 }
+
 function getCountries()
 {
     $callback = function () {
         $countries = [];
         foreach (\App\Models\Country::all() as $country) {
-            $countries[$country->dial_code] = $country['name'] . " " . $country->dial_code;
+            $countries[$country->dial_code] = strtoupper($country['code']) . " (" . $country->dial_code . ")";
         }
         return $countries;
     };
-    $key = "countries_with_ddi";
+    $key = "countries_with_ddi3";
     return getCacheOrCreate($key, null, $callback, \App\Enums\CacheExpiresInEnum::OneMonth, false);
 
 }
@@ -498,3 +509,7 @@ function allowedDdiAsList()
     return implode(",", array_keys(getCountries()));
 }
 
+function modal($id, $title, $content, $extraData = [])
+{
+    return view("layouts.default-modal", ['modalId' => $id, 'title' => $title, 'content' => $content, 'extraData' => $extraData]);
+}

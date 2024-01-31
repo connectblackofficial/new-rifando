@@ -707,7 +707,7 @@
                 </p>
                 @if (env('IS_TREVO_MINAS'))
                     <p>
-                        AGENCY RAUEN <br>
+                        Site <br>
                         00.000.000/0001-00
                     </p>
                 @endif

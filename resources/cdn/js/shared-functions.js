@@ -74,7 +74,17 @@ function processAjaxSuccess(response) {
     }
     endLoading();
 }
-
+function isStringNotEmpty(str) {
+    return str !== null && str.trim() !== '';
+}
+function checkIfFunctionExists(functionName) {
+    return typeof window[functionName] === 'function';
+}
+function snakeToCamel(str) {
+    return str.replace(/_([a-z])/g, function(match, letter) {
+        return letter.toUpperCase();
+    });
+}
 function sendAjaxRequest(url, method, data) {
     var formData = data instanceof FormData ? data : new FormData();
     var hasFiles = false;
@@ -286,4 +296,12 @@ function isValidDate(dateString) {
 }
 function completeCheckout(){
 
+}
+function copyPix() {
+    var copyText = document.getElementById("brcodepix");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    document.getElementById("clip_btn").innerHTML = 'COPIADO';
+    successMsg("Chave PIX COPIA E COLA copiado com sucesso.");
 }

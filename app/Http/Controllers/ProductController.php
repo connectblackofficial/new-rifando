@@ -23,9 +23,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use MercadoPago\Payment;
 use MercadoPago\SDK;
+use Ramsey\Uuid\Uuid;
 
 class ProductController extends Controller
 {
+
     public function index()
     {
         $ganhadores = PrizeDraw::siteOwner()->where('descricao', '!=', null)->where('ganhador', '!=', '')->get();
@@ -127,7 +129,6 @@ class ProductController extends Controller
     }
 
 
-
     public function getRaffles3(Request $request)
     {
         $productData = Product::siteOwner()->whereId($request->idProductURL)->first();
@@ -142,8 +143,8 @@ class ProductController extends Controller
                 $numbers[] = $value . '-' . $statusParticipante . '-' . $participante->name;
             }
         }
-        $pages=[];
-        foreach (array_chunk($numbers, 100) as  $number) {
+        $pages = [];
+        foreach (array_chunk($numbers, 100) as $number) {
 
         }
 
@@ -470,6 +471,7 @@ class ProductController extends Controller
                     }
 
                     $order = Order::create([
+                        'uuid' => Uuid::uuid4(),
                         'key_pix' => $codePIXID,
                         'participant_id' => $participante,
                         'valor' => $price,
@@ -613,7 +615,7 @@ class ProductController extends Controller
         }
 
         $codeKeyPIX = getSiteConfig();
-        $productDesc = "Participação da ação " . $product->id . ' - ' . $product->name;
+        $productDesc = "Participação na ação " . $participante->id;
         $externalReferencee = $participante;
         if ($product->gateway == 'mp') {
 

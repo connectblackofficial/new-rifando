@@ -49,23 +49,29 @@
                     </div>
                 </div>
 
-                    <input class="form-control mr-sm-2" type="search" name="search"
-                           placeholder="<?=htmlLabel("search")?>" aria-label="Search">
-                    <button class="btn btn-outline-secondary my-2 my-sm-0 border border-secondary text-dark text-capitalize"
-                            type="submit"><?= htmlLabel("search") ?>
-                    </button>
+                <input class="form-control mr-sm-2" type="search" name="search"
+                       placeholder="<?=htmlLabel("search")?>" aria-label="Search">
+                <button class="btn btn-outline-secondary my-2 my-sm-0 border border-secondary text-dark text-capitalize"
+                        type="submit"><?= htmlLabel("search") ?>
+                </button>
 
-                    <button data-toggle="modal" data-target="#advancedFiltersModal2"
-                            class="btn ml-2 btn-outline-secondary my-2 my-sm-0 border border-secondary text-dark text-capitalize"
-                            type="button"><?= htmlLabel("advanced filters") ?>
-                    </button>
+                <button data-toggle="modal" data-target="#advancedFiltersModal2"
+                        class="btn ml-2 btn-outline-secondary my-2 my-sm-0 border border-secondary text-dark text-capitalize"
+                        type="button"><?= htmlLabel("advanced filters") ?>
+                </button>
 
             </form>
+
             @if(isset($permissions['create']) && $permissions['create']===true)
-                <a href="{{route($routeCreate)}}" class="btn btn-success d-flex align-items-center"
-                   style="font-size:30px;width: 100px;justify-content: center;height: 50px;margin-left: 5px;">
-                    <i class="bi bi-plus-square "></i>
-                </a>
+                @if(view()->exists($viewCreateBtn))
+                    @include($viewCreateBtn)
+                @else
+                    <a href="{{route($routeCreate)}}" class="btn btn-success d-flex align-items-center"
+                       style="font-size:30px;width: 100px;justify-content: center;height: 50px;margin-left: 5px;">
+                        <i class="bi bi-plus-square "></i>
+                    </a>
+                @endif
+
             @endif
 
         </div>

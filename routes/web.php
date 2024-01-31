@@ -7,8 +7,34 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
-Route::get('/lista_product', function () {
-    return removePhoneMask('(11) 91605-9141');
+Route::get('/fak', function () {
+
+    return "Aooba";
+
+});
+Route::get('/test_manualpix', function () {
+    $lastParticipation = Participant::orderByDesc("id")->first();
+    $lastParticipation->valor = 7.85;
+    $lastParticipation->saveOrFail();
+    $manual = new \App\Helpers\ManualPixGenerator(\App\Models\PixAccount::first(), $lastParticipation);
+    $url = $manual->getPix();
+    dd($url);
+    return "<a href='$url'>" . $url . "</a>";
+
+});
+
+Route::get('/test_asaas', function () {
+    $name = "Caique Marcelino Souza";
+    $email = "caique+" . rand(1111, 9999);
+    $cpf = "07559659578";
+    $product = \App\Models\Product::first();
+    $assasHelper = new \App\Libs\AsaasLib("5ec46e71f7f0a754ba64b3881fc75011e421eb21992d35f162d79e5d9384608c");
+    $resultPricePIX = 25.99;
+    $telefone = "75992426909";
+    $productDesc = "Produto legal";
+    $externalReferencee = rand(11111, 9999);
+    $idCliente = $assasHelper->getOrCreateClienteAsaas($name, $email, $cpf, $telefone);
+    dd($assasHelper->getPix($product, $idCliente, $resultPricePIX, $productDesc, $externalReferencee));
 });
 Route::get('/lists', function () {
     $product = \App\Models\Product::whereId(103)->first();
@@ -47,5 +73,10 @@ Route::middleware(['check', 'subDomain'])->group(function () {
 });
 
 
-
-
+Route::get('admin/products', [\App\Http\Controllers\Admin\ProductsController::class, 'index'])->name('admin.products.index');
+Route::get('admin/products/create', [\App\Http\Controllers\Admin\ProductsController::class, 'create'])->name('admin.products.create');
+Route::post('admin/products', [\App\Http\Controllers\Admin\ProductsController::class, 'store'])->name('admin.products.store');
+Route::get('admin/products/{pk}', [\App\Http\Controllers\Admin\ProductsController::class, 'show'])->name('admin.products.show');
+Route::get('admin/products/{pk}/edit', [\App\Http\Controllers\Admin\ProductsController::class, 'edit'])->name('admin.products.edit');
+Route::put('admin/products/{pk}', [\App\Http\Controllers\Admin\ProductsController::class, 'update'])->name('admin.products.update');
+Route::delete('admin/products/{pk}', [\App\Http\Controllers\Admin\ProductsController::class, 'destroy'])->name('admin.products.destroy');

@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Services\CartService;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
 {
@@ -39,6 +40,7 @@ class ProductController extends Controller
 
 
         $productResume = Product::getResumeCache($productData['id']);
+
         $productDetail = $productData;
         $imagens = $productResume['images'];
 
@@ -47,7 +49,6 @@ class ProductController extends Controller
         $productModel = $productData;
         $cart = CartService::currentCart($productData['id']);
         $config = getSiteConfig();
-
         $activePromo = $productModel->promosAtivasFromCache();
         $arrayProducts = [
             'tokenAfiliado' => $tokenAfiliado,
@@ -65,7 +66,8 @@ class ProductController extends Controller
             'ranking' => $productModel->ranking(),
             'config' => $config,
             'activePromos' => $activePromo,
-            'cart' => $cart
+            'cart' => $cart,
+            'productResume'=>$productResume
         ];
         return view('site.product.details', $arrayProducts);
     }
@@ -77,6 +79,7 @@ class ProductController extends Controller
             'product_uuid' => config("constants.product_uuid_rule"),
             'page' => 'required|integer|min:1|max:10000'
         ];
+
         $action = function () use ($request) {
             $prouctUuid = $request->product_uuid;
             $page = $request->page;
@@ -88,19 +91,19 @@ class ProductController extends Controller
             $currentCart=CartService::currentCart($productData->id);
             $productId = $productData->id;
 
-
             $qtyPagesKey = CacheKeysEnum::getQtyPaginationPageKey($productId);
+
             if (!\Cache::has($qtyPagesKey)) {
-                throw  UserErrorException::pageNotFound();
+                throw  UserErrorException::pageNotFound(__LINE__);
             }
             $qtyPages = \Cache::get($qtyPagesKey);
 
             if ($page > $qtyPages) {
-                throw  UserErrorException::pageNotFound();
+                throw  UserErrorException::pageNotFound(__LINE__);
             }
             $pageKey = CacheKeysEnum::getPaginationPageKey($productId, $page);
             if (!\Cache::store('file')->has($pageKey)) {
-                throw  UserErrorException::pageNotFound();
+                throw  UserErrorException::pageNotFound(__LINE__);
             }
 
             $productService = new ProductService(getSiteConfig(),$currentCart);

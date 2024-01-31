@@ -139,17 +139,8 @@ function loadUrlModal(title, url, size) {
 }
 
 function openModalCheckout() {
-    var raffleType = $('#raffleType').val();
-    var modoJogo = $('#modoDeJogo').val();
-    if (raffleType == 'manual' || modoJogo == 'fazendinha-completa' || modoJogo == 'fazendinha-meio') {
-        var qtdCompra = $('#qtdManual').val()
-    } else {
-        var qtdCompra = $('#qtdNumbers').val()
-    }
-    var nomeRifa = $('#product-name').val()
-    $('#qtd-checkout').text(qtdCompra)
-    $('#rifa-checkout').text(nomeRifa)
-    $('#staticBackdrop').modal('show')
+    loadUrlModal("Finalizar Reserva", replaceId(ROUTES.site_checkout, cartUuid));
+    return false;
 }
 
 function initSitePg() {
@@ -157,11 +148,12 @@ function initSitePg() {
     initAjaxSetup();
     prepareSitePhones();
     initIntlInput();
-    loadUrlModal('Finalizr', 'https://new-rifando.10mb.com.br/site/checkout/cc7d3512-6b90-4edc-99b0-1a27cf846059')
+    //loadUrlModal('Finalizr', 'https://new-rifando.10mb.com.br/site/checkout/cc7d3512-6b90-4edc-99b0-1a27cf846059')
 }
 
-function calPrices() {
-
+function openProductBuy() {
+    $("#mobileMenu").modal("hide");
+    $("#consult-order-modal").show();
 }
 
 function selectRaffles(id, key) {
@@ -460,18 +452,7 @@ function getNumbers() {
 }
 
 function validarQtd() {
-    var qtd = parseInt(document.getElementById('numbersA').value);
-    var disponivel = avaliableNums;
-    if (qtd > disponivel) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Quantidade indisponível!',
-            footer: 'Disponível: ' + disponivel
-        });
-    } else {
-        openModalCheckout();
-    }
+    openModalCheckout();
 }
 
 function initProductFilters() {
@@ -623,7 +604,7 @@ function updateNumbersFazendinha(data) {
         let numbers = data.data.numbers;
         if (productData.game_mode == "fazendinha-meio" || productData.game_mode == "fazendinha-completa") {
             var elements = document.querySelectorAll('.selected-group');
-            elements.forEach(function(element) {
+            elements.forEach(function (element) {
                 element.classList.remove('selected-group');
             });
 

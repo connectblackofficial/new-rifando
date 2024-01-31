@@ -13,7 +13,7 @@ class Participant extends Model
 
     protected $table = 'participant';
 
-    protected $fillable = ['user_id','uuid', 'customer_id', 'name', 'telephone', 'conferido', 'msg_pago_enviada', 'email', 'cpf', 'raffles_id', 'product_id', 'valor', 'numbers', 'pagos', 'reservados'];
+    protected $fillable = ['user_id', 'uuid', 'customer_id', 'name', 'telephone', 'conferido', 'msg_pago_enviada', 'email', 'cpf', 'raffles_id', 'product_id', 'valor', 'numbers', 'pagos', 'reservados'];
 
     public function reservados()
     {
@@ -40,9 +40,7 @@ class Participant extends Model
 
     public function numbers()
     {
-        $numbers = json_decode($this->numbers);
-        sort($numbers);
-        return $numbers;
+        return json_decode($this->numbers, true);
     }
 
     public function numbersResumo()
@@ -137,19 +135,20 @@ class Participant extends Model
         return $this->hasOne(Product::class, 'id', 'product_id')->where("products.user_id", getSiteOwnerId())->first();
     }
 
+    public function product()
+    {
+        return $this->hasOne(Product::class, 'id', 'product_id');
+    }
+
     public function rifa()
     {
         return $this->firstProduct();
     }
 
-    public function order()
-    {
-        return $this->hasOne(Order::class, 'participant_id', 'id')->where("orders.user_id", getSiteOwnerId())->first();
-    }
 
     public function totalReservas()
     {
-        return $this->hasMany(Raffle::class, 'participant_id', 'id')->where("raffles.user_id", getSiteOwnerId())->get();
+        return $this->hasMany(Raffle::class, 'participant_id', 'id')->get();
     }
 
     public function sampleName()
@@ -254,6 +253,11 @@ class Participant extends Model
         return $this->hasOne(PaymentPix::class, 'participant_id', 'id')->where("payment_pix.user_id", getSiteOwnerId())->first();
     }
 
+    public function order()
+    {
+        return $this->hasOne(PaymentPix::class, 'participant_id', 'id')->where("payment_pix.user_id", getSiteOwnerId())->first();
+    }
+
     public function markAsPaid()
     {
         $raffle = Raffle::where('participant_id', $this->id)->firstOrFail();
@@ -283,5 +287,34 @@ class Participant extends Model
         $this->saveOrFail();
         Raffle::where('participant_id', $this->id)->update(['status' => 'Pago']);
         event(new PaymentConfirmedEvent($this));
+    }
+
+    public function getDescription()
+    {
+        return "Ação " . $this->id;
+    }
+
+    public function affiliateVal($affProfit)
+    {
+        if ($affProfit > 0) {
+            $p = safeDiv($affProfit, 100);
+            if ($p > 0 && $this->valor) {
+                return safeMul($this->valor, $p);
+            }
+        }
+
+        return 0.00;
+    }
+
+    public function getMinutesLeft($productExpiresAt)
+    {
+        $criacao = date('Y-m-d H:i:s', strtotime($this->created_at));
+        $minutosExpiracao =$productExpiresAt;
+        $dataDeExpiracao = date('Y-m-d H:i:s', strtotime("+" . $minutosExpiracao . " minutes", strtotime($criacao)));
+        $entrada = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s'));
+        $saida = \DateTime::createFromFormat('Y-m-d H:i:s', $dataDeExpiracao);
+
+        return ceil(($saida->getTimestamp() - $entrada->getTimestamp()) / 60);
+
     }
 }

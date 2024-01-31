@@ -28,7 +28,8 @@ class ProductUpdatedListener
      */
     public function handle(ProductUpdated $event)
     {
-        $product=$event->product->refresh();
+
+        $product = $event->product->refresh();
         Product::getResumeCache($product['id'], true);
         ProductService::processRafflePages($product);
     }

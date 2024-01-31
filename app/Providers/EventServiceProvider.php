@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Events\ProductCreated;
 use App\Events\ProductUpdated;
+use App\Listeners\CheckoutCompletedEventListener;
 use App\Listeners\ProductCreatedListener;
 use App\Listeners\ProductUpdatedListener;
+use CheckoutCompletedListener;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
@@ -25,6 +27,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         ProductCreated::class => [
             ProductCreatedListener::class,
+        ],
+        CheckoutCompletedListener::class => [
+            CheckoutCompletedEventListener::class,
         ]
     ];
 

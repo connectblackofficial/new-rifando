@@ -26,10 +26,7 @@
         #div-cotas::-webkit-scrollbar-thumb:hover {
             background: #28a745 !important;
         }
-    </style>
 
-
-    <style>
         @media (max-width: 768px) {
             .app-main {
                 margin-top: 50px !important;
@@ -404,7 +401,11 @@
                     </label>
 
                     <div class="" style="margin-top: 20px;text-align: center;">
-                        <img src="data:image/jpeg;base64,{{ $qrCode }}" style="width: 50%;">
+                        @if(filter_var($qrCode, FILTER_VALIDATE_URL))
+                            <img src="{{ $qrCode }}" style="width: 50%;">
+                        @else
+                            <img src="data:image/jpeg;base64,{{ $qrCode }}" style="width: 50%;">
+                        @endif
                     </div>
 
                     <div class="text-center">
@@ -482,24 +483,18 @@
                     </label>
                     <br>
                     <label>
-                        <strong>Total: </strong> R$ {{ $price }}
+                        <strong>Total: </strong> {{formatMoney($price)}}
                     </label>
                     <br>
                     <label>
                         <strong>Cotas: </strong>
                         @if ($rifa->modo_de_jogo == 'numeros')
-                            @if ($rifa->type_raffles == 'automatico')
-                                <div id="div-cotas" style="max-height: 200px;overflow: auto;">
-                                    <span id="cotas-pending">Serão geradas após o pagamento!</span>
-                                </div>
-                            @else
                                 @foreach ($participante->numbers() as $key => $number)
                                     @if ($key > 0)
                                         ,
                                     @endif
                                     {{ $number }}
                                 @endforeach
-                            @endif
                         @else
                             @foreach ($participante->reservados() as $key => $number)
                                 @if ($key > 0)

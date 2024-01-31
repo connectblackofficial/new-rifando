@@ -3,8 +3,7 @@
            id="popularCheck-{{ $product->id }}"
            value="{{ $product->getCompraMaisPopular() }}">
 
-    @foreach ($product->shoppingSuggestion() as $compra)
-        @if($compra->qty>0)
+    @foreach ($product->shoppingSuggestions()->get() as $compra)
             <div class="col-md-6 mt-2">
                 <div class="input-group">
                     <div class="input-group-prepend" style="height: 37px;">
@@ -22,6 +21,6 @@
                            value="{{ $compra->qtd }}">
                 </div>
             </div>
-        @endif
+
     @endforeach
 </div>

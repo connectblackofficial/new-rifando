@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+<?php
 
+$siteConfig = getSiteConfig();
+?>
 <head>
-    <title><?php echo @$data['social']->name; ?> @yield('title')</title>
+    <title><?php echo $siteConfig->name; ?> @yield('title')</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--===============================================================================================-->
@@ -46,11 +49,11 @@
                     <span class="login100-form-title">
                         Login Afiliado <br>
                         <a href="{{ route('inicio') }}">
-                            @if (@$data['social']->logo)
-                                <img src="{{imageAsset(@$data['social']->logo)}}" alt=""
+                            @if ($siteConfig->logo)
+                                <img src="{{imageAsset($siteConfig->logo)}}" alt=""
                                     width="100" height="50">
                             @else
-                                Agency Rauen
+                                Site
                             @endif
                         </a>
                     </span>

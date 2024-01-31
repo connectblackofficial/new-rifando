@@ -57,41 +57,41 @@
                     <div class="tab-pane fade show active"
                          id="geral{{ $product->id }}" role="tabpanel"
                          aria-labelledby="geral-tab">
-                        @include("product.general-tab-form")
+                        @include("admin.products.parts.general-tab-form")
                     </div>
 
                     <div class="tab-pane fade show"
                          id="premios{{ $product->id }}" role="tabpanel"
                          aria-labelledby="geral-tab">
                         <div class="row">
-                            @include("product.premium-tab-form")
+                            @include("admin.products.parts.premium-tab-form")
                         </div>
                     </div>
 
                     <div class="tab-pane fade"
                          id="ajustes{{ $product->id }}" role="tabpanel"
                          aria-labelledby="ajustes-tab">
-                        @include("product.ajustes-tab-form")
+                        @include("admin.products.parts.ajustes-tab-form")
                     </div>
 
 
                     <div class="tab-pane fade"
                          id="promocao{{ $product->id }}" role="tabpanel"
                          aria-labelledby="promocao-tab">
-                        @include("product.promo-tab-form")
+                        @include("admin.products.parts.promo-tab-form")
 
                     </div>
 
                     <div class="tab-pane fade"
                          id="compraAuto{{ $product->id }}" role="tabpanel"
                          aria-labelledby="promocao-tab">
-                        @include("product.auto-buy-form")
+                        @include("admin.products.parts.auto-buy-form")
 
                     </div>
 
                     <div class="tab-pane fade" id="fotos{{ $product->id }}"
                          role="tabpanel" aria-labelledby="promocao-tab">
-                        @include("product.images-tab")
+                        @include("admin.products.parts.images-tab")
                     </div>
                 </div>
             </div>

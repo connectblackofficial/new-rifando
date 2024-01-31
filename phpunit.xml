@@ -22,6 +22,7 @@
         <testsuite name="Feature">
             <file>./tests/Feature/ProductServiceTest.php</file>
             <file>./tests/Feature/CartServiceTest.php</file>
+            <file>./tests/Feature/CheckoutServiceTest.php</file>
         </testsuite>
     </testsuites>
 </phpunit>

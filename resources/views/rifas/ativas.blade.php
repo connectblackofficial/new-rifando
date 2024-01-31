@@ -1,9 +1,4 @@
-<style>
-
-</style>
-
-{{-- Ranking de compradores (WDM) --}}
-{{-- @if (count($ranking) > 0)
+@if (count($ranking) > 0)
     <div class="card" style="border: none;border-radius: 10px;background-color: transparent;">
         <div class="card-body body-ranking {{ $config->tema }}">
             <div class="title-ranking {{ $config->tema }}" style="margin-bottom: 10px;">
@@ -24,7 +19,7 @@
             </div>
         </div>
     </div>
-@endif --}}
+@endif
 
 {{-- Promoções --}}
 @if ($productModel->promos()->where('qtdNumeros', '>', 0)->count() > 0)
@@ -48,7 +43,7 @@
                         </div>
                     @else
                         <div class="col-6" style="margin-bottom: 8px;"
-                            onclick="addQtd('{{ $promo->qtdNumeros }}', '{{ $promo->valorFormatted() }}')">
+                             onclick="addQtd('{{ $promo->qtdNumeros }}', '{{ $promo->valorFormatted() }}')">
                             <div class="bg-success" style="color: #fff;text-align: center;border-radius:6px;"><strong>
                                     {{ $promo->qtdNumeros }} POR - R$:
                                     {{ $promo->valorFormatted() }}</strong>
@@ -72,63 +67,56 @@
                     da sua sorte</small>
             </h5>
         </div>
-        <div class="col-12">
-            <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="openModal()"
-                class="btn btn-secondary btn-sm bg-secondary btn-block"
-                style="font-size: 12px; width: 100%; {{ env('APP_URL') == 'rifasonline.link' ? 'background-color: red !important' : 'background: #198754 !important' }}">
+
+        <div class="col-md-12 mb-1">
+            <button type="button" data-bs-toggle="modal" data-bs-target="#consult-order-modal"
+                    class="btn btn-secondary btn-sm bg-success btn-block"
+                    style="font-size: 12px; width: 100%; ">
                 <i class="fas fa-shopping-cart"></i>&nbsp;Ver meus números
             </button>
         </div>
-        {{-- <div class="col-md-12 mt-2">
-            <button type="button" data-bs-toggle="modal" data-bs-target="#modal-premios"
-                class="btn btn-secondary btn-sm bg-secondary btn-block" style="width: 100%; font-size: 12px; ">
-                <i class="fas fa-trophy"></i>&nbsp;Prêmios
-            </button>
-        </div> --}}
+
         @if (count($ranking) > 0)
-            <div class="col-md-12 mt-2">
+            <div class="col-md-12 mb-1">
                 <button type="button" data-bs-toggle="modal" data-bs-target="#modal-ranking"
-                    class="btn btn-secondary btn-sm bg-secondary btn-block" style="width: 100%; font-size: 12px; ">
+                        class="btn btn-secondary btn-sm bg-secondary btn-block" style="width: 100%; font-size: 12px; ">
                     <i class="fas fa-trophy"></i>&nbsp;Top Compradores
                 </button>
             </div>
         @endif
-
-        {{-- <div class="{{ env('APP_URL') == 'rifasonline.link' ? 'col-md-12 col-12' : 'col-md-6 col-6' }}">
-            <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="openModal()"
-                class="btn btn-secondary btn-sm bg-secondary"
-                style="font-size: 12px; width: 100%; {{ env('APP_URL') == 'rifasonline.link' ? 'background-color: red !important' : 'background: #198754 !important' }}">
-                <i class="fas fa-shopping-cart"></i>&nbsp;Ver meus números
+        <div class="col-md-12 mb-1">
+            <button type="button" data-bs-toggle="modal" data-bs-target="#modal-premios"
+                    class="btn btn-secondary btn-sm bg-warning" style="width: 100%; font-size: 12px; ">
+                <i class="fas fa-trophy"></i>&nbsp;Prêmios
             </button>
         </div>
-        <div class="{{ env('APP_URL') == 'agencyrauen.com' ? 'col-md-12 col-12 mt-2' : 'col-md-6 col-6' }}">
-            @if (env('APP_URL') != 'agencyrauen.com')
-                <button type="button" data-bs-toggle="modal" data-bs-target="#modal-premios"
-                    class="btn btn-secondary btn-sm bg-secondary" style="width: 100%; font-size: 12px; ">
-                    <i class="fas fa-trophy"></i>&nbsp;Prêmios
-                </button>
-            @endif
-        </div> --}}
+
     </div>
 
     @if ($productModel->parcial)
-        <div class="card"
-            style="border: none;border-radius: 10px;background-color: transparent; margin-top: -10px !important; margin-bottom: -20px;">
-            <div class="card-body body-compra-auto {{ $config->tema }}" style="">
-                <div class="row justify-content-center">
-                    <div class="col-md-12">
-                        <div class="progress-sell">
-                            <div class="progress">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated {{ env('APP_URL') == 'rifasonline.link' ? 'bg-secondary' : 'bg-success' }}"
-                                    role="progressbar" style="width: {{ $productModel->porcentagem() }}%"
-                                    aria-valuenow="10" aria-valuemin="0" aria-valuemax="100">
-                                    {{ $productModel->porcentagem() }}%
+            <?php
+            $porcentagem = $productModel->porcentagem();
+            ?>
+        @if($porcentagem>0)
+
+            <div class="card"
+                 style="border: none;border-radius: 10px;background-color: transparent; margin-top: -10px !important; margin-bottom: -20px;">
+                <div class="card-body body-compra-auto {{ $config->tema }}" style="">
+                    <div class="row justify-content-center">
+                        <div class="col-md-12">
+                            <div class="progress-sell">
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                         role="progressbar" style="width: {{ $porcentagem }}%"
+                                         aria-valuenow="10" aria-valuemin="0" aria-valuemax="100">
+                                        {{ $porcentagem }}%
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        @endif
     @endif
 </div>

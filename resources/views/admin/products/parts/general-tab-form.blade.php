@@ -43,9 +43,9 @@ $baseLang = 'product';
 
 <div class="row mt-4">
     <div class="col-md-4">
-        <?= selectField('gateway', \App\Enums\PaymentGatewayEnum::getValuesAsSelect(), $product) ?>
+        <?= selectField('gateway', \App\Enums\PaymentGatewayEnum::getValuesAsSelect(), $product,['onchange'=>'updateGatewayPix()']) ?>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-4 pix-account-container" >
         <?= selectField('pix_account_id', \App\Models\PixAccount::getAllAsSelect(), $product) ?>
     </div>
     <div class="col-4">

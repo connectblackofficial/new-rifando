@@ -29,6 +29,6 @@ class UpdateRaffleNumbers implements ShouldQueue
     public function handle()
     {
         ProductService::processRafflePages($this->product);
-        Product::getResumeCache($this->product->id);
+        Product::getResumeCache($this->product->id,true);
     }
 }

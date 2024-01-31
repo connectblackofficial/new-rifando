@@ -17,34 +17,13 @@ class CartServiceTest extends TestCase
     use TestTrait;
 
 
-    private $site;
-    private $product;
-    private $cartService;
-    private $cart;
-    private $sortNums;
-
-    private $sortNumQty = 3;
-
     public function setUp(): void
     {
         parent::setUp();
-
-        // Configuração do site
-        $this->setSiteConfig();
-        $this->site = $this->getSiteConfig();
-
-        // Criação e configuração do produto
-        $this->product = $this->getRandomProduct();
-        $this->product->type_raffles = RaffleTypeEnum::Merged;
-        $this->product->saveOrFail();
-
-        // Criação do carrinho e instância do CartService
-        $this->cart = CartService::createCart($this->product->id);
-        $this->cartService = new CartService($this->site, $this->cart);
-
-        $this->sortNums = $this->product->sortNumQty(4);
+        $this->defaultsetup();
 
     }
+
     public function testManualNumbersAddsCorrectAmount()
     {
         $site = $this->site;
@@ -70,6 +49,7 @@ class CartServiceTest extends TestCase
         $expectedTotal = safeAdd($this->cart->total, safeMul($product['price'], $this->sortNumQty));
         $expectedQty = $currentQty + $this->sortNumQty;
         $cart = $this->cart;
+        /** @var CartService $cartService */
         $cartService = $this->cartService;
         $cartService->addRmNumbers($this->sortNumQty);
         $cart = $cart->refresh();
@@ -176,26 +156,6 @@ class CartServiceTest extends TestCase
         foreach ($cols as $c) {
             $this->assertEquals($oldCart[$c], $newCart[$c]);
         }
-    }
-
-    public function testCanCompleteCheckout()
-    {
-        $this->cartService->addRmNumbers($this->sortNumQty);
-
-        $this->cartService->addRmNumbers($this->sortNums);
-
-        $oldCart = $this->cart->refresh();
-        $requestData = [
-            'ddi' => "+55",
-            "phone" => "7599242" . rand(1111, 9999),
-            'cart_uuid' => $oldCart->uuid,
-            'nome' => 'Manuel tavares de sá',
-            "email" => 'manuel@brhpst.io',
-            'cpf' => '07559659578'
-        ];
-        $checkoutService = new CheckoutService($this->site, $oldCart);
-        $checkoutService->completeCheckout($requestData);
-
     }
 
 

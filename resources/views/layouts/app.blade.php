@@ -1,5 +1,8 @@
 <html lang="pt-br">
+<?php
 
+$siteConfig = getSiteConfig();
+?>
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -26,6 +29,8 @@
             --btn-reserved-color: #ffc107;
             --btn-paid-color: #0dcaf0;
             --brand-bg-color: #000;
+            --secondary-bg-color: #020f1e;
+            --secondary-bg-text-color: #fff;
 
         }
 
@@ -34,12 +39,18 @@
     <!-- Bootstrap CSS -->
     <link href="{{cdnAsset("build/site.css")}}" rel="stylesheet">
 
+    @if(isset($siteConfig['name']))
+        <title>{{$siteConfig['name']}} @yield('title')</title>
+    @else
+        <title>@yield('title')</title>
+    @endif
 
-    <title><?php echo @$data['social']->name; ?> @yield('title')</title>
 
-    <meta name="facebook-domain-verification" content="<?php echo @$data['social']->verify_domain_fb; ?>"/>
+    @if(isset($siteConfig['verify_domain_fb']) && !empty($siteConfig['verify_domain_fb']))
+        <meta name="facebook-domain-verification" content="<?php echo $siteConfig->verify_domain_fb; ?>"/>
+            <?php echo $siteConfig->pixel; ?>
+    @endif
 
-    <?php echo @$data['social']->pixel; ?>
     <script>
         var user_phone = "<?= getSiteOwnerUser()->telephone ?>"
     </script>
@@ -48,52 +59,39 @@
 
 </head>
 
-<body id="pg-{{Route::currentRouteName()}}-route">
+<body id="pg-{{routeAsDivId()}}-route">
 @section('sidebar')
 @show
-
 <?php
 $subDomain = explode('.', request()->getHost());
 ?>
 <div id="loadingSystem" class="d-none"></div>
-
-
 <nav class="navbar navbar-expand-lg  fixed-top px-0 py-3 ">
 
     <div class="container header-menu" style="justify-content:space-evenly;align-items: center;">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <div>
                 <a class="" href="{{ route('inicio') }}">
-                    @if (@$data['social']->logo)
-                        <img src="{{ imageAsset( @$data['social']->logo) }}" alt="" width="100">
+                    @if ($siteConfig->logo)
+                        <img src="{{ imageAsset( $siteConfig->logo) }}" alt="" width="100">
                     @else
-                        Agency
+                        Site
                     @endif
                 </a>
             </div>
 
             <div>
-                <a href="#" data-bs-toggle="modal" data-bs-target="#consultar-reservas"
-                   style="text-decoration: none; font-size: 15px; color: #fff">
-                    @if (env('APP_URL') == 'agencyrauen.com')
-                        <span class="badge bg-success p-2" style="font-size: 10px;"><i
-                                    class="fas fa-search"></i>&nbsp;MEUS NÚMEROS</span>
-                    @else
-                        <i class="bi bi-cart-check"
-                           style="margin-top: 10px;font-size: 30px;color: rgb(180, 180, 180) !important; opacity: 1;"></i>
-                    @endif
-                </a>
 
+                <a href="#" data-bs-toggle="modal" data-bs-target="#consult-order-modal"
+                   style="text-decoration: none; font-size: 15px; color: #fff">
+                    <i class="bi bi-cart-check"
+                       style="margin-top: 10px;font-size: 30px;color: rgb(180, 180, 180) !important; opacity: 1;"></i>
+                </a>
                 <button type="button" aria-label="Menu" class="btn btn-link text-white" data-bs-toggle="modal"
                         data-bs-target="#mobileMenu" style="margin-top: -10px;"><i class="bi bi-filter-right"
                                                                                    style="font-size: 35px;"></i>
                 </button>
 
-                @if (env('IS_TREVO_MINAS'))
-                    <a href="https://www.instagram.com/{{ @$data['social']->instagram }}" target="_blank"
-                       style="text-decoration: none; font-size: 20px; color: #CF235F"><i
-                                class="fab fa-instagram"></i></a>
-                @endif
             </div>
         </div>
     </div>
@@ -107,11 +105,11 @@ $subDomain = explode('.', request()->getHost());
             <header class="app-header app-header-mobile--show">
                 <div class="container container-600 h-100 d-flex align-items-center justify-content-between">
                     <a href="/">
-                        @if (@$data['social']->logo)
-                            <img src="{{imageAsset(@$data['social']->logo)}}" alt=""
+                        @if ($siteConfig->logo)
+                            <img src="{{imageAsset($siteConfig->logo)}}" alt=""
                                  class="app-brand img-fluid">
                         @else
-                            Agency Rauen
+                            Site
                         @endif
                     </a>
                     <div class="app-header-mobile">
@@ -121,24 +119,33 @@ $subDomain = explode('.', request()->getHost());
                     </div>
                 </div>
             </header>
-            <div class="modal-body" style="background: var(--brand-bg-color) !important">
+            <div class="modal-body primary-bg-color">
                 <div class="container container-600">
                     <nav class="nav-vertical nav-submenu font-xs mb-2">
                         <ul>
                             <li><a class="text-white" alt="Página Principal" href="/"><i
                                             class="icone bi bi-house"></i><span>Início</span></a></li>
-                            @if (env('AFILIADOS'))
-                                <li><a class="text-white" alt="Área de Afiliados"
+                            @if ($siteConfig->enable_affiliates==1)
+                                <li>
+                                    <a class="text-white" alt="Área de Afiliados"
                                        href="{{ route('afiliado.home') }}"><i
                                                 class="icone bi bi-cash-coin"></i><span>Área de
                                                 Afiliados</span></a>
                                 </li>
                             @endif
-                            <li><a class="text-white" alt="Sorteios" href="/sorteios"><i
-                                            class="icone bi bi-ticket"></i><span>Sorteios</span></a></li>
-                            <li><a class="text-white" alt="Meus Números" data-bs-toggle="modal"
-                                   data-bs-target="#consultar-reservas"><i
-                                            class="icone bi bi-receipt"></i><span>Meus números</span></a>
+
+                            <li>
+                                <a class="text-white" alt="Sorteios" href="{{route("sorteios")}}">
+                                    <i class="icone bi bi-ticket"></i><span>Sorteios</span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="text-white" alt="Meus Números" data-bs-toggle="modal"
+                                   data-bs-target="#consult-order-modal"><i
+                                            class="icone bi bi-receipt"></i>
+                                    <span>Meus números</span>
+                                </a>
                             </li>
 
                             <li><a alt="Termos de uso" class="text-white" href="{{ route('politica') }}"><i
@@ -164,45 +171,17 @@ $subDomain = explode('.', request()->getHost());
 </div>
 
 <!-- Modal  consultar -->
-<div class="modal fade" id="consultar-reservas" tabindex="-1" aria-labelledby="exampleModalLabel"
-     aria-hidden="true" style="z-index: 9999999;">
-    <div class="modal-dialog">
-        <div class="modal-content" style="border: none;">
-            <div class="modal-header" style="background-color: #020f1e;">
-                <h5 class="modal-title" id="exampleModalLabel" style="color: #fff;">CONSULTAR RESERVAS</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
-                        style="color: #fff;">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" style="background-color: #020f1e;">
-                <div class="row">
-                    <div class="col-md-12">
-                        <form action="{{ route('minhasReservas') }}" method="POST" style="display: flex;">
-                            {{ csrf_field() }}
-                            <input type="text" name="telephone" id="telephone"
-                                   style="background-color: #fff;border: none;color: #000000;margin-right:5px;"
-                                   aria-describedby="passwordHelpBlock" maxlength="15" placeholder="Celular com DDD"
-                                   class="form-control" required>
-                            <button type="submit" class="btn btn-danger">Buscar</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<?= modal("consult-order-modal", "CONSULTAR RESERVAS", view("site.orders.consult-order-modal")->render()) ?>
 
-
-@if (@$data['social']->group_whats != null)
-    <a href="{{ @$data['social']->group_whats }}" class="botao-flutuante" target="_blank">
+@if ($siteConfig->group_whats != null)
+    <a href="{{ $siteConfig->group_whats }}" class="botao-flutuante" target="_blank">
         <i style="margin-top:8px" class="fa fa-whatsapp"></i>&nbsp; GRUPO
     </a>
 @endif
 
 
-@if (@$data['social']->instagram != null)
-    <a href="https://www.instagram.com/{{ @$data['social']->instagram }}" class="botao-flutuante-insta" target="_blank">
+@if ($siteConfig->instagram != null)
+    <a href="https://www.instagram.com/{{ $siteConfig->instagram }}" class="botao-flutuante-insta" target="_blank">
         <i style="margin-top:8px" class="fab fa-instagram"></i>
     </a>
 @endif
@@ -214,6 +193,7 @@ $subDomain = explode('.', request()->getHost());
         </div>
     </div>
 </div>
+@yield('modals')
 <script>
 
 </script>

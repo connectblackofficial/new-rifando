@@ -95,10 +95,6 @@ function getLinkAfiliado(el) {
 }
 
 
-
-
-
-
 function removeFocusRed(input) {
     element = $(input).removeAttr("style")
 }
@@ -111,6 +107,7 @@ function modal(title, content) {
     $('#modal_url').modal('show');
     $('[data-toggle="tooltip"]').tooltip();
 }
+
 
 function addFoto(el) {
     $('#rifa-id').val(el.dataset.id)
@@ -155,8 +152,6 @@ function loadUrlBigModal(title, url) {
 }
 
 
-
-
 function startLoading() {
     $("#modalLoadingMsg").show();
     $("#modalMsgBody").hide();
@@ -172,6 +167,37 @@ function closeUrlModal() {
     return false;
 }
 
+function loadRouteModal(title, url, route, size) {
+    var modalUrl = $("#modal_url");
+    modalUrl.attr("data-url-route", route);
+
+    return loadUrlModal(title, url, size);
+}
+
+
+
+function updateGatewayPix() {
+    let currentGateway = $("#gateway").val();
+    console.log(currentGateway)
+    if (currentGateway == 'pix') {
+        $(".pix-account-container").show();
+    } else {
+        $(".pix-account-container").hide();
+    }
+
+}
+
+function productAjaxcallBack() {
+    updateGatewayPix();
+}
+
+function successProductCreateCallback(data) {
+    updateGatewayPix();
+}
+
+function successProductEditCallback(data) {
+    productAjaxcallBack();
+}
 
 function loadUrlModal(title, url, size) {
     startLoading();
@@ -185,6 +211,16 @@ function loadUrlModal(title, url, size) {
     modalUrl.removeData('.bs.modal');
 
     $("#modalMsgBody").html('').load(url, function (response, status, xhr) {
+        if (isStringNotEmpty(modalUrl.attr("data-url-route"))) {
+            let routeName = modalUrl.attr("data-url-route");
+            let callBackFnName = snakeToCamel("success_" + routeName + "_callback");
+            console.log(callBackFnName)
+            if (checkIfFunctionExists(callBackFnName)) {
+                window[callBackFnName](response);  // Substitua 'window' pelo objeto que contém a função se ela não estiver no escopo global
+            }
+
+        }
+
         if (status == "error") {
             var errorMsg = "Erro: " + xhr.status + " " + xhr.statusText;
             alrtError("Ops", "Houve um erro ao carregar o conteúdo: " + errorMsg);
@@ -204,13 +240,13 @@ function changePopular(el) {
 
 function productEdit(id) {
     let url = replaceId(ROUTES.product_edit, id);
-    loadUrlModal("Editar rifa", url);
+    loadRouteModal("Editar rifa", url, "product_edit");
     return false;
 }
 
 function productCreate() {
     let url = ROUTES.product_create;
-    loadUrlModal("Nova rifa", url);
+    loadRouteModal("Nova rifa", url, "product_create");
     return false;
 }
 
@@ -220,7 +256,6 @@ function deleteProduct(id) {
         return sendAjaxRequest(url, 'delete', {'id': id});
     });
 }
-
 
 
 function openRanking(id) {
@@ -322,4 +357,8 @@ function initPage() {
     }
 
 
+}
+
+function initCreateOrUpdateProduct() {
+    alert("hihi")
 }

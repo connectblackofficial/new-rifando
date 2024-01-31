@@ -13,10 +13,24 @@ use App\Models\Site;
 use App\Models\User;
 use App\Services\CartService;
 use App\Services\ProductService;
+use Faker\Provider\en_IN\Person;
 use Illuminate\Http\UploadedFile;
+use Faker\Generator as Faker;
 
 trait TestTrait
 {
+
+    private $site;
+    private $product;
+    private $cartService;
+    private $cart;
+    private $sortNums;
+
+    private $sortNumQty = 3;
+
+    /** @var Faker $faker */
+    private $faker;
+
     public function getUser()
     {
         return User::first();
@@ -34,12 +48,12 @@ trait TestTrait
 
     public function getRandomProductData()
     {
-        $faker = \Faker\Factory::create();
-        $name = "Rifa do site " . $faker->domainName;
+
+        $name = "Rifa do site " . $this->faker->domainName;
         return [
             'name' => $name,
             'subname' => $name,
-            'slug' => createSlug($name),
+            'slug' => createSlug($name).rand(1111,99999),
             'price' => 1000,
             'gateway' => PaymentGatewayEnum::MP,
             'modo_de_jogo' => GameModeEnum::Numbers,
@@ -172,4 +186,41 @@ trait TestTrait
         return $this->cart->refresh();
     }
 
+    public function basicSetup()
+    {
+        // Configuração do site
+        $this->setSiteConfig();
+        $this->site = $this->getSiteConfig();
+        $this->faker = \Faker\Factory::create();
+    }
+
+    public function defaultsetup()
+    {
+        $this->basicSetup();
+
+        // Criação e configuração do produto
+        $this->product = $this->getRandomProduct();
+        $this->product->type_raffles = RaffleTypeEnum::Merged;
+        $this->product->saveOrFail();
+
+        // Criação do carrinho e instância do CartService
+        $this->cart = CartService::createCart($this->product->id);
+        $this->cartService = new CartService($this->site, $this->cart);
+
+        $this->sortNums = $this->product->sortNumQty(4);
+
+    }
+
+    public function getCustomerData()
+    {
+        $name = $this->faker->name;
+        return [
+            'ddi' => "+55",
+            "phone" => "7599242" . rand(1111, 9999),
+            "email" => $this->faker->email,
+            'cpf' => "07559659578",
+            'name' =>$name,
+            'nome'=>$name
+        ];
+    }
 }

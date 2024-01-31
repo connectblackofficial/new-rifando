@@ -1,4 +1,4 @@
-<div aria-hidden="true" id="modal_url" class="onboarding-modal modal fade animated" role="dialog" tabindex="-1">
+<div aria-hidden="true"  id="modal_url" class="onboarding-modal modal fade animated" role="dialog" tabindex="-1">
     <div class="modal-dialog modal-centered modal-lg" role="document">
         <div class="modal-content cc-branding text-center">
             <div class="modal-header">

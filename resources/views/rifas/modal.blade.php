@@ -1,4 +1,3 @@
-
 <script>
     $('#staticBackdrop').on('hide.bs.modal', function () {
         clearModal()
@@ -9,47 +8,18 @@
 
 
 <!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
-     style="z-index: 9999999;">
-    <div class="modal-dialog">
-        <div class="modal-content" style="border: none;">
-            <div class="modal-header" style="background-color: #020f1e;">
-                <h5 class="modal-title" id="exampleModalLabel" style="color: #fff;">CONSULTAR RESERVAS</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
-                        style="color: #fff;">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" style="background-color: #020f1e;">
-                <div class="row">
-                    <div class="col-md-12">
-                        <form action="{{ route('consultingReservation') }}" method="POST" style="display: flex;">
-                            {{ csrf_field() }}
-                            <input type="hidden" name="productID" value="{{ $productModel->id }}">
-                            <input type="text" id="telephone3" name="telephone"
-                                   style="background-color: #fff;border: none;color: #000;margin-right:5px;"
-                                   aria-describedby="passwordHelpBlock" maxlength="15" placeholder="Celular com DDD"
-                                   class="form-control" required>
-                            <button type="submit" class="btn btn-danger">Buscar</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 <!-- Modal -->
 <div class="modal fade" id="exampleModal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content" style="border: none;">
-            <div class="modal-header" style="background-color: #020f1e;">
+            <div class="modal-header secondary-bg-color">
                 <h5 class="modal-title" id="exampleModalLabel" style="color: #fff;">DÚVIDAS FREQUENTES</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"
                         style="color: #fff;background-color: red!important;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body" style="background-color: #020f1e;color: #ffffff;">
+            <div class="modal-body secondary-bg-color">
                 <b style="text-transform: uppercase;">- É confiável?</b><br>
                 <span style="color: #999999;">R: Sim, sorteio pela milhar da loteria federal.</span><br>
                 <b style="text-transform: uppercase;">- Que dia é o sorteio?</b><br>
@@ -62,7 +32,7 @@
                 <b style="text-transform: uppercase;">- Se eu escolher o veículo</b><br>
                 <span style="color: #999999;">R: Vamos entregar na sua garagem o prêmio.</span>
             </div>
-            <div class="modal-footer" style="background-color: #020f1e;">
+            <div class="modal-footer secondary-bg-color">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
             </div>
         </div>
@@ -70,34 +40,35 @@
 </div>
 
 {{-- Modal Premios --}}
-<div class="modal fade" id="modal-premios" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
-     style="z-index: 9999999;">
-    <div class="modal-dialog">
-        <div class="modal-content" style="border: none;">
-            <div class="modal-header" style="background-color: #020f1e;">
-                <h5 class="modal-title" id="exampleModalLabel" style="color: #fff;">PRÊMIOS</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
-                        style="color: #fff;">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" style="">
-                <div class="col-md-12 text-center">
-                    Estes são os prêmios disponíveis no sorteio <strong>{{ $productModel->name }}</strong>
+@if(isset($productResume['prizeDraws']) && count($productResume['prizeDraws'])>0)
+    <div class="modal fade" id="modal-premios" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
+         style="z-index: 9999999;">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border: none;">
+                <div class="modal-header secondary-bg-color">
+                    <h5 class="modal-title" id="exampleModalLabel" style="color: #fff;">PRÊMIOS</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
+                            style="color: #fff;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <hr>
-                @foreach ($productModel->prizeDraws()->where('descricao', '!=', '') as $premio)
-                    <div class="row mt-4">
-                        <div class="col-md-12 text-center">
-                            <label><strong>Prêmio {{ $premio->ordem }}: </strong>{{ $premio->descricao }}</label>
-                        </div>
+                <div class="modal-body" style="">
+                    <div class="col-md-12 text-center">
+                        Estes são os prêmios disponíveis no sorteio <strong>{{ $productModel->name }}</strong>
                     </div>
-                @endforeach
+                    <hr>
+                    @foreach ($productResume['prizeDraws'] as $premio)
+                        <div class="row mt-4">
+                            <div class="col-md-12 text-center">
+                                <label><strong>Prêmio {{ $premio->ordem }}: </strong>{{ $premio->descricao }}</label>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         </div>
     </div>
-</div>
-
+@endif
 {{-- Modal Ranking Compradores --}}
 <div class="modal fade" id="modal-ranking" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
      style="z-index: 9999999;">
