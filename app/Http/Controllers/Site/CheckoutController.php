@@ -53,7 +53,6 @@ class CheckoutController extends Controller
 
 
         $action = function () use ($postData, $site) {
-            sleep(25);
             $cartData = Cart::getCartByUuidOrFail($postData['cart_uuid']);
             $cart = $cartData['cart'];
             $checkoutService = new CheckoutService($site, $cart);

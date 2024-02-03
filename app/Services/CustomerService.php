@@ -27,6 +27,16 @@ class CustomerService
         if (empty($requestData['phone']) || empty($requestData['ddi'])) {
             throw  UserErrorException::invalidPhone();
         }
+        if (isset($requestData['name'])) {
+            $requestData['nome'] = $requestData['name'];
+        }
+        if (isset($requestData['email-cliente'])) {
+            $requestData['email'] = $requestData['email-cliente'];
+        }
+        if (isset($requestData['cpf-cliente'])) {
+            $requestData['cpf'] = $requestData['cpf-cliente'];
+        }
+
 
         if (!isset($customer['id'])) {
             $customerRules = Customer::getRules($config);

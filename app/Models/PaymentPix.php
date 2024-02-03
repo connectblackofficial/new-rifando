@@ -12,7 +12,7 @@ class PaymentPix extends Model
     protected $table = 'payment_pix';
 
     protected $fillable = [
-        'key_pix', 'participant_id', 'user_id', 'status'
+        'key_pix', 'participant_id', 'user_id', 'status','full_pix'
     ];
 
     /** @return Participant */

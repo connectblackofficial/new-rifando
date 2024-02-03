@@ -131,12 +131,17 @@ function startBtnLoad(formJq) {
 }
 
 function endBtnLoad(formJq) {
+    console.log(formJq)
     if (formJq) {
         var submitBtns = formJq.find('button[type="submit"]');
+        console.log(submitBtns)
+
         submitBtns.each(function () {
-            $(this).prop('disabled', false);
+            $(this).removeAttr('disabled');
             $(".btn-block-loading").hide();
             $(".btn-block-text").show();
+            console.log("hihih")
+
         })
     }
 }
@@ -178,6 +183,7 @@ function sendAjaxRequest(url, method, data, formJq = false) {
         contentType: false,
         success: function (response) {
             processAjaxSuccess(response);
+            endBtnLoad(formJq);
         },
         error: function () {
             alertUnkonwnError();

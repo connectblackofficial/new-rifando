@@ -53,7 +53,9 @@ class MpLib
         $responsex = curl_exec($ch);
         $data = json_decode($responsex, true);
         curl_close($ch);
-
+if(!isset($data['id'])){
+    throw  UserErrorException::pixError();
+}
         $codePIXID = $data['id'];
         $codePIX = $data['point_of_interaction']['transaction_data']['qr_code'];
         $qrCode = $data['point_of_interaction']['transaction_data']['qr_code_base64'];

@@ -7,11 +7,14 @@ use App\Enums\PaymentGatewayEnum;
 use App\Enums\RaffleTypeEnum;
 use App\Events\ProductUpdated;
 use App\Models\Cart;
+use App\Models\Order;
+use App\Models\Participant;
 use App\Models\Product;
 use App\Models\Promo;
 use App\Models\Site;
 use App\Models\User;
 use App\Services\CartService;
+use App\Services\CheckoutService;
 use App\Services\ProductService;
 use Faker\Provider\en_IN\Person;
 use Illuminate\Http\UploadedFile;
@@ -53,7 +56,7 @@ trait TestTrait
         return [
             'name' => $name,
             'subname' => $name,
-            'slug' => createSlug($name).rand(1111,99999),
+            'slug' => createSlug($name) . rand(1111, 99999),
             'price' => 1000,
             'gateway' => PaymentGatewayEnum::MP,
             'modo_de_jogo' => GameModeEnum::Numbers,
@@ -219,8 +222,39 @@ trait TestTrait
             "phone" => "7599242" . rand(1111, 9999),
             "email" => $this->faker->email,
             'cpf' => "07559659578",
-            'name' =>$name,
-            'nome'=>$name
+            'name' => $name,
+            'nome' => $name
         ];
+    }
+
+    public function checkoutCanBeCompleted($gateway = null)
+    {
+        /** @var Cart $cart */
+        $cart = $this->cart;
+        $product = $cart->product()->first();
+        if (!is_null($gateway)) {
+            $product->gateway = $gateway;
+            $product->saveOrFail();
+            event(new ProductUpdated($product));
+        }
+        $freeNumbers = $product->getFreeNumbers();
+        $cart->getAllCartNumbers();
+        $checkoutService = new CheckoutService($this->site, $this->cart);
+        $requestData = $this->getCustomerData();
+        $requestData['cart_uuid'] = $cart->uuid;
+        $order = $checkoutService->completeCheckout($requestData);
+        $this->assertInstanceOf(Order::class, $order);
+        /** @var Participant $participant */
+        $participant = $order->participant()->first();
+        $participantNumbers = $participant->numbers();
+        $product = $product->refresh();
+        $freeNumbersUpdated = $product->getFreeNumbers();
+        foreach ($participantNumbers as $n) {
+            $this->assertTrue(in_array($n, $freeNumbers), "order number($n) were not available.");
+        }
+        foreach ($participantNumbers as $n) {
+            $this->assertFalse(in_array($n, $freeNumbersUpdated), "The number($n)  orders are still available.");
+        }
+
     }
 }

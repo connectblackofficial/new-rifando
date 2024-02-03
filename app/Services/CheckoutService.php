@@ -50,6 +50,7 @@ class CheckoutService
             $siteOwner = $this->siteConfig['user_id'];
             $siteConfig = $this->siteConfig;
             $customerService = new CustomerService($siteConfig);
+
             $customer = $customerService->createOrGet($requestData);
             if (!isset($customer['id'])) {
                 throw UserErrorException::customerNotFound();
@@ -187,11 +188,11 @@ class CheckoutService
             return $order;
         } catch (UserErrorException $e) {
             DB::rollBack();
-            throw new UserErrorException($e->getMessage());
+            throw new UserErrorException(parseExceptionMessage($e));
 
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new \Exception($e->getMessage());
+            throw new \Exception(parseExceptionMessage($e));
         }
 
 

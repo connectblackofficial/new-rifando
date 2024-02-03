@@ -22,6 +22,11 @@ class UserErrorException extends Exception
         return new self("Pagamento não encontrado;");
 
     }
+    public static function pixError()
+    {
+        return new self("Ocorreu um erro ao gerar o código pix. Tente novamente.");
+
+    }
 
     public static function pixNotFound()
     {
