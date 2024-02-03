@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Site;
 
 
+use App\Exceptions\UserErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CompleteCheckoutRequest;
 use App\Http\Requests\PhoneRequest;
@@ -21,40 +22,49 @@ class CheckoutController extends Controller
 {
     public function index($cartUuid, Request $request)
     {
-        $cart = Cart::whereUuid($cartUuid)->firstOrFail();
-        $productResume = Product::getResumeCache($cart->product_id);
-        $productData = $productResume['product'];
-        checkUserIdSite($productData['user_id']);
+        $action = function () use ($request, $cartUuid) {
+            $cartData = Cart::getCartByUuidOrFail($cartUuid);
+            $cart = $cartData['cart'];
+            $productResume = $cartData['productResume'];
+            $productData = $productResume['product'];
+            $pageData = [
+                'tokenAfiliado' => $request->tokenAfiliado,
+                'product' => $productResume['product'],
+                'cart' => $cart,
+                'numbers' => $cart->getNumbersAsArray(),
+                'qtd_zeros' => $productData['qtd_zeros'],
+                'config' => getSiteConfig()
+            ];
+            return ['html' => view("site.checkout.complete", $pageData)->render()];
+        };
 
-        $pageData = [
-            'tokenAfiliado' => $request->tokenAfiliado,
-            'product' => $productResume['product'],
-            'cart' => $cart,
-            'numbers' => $cart->getNumbersAsArray(),
-            'qtd_zeros' => $productData['qtd_zeros'],
-            'config' => getSiteConfig()
-        ];
-        return view("site.checkout.index", $pageData);
-    }
-
-    public function step1(Request $request)
-    {
-        $rules = [
-            'cart_uuid' => 'required',
-            'phone' => 'required|min:8|max:15'
-        ];
+        return $this->processAjaxResponse([], [], $action);
     }
 
     public function completeCheckout(Request $request)
     {
-
+        $site = getSiteConfig();
         $rules = (new CompleteCheckoutRequest())->rules();
-        $action = function () use ($request) {
-            $customer = Customer::siteOwner()->phoneFromRequest($request)->first();
-            $response['customer'] = $customer;
-            return $response;
+        $postData = $request->all();
+
+        if (isset($postData['DDI'])) {
+            $postData['ddi'] = $postData['DDI'];
+        }
+
+
+        $action = function () use ($postData, $site) {
+            sleep(25);
+            $cartData = Cart::getCartByUuidOrFail($postData['cart_uuid']);
+            $cart = $cartData['cart'];
+            $checkoutService = new CheckoutService($site, $cart);
+            /*** @var Order $order * */
+            $order = $checkoutService->completeCheckout($postData);
+            return [
+                'redirect_url' => route("site.checkout.pay", ['uuid' => $order->uuid])
+            ];
         };
-        return $this->processAjaxResponse(['phone' => $request->phone, 'ddi' => $request->ddi], $rules, $action, true);
+        return $this->processAjaxResponse($postData, $rules, $action);
+
     }
 
     public function payment($orderuuid, Request $request)

@@ -64,12 +64,9 @@ class CheckPagamentos extends Command
                         if ($payment->status == 'cancelled') {
                             DB::table('payment_pix')->where('id', '=', $value->id)->delete();
                         } else if ($payment->status == 'approved') {
-
                             $participante = Participant::find($payment->external_reference);
                             if ($participante) {
-                                $rifa = $participante->firstProduct();
-                                $rifa->confirmPayment($participante->id);
-
+                                $participante->confirmPayment();
                                 DB::table('payment_pix')->where('id', '=', $value->id)->update([
                                     'status' => 'Aprovado'
                                 ]);

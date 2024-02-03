@@ -1,0 +1,1 @@
+php artisan crud:generate PaymentReceipts --fields_from_file="/home/caique/sites/new-rifando/resources/crud-generator/fields_from_file/payment_receipts.json" --view-path=admin --controller-namespace=App\\Http\\Controllers\\Admin --route-group=admin --form-helper=html

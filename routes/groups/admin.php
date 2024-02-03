@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\CustomersController;
+use App\Http\Controllers\Admin\FaqsController;
+use App\Http\Controllers\Admin\PaymentReceiptsController;
 use App\Http\Controllers\Admin\PixAccountsController;
 use App\Http\Controllers\SuperAdmin\UsersController;
 use Illuminate\Support\Facades\Route;
@@ -125,10 +127,26 @@ Route::get('admin/customers/{pk}/edit', [CustomersController::class, 'edit'])->n
 Route::put('admin/customers/{pk}', [CustomersController::class, 'update'])->name('admin.customers.update');
 Route::delete('admin/customers/{pk}', [CustomersController::class, 'destroy'])->name('admin.customers.destroy');
 
-Route::get('admin/products', [\App\Http\Controllers\Admin\ProductsController::class, 'index'])->name('admin.products.index');
-Route::get('admin/products/create', [\App\Http\Controllers\Admin\ProductsController::class, 'create'])->name('admin.products.create');
-Route::post('admin/products', [\App\Http\Controllers\Admin\ProductsController::class, 'store'])->name('admin.products.store');
-Route::get('admin/products/{pk}', [\App\Http\Controllers\Admin\ProductsController::class, 'show'])->name('admin.products.show');
-Route::get('admin/products/{pk}/edit', [\App\Http\Controllers\Admin\ProductsController::class, 'edit'])->name('admin.products.edit');
-Route::put('admin/products/{pk}', [\App\Http\Controllers\Admin\ProductsController::class, 'update'])->name('admin.products.update');
-Route::delete('admin/products/{pk}', [\App\Http\Controllers\Admin\ProductsController::class, 'destroy'])->name('admin.products.destroy');
+Route::get('admin/products', [ProductAdmController::class, 'index'])->name('admin.products.index');
+Route::get('admin/products/create', [ProductAdmController::class, 'create'])->name('admin.products.create');
+Route::post('admin/products', [ProductAdmController::class, 'store'])->name('admin.products.store');
+Route::get('admin/products/{pk}', [ProductAdmController::class, 'show'])->name('admin.products.show');
+Route::get('admin/products/{pk}/edit', [ProductAdmController::class, 'edit'])->name('admin.products.edit');
+Route::put('admin/products/{pk}', [ProductAdmController::class, 'update'])->name('admin.products.update');
+Route::delete('admin/products/{pk}', [ProductAdmController::class, 'destroy'])->name('admin.products.destroy');
+
+Route::get('admin/faqs', [FaqsController::class, 'index'])->name('admin.faqs.index');
+Route::get('admin/faqs/create', [FaqsController::class, 'create'])->name('admin.faqs.create');
+Route::post('admin/faqs', [FaqsController::class, 'store'])->name('admin.faqs.store');
+Route::get('admin/faqs/{pk}', [FaqsController::class, 'show'])->name('admin.faqs.show');
+Route::get('admin/faqs/{pk}/edit', [FaqsController::class, 'edit'])->name('admin.faqs.edit');
+Route::put('admin/faqs/{pk}', [FaqsController::class, 'update'])->name('admin.faqs.update');
+Route::delete('admin/faqs/{pk}', [FaqsController::class, 'destroy'])->name('admin.faqs.destroy');
+
+Route::get('admin/payment-receipts', [PaymentReceiptsController::class, 'index'])->name('admin.payment-receipts.index');
+Route::get('admin/payment-receipts/create', [PaymentReceiptsController::class, 'create'])->name('admin.payment-receipts.create');
+Route::post('admin/payment-receipts', [PaymentReceiptsController::class, 'store'])->name('admin.payment-receipts.store');
+Route::get('admin/payment-receipts/{pk}', [PaymentReceiptsController::class, 'show'])->name('admin.payment-receipts.show');
+Route::get('admin/payment-receipts/{pk}/edit', [PaymentReceiptsController::class, 'edit'])->name('admin.payment-receipts.edit');
+Route::put('admin/payment-receipts/{pk}', [PaymentReceiptsController::class, 'update'])->name('admin.payment-receipts.update');
+Route::delete('admin/payment-receipts/{pk}', [PaymentReceiptsController::class, 'destroy'])->name('admin.payment-receipts.destroy');

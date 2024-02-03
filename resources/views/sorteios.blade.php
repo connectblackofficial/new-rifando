@@ -1,12 +1,6 @@
 @extends('layouts.app')
 
 @section("scripts-top")
-    <script>
-
-
-    </script>
-
-
     <style>
         @media (max-width: 768px) {
             .app-main {

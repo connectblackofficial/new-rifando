@@ -75,8 +75,10 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="border: none;">
             <div class="modal-header" style="background-color: #fff;">
-                <h5 class="modal-title" id="exampleModalLabel" style="color: #000;"><img
-                            src="{{ cdnImageAsset('treofeu.png') }}" alt=""> Top Compradores</h5>
+                <h5 class="modal-title" id="exampleModalLabel" style="color: #000;">
+                    <img
+                            src="{{ cdnImageAsset('treofeu.png') }}" alt=""> Top Compradores
+                </h5>
                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
                         style="color: #000;">
                     <span aria-hidden="true">&times;</span>
@@ -115,13 +117,6 @@
                         </div>
                     </div>
 
-                    {{-- <div class="btn-auto item-ranking">
-                        {{ $key + 1 }}º {{ $productModel->medalhaRanking($key) }}<br>
-                        <span style="font-size: 20px;font-weight: bold;">{{ $rk->name }}</span>
-                        <br>
-                        <span style="font-size: 12px;">Qtd. de Bilhetes
-                            {{ $rk->totalReservas }}</span>
-                    </div> --}}
                 @endforeach
             </div>
         </div>

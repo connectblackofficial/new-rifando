@@ -6,6 +6,7 @@ use Exception;
 
 class UserErrorException extends Exception
 {
+
     public static function unauthorizedAccess()
     {
         return new self(htmlLabel("unauthorized access."));
@@ -52,9 +53,28 @@ class UserErrorException extends Exception
 
     }
 
-    public static function pageNotFound($id = null)
+    public static function pageNotFound()
     {
-        return new self("#$id Página não encontrada.");
+        return new self("Página não encontrada.");
 
     }
+
+    public static function customerNotFound()
+    {
+        return new self("Cliente não encontrado.");
+
+    }
+
+    public static function invalidPhone()
+    {
+        return new self("Telefone inválido.");
+
+    }
+
+    public static function cartNotFound()
+    {
+        return new self("Checkout inválido.");
+
+    }
+
 }

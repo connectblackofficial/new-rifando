@@ -69,7 +69,7 @@
         </div>
 
         <div class="col-md-12 mb-1">
-            <button type="button" data-bs-toggle="modal" data-bs-target="#consult-order-modal"
+            <button type="button" onclick="return participantCheck()"
                     class="btn btn-secondary btn-sm bg-success btn-block"
                     style="font-size: 12px; width: 100%; ">
                 <i class="fas fa-shopping-cart"></i>&nbsp;Ver meus números

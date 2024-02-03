@@ -123,6 +123,7 @@ class Controller extends BaseController
         try {
             return $callback();
         } catch (\Exception $e) {
+            return parseExceptionMessage($e);
             return redirect()->back()->withErrors(parseExceptionMessage($e));
         }
     }
@@ -164,10 +165,16 @@ class Controller extends BaseController
                         $return["data"] = $response;
                     }
                     $return["success"] = true;
-                    $return["sucess_message"] = "Operação realizada com sucesso.";
-                    if ($redirect) {
+                    $return["success_message"] = "Operação realizada com sucesso.";
+                    if (isset($response['redirect_url']) && validateUrl($response['redirect_url'])) {
+                        $return['redirect'] = true;
+                        $return['redirect_url'] = $response['redirect_url'];
+                    } elseif ($redirect === true) {
                         $return['redirect'] = true;
                         $return['redirect_url'] = url()->previous();
+                    } else if (validateUrl($redirect)) {
+                        $return['redirect'] = true;
+                        $return['redirect_url'] = $redirect;
                     }
                     if ($withTrans) {
                         \DB::commit();

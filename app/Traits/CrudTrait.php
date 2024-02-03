@@ -29,12 +29,21 @@ trait CrudTrait
 
     private $modelInstance;
     private $removedFromAdvancedSearch = ['user_id', 'uuid'];
+    private $removedFromOrderBy = ['user_id', 'uuid', 'participant_id', "customer_id", "comments", "description"];
     private $hashFields = ['password'];
     private $uniqueFields = ['email'];
     private $currentUpdateData = [];
     private $indexExtraWhere = [];
     private $rowsLimit = 100;
 
+    private function removeFieldFromOrderByAndSearch($fields)
+    {
+        foreach ($fields as $f) {
+            $this->removedFromOrderBy[] = $f;
+            $this->removedFromAdvancedSearch[] = $f;
+        }
+
+    }
 
     private function getModelFields()
     {
@@ -128,7 +137,7 @@ trait CrudTrait
                     $denyList[] = $fName;
                 }
                 foreach ($this->orderByCols as $k => $v) {
-                    if (in_array($v, $denyList)) {
+                    if (in_array($v, $denyList) || in_array($v, $this->removedFromOrderBy)) {
                         unset($this->orderByCols[$k]);
                     }
                 }
@@ -182,7 +191,46 @@ trait CrudTrait
                 return "";
             };
         }
+        $this->setFormatDateCols();
+        $this->setPhoneCol();
         return $this->formatFieldsFn;
+    }
+
+    private function setFormatDateCols()
+    {
+        $cols = ['created_at', 'updated_at'];
+        foreach ($cols as $c) {
+            $this->formatFieldsFn[$c] = function ($value, $item) use ($c) {
+                return defaultDateFormat($item[$c]);
+            };
+        }
+
+    }
+
+    private function setPhoneCol()
+    {
+        $c = "customer_phone";
+        $this->formatFieldsFn[$c] = function ($value, $item) use ($c) {
+            return getWhatsAppShortLink($value, $item['customer_ddi'], '', true);
+        };
+
+        $c = "customer_name";
+        $this->formatFieldsFn[$c] = function ($value, $item) use ($c) {
+            $link = route("admin.customers.edit", ['pk' => $item['customer_id']]);
+            return "<a href='$link' target='_blank'>" . $value . "</a>";
+        };
+
+        $c = "telephone";
+        $this->formatFieldsFn[$c] = function ($value, $item) use ($c) {
+            return getWhatsAppShortLink($value, $item['ddi'], '', true);
+        };
+        $c = "valor";
+        $this->formatFieldsFn[$c] = function ($value, $item) use ($c) {
+            return formatMoney($value);
+        };
+        $this->formatFieldsFn['status'] = function ($value, $item) use ($c) {
+            return getBadgeByStatus($value);
+        };
     }
 
     private function getRouteIndex()
@@ -323,12 +371,17 @@ trait CrudTrait
     }
 
 
-    private function processUpdate($validationRule, array $requestData, $id)
+    private function processUpdate($validationRule, array $requestData, $id, $isAjax = false)
     {
         $currentData = $this->modelClass::findOrFail($id);
         $this->currentUpdateData = $currentData;
         $cleanData = $this->getCleanRulesAndData($validationRule, $requestData);
         if (count($cleanData['requestData']) <= 2) {
+            if ($isAjax) {
+
+            } else {
+
+            }
             return redirect(route($this->getRouteIndex()))->with('success', htmlLabel($this->crudNameSingular . ' updated'));
         }
         $requestData = $cleanData['requestData'];
@@ -541,14 +594,15 @@ trait CrudTrait
 
     public function edit($id)
     {
-
         $editPage = function (self $instance) use ($id) {
             $instance->hasPermissionOrFail('edit');
             $instance->beforeRenderEditPage($id);
             $view = $instance->getGroup() . '.' . $this->crudName . '.edit';
             $pageData = [];
             $pageData[$this->crudNameSingular] = $this->modelClass::siteOwner()->where($instance->getPkModelCol(), $id)->firstOrFail();
+            $pageData['row'] = $pageData[$this->crudNameSingular];
             $pageData['pgTitle'] = htmlLabel($instance->crudName . '_edit');;
+
             return $this->parseViewCi($view, $pageData);
         };
         return $this->processResponse($editPage);

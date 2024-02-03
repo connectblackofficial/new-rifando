@@ -7,6 +7,10 @@ use App\Events\ProductUpdated;
 use App\Listeners\CheckoutCompletedEventListener;
 use App\Listeners\ProductCreatedListener;
 use App\Listeners\ProductUpdatedListener;
+use App\Models\Faq;
+use App\Models\Product;
+use App\Observers\FaqObserver;
+use App\Observers\ProductObserver;
 use CheckoutCompletedListener;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -42,6 +46,7 @@ class EventServiceProvider extends ServiceProvider
     {
         parent::boot();
 
-        //
+        Product::observe(ProductObserver::class);
+        Faq::observe(FaqObserver::class);
     }
 }

@@ -44,13 +44,8 @@ let siteScriptsFooter = [
 mix.sass('resources/cdn/saas/site.scss', 'public/cdn/build').sass('resources/cdn/saas/admin.scss', 'public/cdn/build').combine([
     `${resourceCdnDirVendor}/jquery/jquery-3.7.0.min.js`,
     `${nodeDir}/bootstrap_4_6_1/dist/js/bootstrap.bundle.js`,
-    `${resourceCdnDirVendor}/summernote/summernote-bs4.min.js`,
     `${resourceCdnDir}/dist/js/adminlte.min.js`,
     `${resourceCdnDirVendor}//jquery/jquery.maskMoney.min.js`,
-    `${resourceCdnDirVendor}/codemirror/codemirror.js`,
-    `${resourceCdnDirVendor}/codemirror/mode/css/css.js`,
-    `${resourceCdnDirVendor}/codemirror/mode/xml/xml.js`,
-    `${resourceCdnDirVendor}/codemirror/mode/htmlmixed/htmlmixed.js`,
     `${resourceCdnDirVendor}/moment/moment.min.js`,
     `${resourceCdnDirVendor}/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js`,
     `${resourceCdnDirVendor}/jquery_dataTables_v1.11.5/js/jquery.dataTables.min.js`,

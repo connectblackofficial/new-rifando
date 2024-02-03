@@ -1,0 +1,28 @@
+{
+  "fields": [
+    {
+      "name": "status",
+      "type": "select",
+      "options": {
+        "Recusado": "Recusado",
+        "Aprovado": "Aprovado",
+        "Pendente": "Pendente"
+      }
+    },
+    {
+      "name": "comments",
+      "type": "text"
+    }
+
+  ],
+  "validations": [
+    {
+      "field": "status",
+      "rules": "required|max:191"
+    },
+    {
+      "field": "comments",
+      "rules": "required|max:191"
+    }
+  ]
+}

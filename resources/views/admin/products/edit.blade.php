@@ -42,6 +42,14 @@
                                role="tab" aria-controls="compraAuto"
                                aria-selected="false">Compra Automática</a>
                         </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" id="faq-tab"
+                               data-toggle="tab"
+                               href="#faq{{ $product->id }}"
+                               role="tab" aria-controls="faq"
+                               aria-selected="false">FAQs</a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link" id="fotos-tab"
                                data-toggle="tab"
@@ -86,9 +94,13 @@
                          id="compraAuto{{ $product->id }}" role="tabpanel"
                          aria-labelledby="promocao-tab">
                         @include("admin.products.parts.auto-buy-form")
-
                     </div>
+                    <div class="tab-pane fade"
+                         id="faq{{ $product->id }}" role="tabpanel"
+                         aria-labelledby="faq-tab">
 
+                        @include("admin.products.parts.faq-tab-form")
+                    </div>
                     <div class="tab-pane fade" id="fotos{{ $product->id }}"
                          role="tabpanel" aria-labelledby="promocao-tab">
                         @include("admin.products.parts.images-tab")
@@ -103,7 +115,3 @@
         <button type="submit" class="criar btn btn-lg btn-success"><i class="fa fa-save"></i> Salvar</button>
     </div>
 </form>
-<script>
-    initCreateOrUpdateProduct();
-
-</script>

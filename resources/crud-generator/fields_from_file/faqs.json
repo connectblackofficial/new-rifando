@@ -1,0 +1,42 @@
+{
+  "fields": [
+    {
+      "name": "title",
+      "type": "string"
+    },
+    {
+      "name": "description",
+      "type": "text"
+    },
+    {
+      "name": "order",
+      "type": "tinyint"
+    },
+    {
+      "name": "show",
+      "type": "select",
+      "options": {
+        "0": "Yes",
+        "1": "No"
+      }
+    }
+  ],
+  "validations": [
+    {
+      "field": "title",
+      "rules": "required|max:191"
+    },
+    {
+      "field": "description",
+      "rules": "required|max:999|min:3"
+    },
+    {
+      "field": "order",
+      "rules": "required|integer|min:0|max:127"
+    },
+    {
+      "field": "show",
+      "rules": "required|in:0,1"
+    }
+  ]
+}

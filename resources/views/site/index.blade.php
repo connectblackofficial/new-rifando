@@ -178,60 +178,15 @@
 
         </div>
     @endif
-
-    {{-- Perguntas ferquentes --}}
-    @if (!env('HIDE_FAQ'))
-        <div class="perguntas-frequentes pb-2">
-            <div class="app-title {{ $config->tema }}">
-                <h1>🤷 Perguntas frequentes</h1>
+    @if($config->show_faqs==1)
+            <?php
+            $siteFaqs = \App\Models\Faq::getAllActive($config->user_id);
+            ?>
+        @if(!is_null($siteFaqs) && count($siteFaqs)>0)
+            <div class="perguntas-frequentes pb-2">
+                    <?= faqColapse(\App\Models\Faq::getAllActive($config->user_id), $config) ?>
             </div>
-            <div class="accordion" id="accordionExample">
-                <div class="card">
-                    <div class="card-header" id="headingOne">
-                        <h2 class="mb-0">
-                            <button class="btn btn-sm btn-block text-left collapsed" type="button"
-                                    data-toggle="collapse" data-target="#collapseOne" aria-expanded="false"
-                                    aria-controls="collapseOne">
-                                Acessando suas compras
-                            </button>
-                        </h2>
-                    </div>
-                    <div id="collapseOne" class="collapse" aria-labelledby="headingOne"
-                         data-parent="#accordionExample">
-                        <div class="card-body">
-                            Existem <strong>duas</strong> formas de você conseguir acessar suas compras, a
-                            primeira é logando no site, clicando no carrinho de compras no menu superior e a
-                            segunda é visitando o sorteio e clicando em "Ver meus números".
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="accordion mt-2" id="accordionExample">
-                <div class="card">
-                    <div class="card-header" id="headingTwo">
-                        <h2 class="mb-0">
-                            <button class="btn btn-sm btn-block text-left collapsed" type="button"
-                                    data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false"
-                                    aria-controls="collapseTwo">
-                                Como envio o comprovante ?
-                            </button>
-                        </h2>
-                    </div>
-                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo"
-                         data-parent="#accordionExample">
-                        <div class="card-body">
-                            Caso você tenha feito o pagamento via PIX QR Code ou copiando o código, não é
-                            necessário enviar o comprovante, aguardando até 5 minutos após o pagamento, o
-                            sistema irá dar baixa automaticamente, para mais dúvidas entre em contato conosco
-                            pelo whatsapp.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        @endif
     @endif
-
-    @include('layouts.footer')
 
 @endsection

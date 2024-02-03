@@ -21,7 +21,7 @@ class Promo extends Model
 
     public function valorFormatted()
     {
-        return number_format($this->valor, 2, ",", ".");
+        return formatMoney($this->valor,false);
     }
 
     public function product()

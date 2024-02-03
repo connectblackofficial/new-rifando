@@ -11,7 +11,7 @@
     </div>
 </div>
 
-@foreach ($rifa->prizeDraws()->where('descricao', '!=', '')->whereNotNull('participant_id')->get() as $premio)
+@foreach ($rifa->paidPrizeDraws()->get()  as $premio)
         <?php
         /** @var \App\Models\PrizeDraw $premio */
         $participante = $premio->participant();

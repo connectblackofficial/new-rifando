@@ -83,6 +83,9 @@ function openModal1() {
 }
 
 function endLoading() {
+    $(".btn-block-text").show();
+    $(".btn-block-loading").hide();
+
     $("#loadingSystem").hide();
 }
 
@@ -116,7 +119,7 @@ function initIntlInput() {
     });
 }
 
-function loadUrlModal(title, url, size) {
+function loadUrlModal2(title, url, size) {
     loading();
     var modalUrl = $("#modal_url");
     if (size) {
@@ -134,12 +137,67 @@ function loadUrlModal(title, url, size) {
             $('#modal_url').modal('hide');
         }
         loading();
-    });
+    })
     $('#modal_url').modal('show');
 }
 
+function loadUrlModal(title, url, size) {
+    loading();
+    var modalUrl = $("#modal_url");
+    if (size) {
+        modalUrl.find('.modal-dialog').addClass(size);
+    }
+    modalUrl.attr("data-title", title);
+    modalUrl.attr("data-url", url);
+    $("#modalMsgTitle").html(title);
+    modalUrl.removeData('.bs.modal');
+
+    return fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erro: ${response.status} ${response.statusText}`);
+            }
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            } else {
+                return response.text();
+            }
+        })
+        .then(data => {
+            if (typeof data === 'object') {
+                var hasErrors = processAjaxError(data);
+                if (!hasErrors) {
+                    $("#modalMsgBody").html(data.data.html);
+                    $('#modal_url').modal('show');
+                }
+            } else {
+                // Manipular HTML
+                $("#modalMsgBody").html(data);
+                $('#modal_url').modal('show');
+            }
+            loading();
+        })
+        .catch(error => {
+            errorMsg(`Houve um erro ao carregar o conteúdo: ${error}`);
+            $('#modal_url').modal('hide');
+            loading();
+        });
+}
+
+
+function participantCheck() {
+    loadUrlModal("Consultar Reservas", ROUTES.site_participant_check);
+    return false;
+}
+
 function openModalCheckout() {
-    loadUrlModal("Finalizar Reserva", replaceId(ROUTES.site_checkout, cartUuid));
+    loadUrlModal("Finalizar Reserva", replaceId(ROUTES.site_checkout, cartUuid)).then(function () {
+        setCheckoutStep(1);
+        $("#btn-checkout-continue").click(function () {
+            return checkCustomer();
+        });
+    });
     return false;
 }
 
@@ -148,6 +206,7 @@ function initSitePg() {
     initAjaxSetup();
     prepareSitePhones();
     initIntlInput();
+
     //loadUrlModal('Finalizr', 'https://new-rifando.10mb.com.br/site/checkout/cc7d3512-6b90-4edc-99b0-1a27cf846059')
 }
 
@@ -416,30 +475,34 @@ function productPageTouchStart() {
     });
 }
 
-function lastParticipantsNotifications() {
-
-    var updateRandomParticipan = function () {
-        $('#messageIn').fadeIn('fast');
-
-        $.ajax({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            type: 'POST',
-            dataType: 'json',
-            url: ROUTES.randomParticipant,
-            success: function (data) {
-                document.getElementById('messageIn').innerHTML = data[0] + ' acabou de comprar';
-            },
-        });
-
-
-        setTimeout(function () {
-            $('#messageIn').fadeOut('fast');
-        }, 2000); // <-- time in milliseconds
+function getRandParticipant() {
+    if (SITE_CONFIG.show_purchase_notifications != 1) {
+        return false;
     }
-    updateRandomParticipan();
-    var refInterval = window.setInterval('updateRandomParticipan()', 1000 * 60 * 1); // 30 seconds
+    $('#messageIn').fadeIn('fast');
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        type: 'POST',
+        dataType: 'json',
+        url: ROUTES.randomParticipant,
+        success: function (data) {
+            document.getElementById('messageIn').innerHTML = data[0] + ' acabou de comprar';
+        },
+    });
+    setTimeout(function () {
+        $('#messageIn').fadeOut('fast');
+    }, 2000); // <-- time in milliseconds
+
+}
+
+function lastParticipantsNotifications() {
+    //getRandParticipant();
+    $('#messageIn').fadeOut('fast');
+    window.setInterval(function () {
+        getRandParticipant();
+    }, rand(30, 60) * 1000); // 30 seconds
 
 
 }
@@ -677,7 +740,6 @@ function changeAjaxPage(page) {
     if (productData.game_mode != "numeros") {
         return false;
     }
-
     let url = ROUTES.product_site_numbers;
     if (page == 1) {
         beforeCallback = function () {
@@ -712,10 +774,8 @@ $('input.keydown').on('keydown', function (e) {
 
 
 function checkCustomer() {
-
-    var phone = $('#telephone1').val();
-
-    var ddi = $('#DDI').val();
+    var phone = $('#phone').val();
+    var ddi = $('#custom-phone-ddi').val();
 
     var callback = function (response) {
         console.log(checkAttribute(response, 'data'));
@@ -723,7 +783,7 @@ function checkCustomer() {
 
         if (checkAttribute(response, 'data') && checkAttribute(response.data, 'customer')) {
             if (response.data.customer == null) {
-                novoCliente(phone);
+                novoCliente(ddi, phone);
             } else {
                 findCustomer(response.data.customer)
             }
@@ -738,31 +798,23 @@ function finalizarCompra() {
 }
 
 function findCustomer(customer) {
-    document.getElementById('customer-name').innerHTML = customer.nome;
-    document.getElementById('customer-phone').innerHTML = customer.telephone;
-    document.getElementById('name').value = customer.nome;
-    document.getElementById('phone-cliente').value = customer.telephone;
-    if (idExists('cpf-cliente')) {
-        document.getElementById('cpf-cliente').value = customer.cpf;
-    }
-    if (idExists('email-cliente')) {
-        document.getElementById('email-cliente').value = customer.email;
-    }
+    $("#customer-name").html(customer.nome);
+    $("#customer-phone").html(customer.telephone)
+    $("#cpf-cliente").val(customer.cpf);
+    $("#email-cliente").val(customer.email);
+    $("#name").val(customer.nome);
+    $("#ddi").val(customer.ddi);
+    $("#phone").val(customer.telephone);
 
-    document.getElementById('customer').value = customer.id;
-    document.getElementById('div-customer').classList.toggle('d-none');
-    document.getElementById('btn-checkout').innerHTML = 'Concluir reserva';
-    document.getElementById('btn-checkout-action').type = 'submit'
-    document.getElementById('btn-alterar').innerHTML = 'Alterar Conta';
-    document.getElementById('btn-alterar').classList.remove('d-none');
-    document.getElementById('div-info').classList.add('d-none');
-    document.getElementById('div-telefone').classList.add('d-none');
+    setCheckoutStep(3);
 }
 
 function clearModal() {
-    document.getElementById('telephone1').value = '';
-    document.getElementById('telephone1').disabled = false;
-    document.getElementById('DDI').disabled = false;
+    $("#div-telefone").show();
+
+    document.getElementById('phone').value = '';
+    document.getElementById('phone').disabled = false;
+    document.getElementById('custom-phone-ddi').disabled = false;
 
     document.getElementById('div-nome').classList.add('d-none');
     document.getElementById('info-footer').innerHTML = 'Informe seu telefone para continuar.';
@@ -777,17 +829,30 @@ function clearModal() {
     document.getElementById('div-telefone').classList.remove('d-none');
 }
 
-function novoCliente(phone) {
-    document.getElementById('telephone1').disabled = true;
-    document.getElementById('DDI').disabled = true;
-    document.getElementById('div-nome').classList.toggle('d-none');
-    document.getElementById('info-footer').innerHTML = 'Informe os dados corretos para recebimento das premiações.';
-    document.getElementById('btn-checkout').innerHTML = 'Concluir cadastro e pagar';
-    document.getElementById('btn-checkout-action').setAttribute("onclick", "loading()")
-    document.getElementById('btn-checkout-action').type = 'submit'
-    document.getElementById('btn-alterar').classList.innerHTML = 'Alterar Telefone';
-    document.getElementById('btn-alterar').classList.toggle('d-none');
-    document.getElementById('phone-cliente').value = phone
-    document.getElementById('customer').value = 0;
+function resetCheckoutModal() {
+    setCheckoutStep(1);
+    $("#cpf-cliente").val("");
+    $("#email-cliente").val("");
+    $("#name").val("");
+    return false;
+}
 
+function setCheckoutStep(step) {
+    for (var i = 1; i <= 3; i++) {
+        var newStepDiv = "#checkout-step" + i;
+        if (i == step) {
+            $(newStepDiv).show();
+        } else {
+            $(newStepDiv).hide();
+
+        }
+    }
+    return false;
+
+}
+
+function novoCliente(ddi, phone) {
+    $("#ddi-phone-cliente").val(ddi);
+    $("#phone-cliente").val(phone);
+    setCheckoutStep(2);
 }

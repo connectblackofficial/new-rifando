@@ -40,7 +40,6 @@ class PrizeDraw extends Model
     {
         $tel = "55" . str_replace(["(", ")", "-", " "], "", $this->telefone);
         $link = 'https://api.whatsapp.com/send?phone=' . $tel;
-
         return $link;
     }
 

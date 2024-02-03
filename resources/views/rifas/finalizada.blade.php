@@ -10,7 +10,7 @@
         </h2>
     @else
         <h2 style="text-align: center">
-            Rifa Finalizada!
+            Sorteio Finalizado!
         </h2>
     @endif
 

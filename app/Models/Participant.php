@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProductStatusEnum;
 use App\Events\PaymentConfirmedEvent;
 use App\Exceptions\UserErrorException;
 use App\Traits\ModelSiteOwnerTrait;
@@ -13,7 +14,7 @@ class Participant extends Model
 
     protected $table = 'participant';
 
-    protected $fillable = ['user_id', 'uuid', 'customer_id', 'name', 'telephone', 'conferido', 'msg_pago_enviada', 'email', 'cpf', 'raffles_id', 'product_id', 'valor', 'numbers', 'pagos', 'reservados'];
+    protected $fillable = ['user_id', 'uuid', 'ddi', 'customer_id', 'name', 'telephone', 'conferido', 'msg_pago_enviada', 'email', 'cpf', 'raffles_id', 'product_id', 'valor', 'numbers', 'pagos', 'reservados'];
 
     public function reservados()
     {
@@ -281,6 +282,9 @@ class Participant extends Model
         if (!isset($product['id'])) {
             throw new \Exception("Produto não encontrado.");
         }
+        if ($product->status == ProductStatusEnum::Finished) {
+            throw new \Exception("Este produto não recebe novos pedidos.");
+        }
         $numbersParticipante = $this->numbers();
         $this->reservados = 0;
         $this->pagos = count($numbersParticipante);
@@ -309,7 +313,7 @@ class Participant extends Model
     public function getMinutesLeft($productExpiresAt)
     {
         $criacao = date('Y-m-d H:i:s', strtotime($this->created_at));
-        $minutosExpiracao =$productExpiresAt;
+        $minutosExpiracao = $productExpiresAt;
         $dataDeExpiracao = date('Y-m-d H:i:s', strtotime("+" . $minutosExpiracao . " minutes", strtotime($criacao)));
         $entrada = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s'));
         $saida = \DateTime::createFromFormat('Y-m-d H:i:s', $dataDeExpiracao);

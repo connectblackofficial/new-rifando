@@ -35,15 +35,24 @@ a {
     width: 100%;
     z-index: 9999999;
 }
-.separator-20{
+
+.separator-20 {
     height: 20px !important;
     display: block !important;
 }
-.separator-10{
+
+.separator-10 {
     height: 10px !important;
     display: block !important;
 }
-.separator-5{
+
+.separator-5 {
     height: 5px !important;
     display: block !important;
+}
+
+@media (max-width: 768px) {
+    .wpp-short-link i {
+        display: none !important;
+    }
 }

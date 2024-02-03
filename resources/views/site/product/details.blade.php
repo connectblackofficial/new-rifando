@@ -31,14 +31,14 @@ if (isset($imagens[0])) {
         <div class="container detail">
             <input type="hidden" id="product-name" value="{{ $productModel->name }}">
             <div class="row justify-content-center">
-                <div class="col-md-6 rifa-content {{ $config->tema }}">
+                <div class="col-md-8 rifa-content {{ $config->tema }}">
                     <input type="hidden" id="raffleType" value="{{ $productModel->type_raffles }}">
                     <input type="hidden" id="modoDeJogo" value="{{ $productModel->modo_de_jogo }}">
                     @include('site.product.common')
                     @if ($product->status == 'Finalizado')
-                        @include('rifas.finalizada')
+                        @include('site.product.finished')
                     @else
-                        @include('rifas.ativas')
+                        @include('site.product.actives')
                         @if ($productModel->modo_de_jogo == 'fazendinha-completa' || $productModel->modo_de_jogo == 'fazendinha-meio')
                             @if ($productModel->modo_de_jogo == 'fazendinha-completa')
                                 @include('rifas.fazendinha')
@@ -54,8 +54,11 @@ if (isset($imagens[0])) {
                             @endif
                         @endif
                     @endif
+
+
                 </div>
             </div>
+
             <br>
             @include('layouts.footer')
         </div>
@@ -66,7 +69,7 @@ if (isset($imagens[0])) {
         </div>
 
         @include("site.checkout.modal")
-        @include('rifas.modal')
+        @include('site.product.modals')
 
         @section("scripts-footer")
             <script>

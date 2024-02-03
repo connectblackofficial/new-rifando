@@ -65,8 +65,16 @@ Route::post('site/cart/add_rmo', [CartController::class, 'addRm'])->name('cart.a
 Route::post('site/cart/resume', [CartController::class, 'index'])->name('cart.resume');
 Route::delete('site/cart/destroy', [CartController::class, 'destroy'])->name('cart.destroy');
 
+
+Route::get('site/customer/{uuid}/orders', [\App\Http\Controllers\Site\CustomerController::class, 'getOrders'])->name('site.customer.orders');
+
+Route::post('site/checkout/complete', [\App\Http\Controllers\Site\CheckoutController::class, 'completeCheckout'])->name('site.checkout.complete');
+Route::get('site/checkout/{uuid}', [\App\Http\Controllers\Site\CheckoutController::class, 'index'])->name('site.checkout');
 Route::get('site/checkout/{uuid}/pay', [\App\Http\Controllers\Site\CheckoutController::class, 'payment'])->name('site.checkout.pay');
 Route::get('site/checkout/{uuid}', [\App\Http\Controllers\Site\CheckoutController::class, 'index'])->name('site.checkout');
 Route::get('site/checkout/{uuid}/1', [\App\Http\Controllers\Site\CheckoutController::class, 'step1'])->name('site.checkout.step1');
 Route::post('/site/customer/get', [\App\Http\Controllers\Site\CustomerController::class, 'getCustomer'])->name('getCustomer');
 
+
+Route::get('site/participant/check', [\App\Http\Controllers\Site\ParticipantsController::class, 'check'])->name('site.participant.check');
+Route::post('site/participant/check', [\App\Http\Controllers\Site\ParticipantsController::class, 'processCheck'])->name('site.participant.process_check');

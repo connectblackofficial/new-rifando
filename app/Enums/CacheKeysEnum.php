@@ -14,6 +14,7 @@ final class CacheKeysEnum extends Enum
     const  PaginationQtyRowsperPage = 'p_number_row_per_page_{id}';
 
     const  CartProductKey = 'cart_product_{id}';
+    const  SiteFaqsKey = 'site_faqs_{id}';
 
     public static function __callStatic($name, $arguments)
     {
@@ -62,5 +63,11 @@ final class CacheKeysEnum extends Enum
     {
         $key = self::CartProductKey;
         return self::replaceVars($key, ['id' => $productId]);
+    }
+
+    public static function getSIteFaqKey($userId)
+    {
+        $key = self::SiteFaqsKey;
+        return self::replaceVars($key, ['id' => $userId]);
     }
 }

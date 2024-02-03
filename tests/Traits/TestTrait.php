@@ -57,7 +57,7 @@ trait TestTrait
             'price' => 1000,
             'gateway' => PaymentGatewayEnum::MP,
             'modo_de_jogo' => GameModeEnum::Numbers,
-            'numbers' => 9999,
+            'numbers' => 999,
             'description' => 'Descrição do produto teste',
             'minimo' => 1,
             'maximo' => 100,

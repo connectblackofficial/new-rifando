@@ -46,7 +46,7 @@
         </p>
     </div>
 @endif
-
+@include('site.product.product-faqs')
 
 <div class="mt-2 d-flex text-center justify-content-center">
     <div class="text-center">

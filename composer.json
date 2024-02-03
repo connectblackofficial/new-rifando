@@ -14,6 +14,7 @@
     "doctrine/dbal": "2.*",
     "dompdf/dompdf": "^2.0",
     "fideloper/proxy": "~4.0",
+    "giggsey/libphonenumber-for-php": "^8.13",
     "guzzlehttp/guzzle": "^7.5",
     "kylekatarnls/laravel-carbon-2": "^1.0.0",
     "laravel/framework": "5.8.*",

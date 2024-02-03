@@ -16,6 +16,31 @@ function deleteConfirm(callback) {
     return false;
 }
 
+
+function rand(min, max) {
+    // Se apenas um argumento for fornecido, gera um número entre 0 e esse valor.
+    if (arguments.length === 1) {
+        max = min;
+        min = 0;
+    }
+
+    // Garante que os argumentos são números inteiros.
+    min = Math.floor(min);
+    max = Math.floor(max);
+
+    // Gera um número aleatório entre min (inclusive) e max (exclusive).
+    return Math.floor(Math.random() * (max - min) + min);
+}
+
+function getValueById(id) {
+    // Verifica se o elemento com o ID fornecido existe
+    const elemento = document.getElementById(id);
+
+    // Se o elemento existir, retorna o valor, caso contrário, retorna null
+    return elemento ? elemento.value : null;
+}
+
+
 function errorMsg(msg) {
     alrtError("Ops!", msg);
 }
@@ -46,6 +71,18 @@ function processAjaxError(response) {
             }
 
         }
+        return true;
+    }
+    return false;
+}
+
+function processAjaxRedirect(response) {
+    if (response.redirect) {
+        if (typeof response.redirect_url != "undefined") {
+            setTimeout(function () {
+                location.href = response.redirect_url;
+            }, 1000);
+        }
     }
 }
 
@@ -60,32 +97,52 @@ function processAjaxSuccess(response) {
     }
     processAjaxError(response);
     if (response.success) {
-        if (typeof response.sucess_message != "undefined") {
-            successMsg(response.sucess_message);
+        if (typeof response.success_message != "undefined") {
+            successMsg(response.success_message);
         }
     }
-    if (response.redirect) {
-        if (typeof response.redirect_url != "undefined") {
-            setTimeout(function () {
-                location.href = response.redirect_url;
-            }, 1000);
-        }
-
-    }
+    processAjaxRedirect(response);
     endLoading();
 }
+
 function isStringNotEmpty(str) {
-    return str !== null && str.trim() !== '';
+    return typeof str === 'string' && str.trim() !== '';
 }
+
 function checkIfFunctionExists(functionName) {
     return typeof window[functionName] === 'function';
 }
+
 function snakeToCamel(str) {
-    return str.replace(/_([a-z])/g, function(match, letter) {
+    return str.replace(/_([a-z])/g, function (match, letter) {
         return letter.toUpperCase();
     });
 }
-function sendAjaxRequest(url, method, data) {
+
+function startBtnLoad(formJq) {
+    if (formJq) {
+        var submitBtns = formJq.find('button[type="submit"]');
+        submitBtns.each(function () {
+            $(this).prop('disabled', true);
+            $(".btn-block-loading").show();
+            $(".btn-block-text").hide();
+        })
+    }
+}
+
+function endBtnLoad(formJq) {
+    if (formJq) {
+        var submitBtns = formJq.find('button[type="submit"]');
+        submitBtns.each(function () {
+            $(this).prop('disabled', false);
+            $(".btn-block-loading").hide();
+            $(".btn-block-text").show();
+        })
+    }
+}
+
+function sendAjaxRequest(url, method, data, formJq = false) {
+    startBtnLoad(formJq);
     var formData = data instanceof FormData ? data : new FormData();
     var hasFiles = false;
     // Se data não for FormData, adiciona seus campos ao formData
@@ -96,9 +153,14 @@ function sendAjaxRequest(url, method, data) {
             formData.append(obName, obValue);
         }
     }
+    if (formJq) {
+        var allFileInputs = formJq.find("input[type='file']");
+    } else {
+        var allFileInputs = $("input[type='file']");
 
+    }
     // Verifica se há inputs de arquivo com arquivos
-    $("input[type='file']").each(function () {
+    allFileInputs.each(function () {
         if (this.files.length > 0) {
             hasFiles = true;
             var inputName = $(this).attr('name'); // Obtém o nome do input
@@ -120,6 +182,7 @@ function sendAjaxRequest(url, method, data) {
         error: function () {
             alertUnkonwnError();
             endLoading();
+            endBtnLoad(formJq);
         }
     };
     console.log(ajaxData)
@@ -230,14 +293,13 @@ function ltrimAsset(asset) {
 function focusRed(input) {
     $("input").focusout();
     $("select").focusout();
-    $("input").attr("style", "border-color:none;");
-    $("select").attr("style", "border-color:none;");
     $(input).focus();
-    element = $(input).attr("style", "border-color:red;");
+    $(input).addClass("is-invalid");
 }
 
 function sendForm(form) {
-    return sendAjaxRequest(form.attr('action'), form.attr('method'), form.serializeArray());
+    $('.is-invalid').removeClass('is-invalid');
+    return sendAjaxRequest(form.attr('action'), form.attr('method'), form.serializeArray(), form);
 }
 
 function maskMoney(element) {
@@ -294,9 +356,11 @@ function isValidDate(dateString) {
     // Verifica se o timestamp é um número e se a data é futura
     return !isNaN(timestamp) && new Date(timestamp) <= new Date();
 }
-function completeCheckout(){
+
+function completeCheckout() {
 
 }
+
 function copyPix() {
     var copyText = document.getElementById("brcodepix");
     copyText.select();

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\UserErrorException;
 use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -77,5 +78,17 @@ class Cart extends Model
     public function getAllCartNumbers()
     {
         return array_merge($this->sortAutoNumbers(), array_values($this->getNumbersAsArray()));
+    }
+
+    public static function getCartByUuidOrFail($uuid)
+    {
+        $cart = self::whereUuid($uuid)->first();
+        if (!isset($cart['id'])) {
+            throw UserErrorException::cartNotFound();
+        }
+        $productResume = Product::getResumeCache($cart->product_id);
+        $productData = $productResume['product'];
+        checkUserIdSite($productData['user_id']);
+        return ['cart' => $cart, 'productResume' => $productResume];
     }
 }

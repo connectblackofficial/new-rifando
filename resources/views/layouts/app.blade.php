@@ -15,13 +15,15 @@ $siteConfig = getSiteConfig();
 
     <meta name="color-scheme" content="light only">
     <meta name="X-DarkMode-Default" value="false"/>
-
-    @yield('ogContent')
-    @yield('scripts-top')
     <script>
         var ROUTES = <?= getSiteJsRoutes() ?>;
         var CDN_URL = "<?= cdnAsset() ?>";
+        var SITE_CONFIG = <?= json_encode($siteConfig->jsKeys()) ?>;
+
     </script>
+    @yield('ogContent')
+    @yield('scripts-top')
+
     <style>
         :root {
             --brand-color: #671392;
@@ -56,6 +58,7 @@ $siteConfig = getSiteConfig();
     </script>
 
     <script src="{{cdnAsset("js/site-header-bundle.min.js")}}"></script>
+    <?= $siteConfig->scripts_top ?>
 
 </head>
 
@@ -82,7 +85,7 @@ $subDomain = explode('.', request()->getHost());
 
             <div>
 
-                <a href="#" data-bs-toggle="modal" data-bs-target="#consult-order-modal"
+                <a href="#" onclick="return participantCheck()"
                    style="text-decoration: none; font-size: 15px; color: #fff">
                     <i class="bi bi-cart-check"
                        style="margin-top: 10px;font-size: 30px;color: rgb(180, 180, 180) !important; opacity: 1;"></i>
@@ -141,8 +144,7 @@ $subDomain = explode('.', request()->getHost());
                             </li>
 
                             <li>
-                                <a class="text-white" alt="Meus Números" data-bs-toggle="modal"
-                                   data-bs-target="#consult-order-modal"><i
+                                <a class="text-white" alt="Meus Números" onclick="return participantCheck()" ><i
                                             class="icone bi bi-receipt"></i>
                                     <span>Meus números</span>
                                 </a>
@@ -171,7 +173,6 @@ $subDomain = explode('.', request()->getHost());
 </div>
 
 <!-- Modal  consultar -->
-<?= modal("consult-order-modal", "CONSULTAR RESERVAS", view("site.orders.consult-order-modal")->render()) ?>
 
 @if ($siteConfig->group_whats != null)
     <a href="{{ $siteConfig->group_whats }}" class="botao-flutuante" target="_blank">
@@ -193,6 +194,7 @@ $subDomain = explode('.', request()->getHost());
         </div>
     </div>
 </div>
+@include('layouts.footer')
 @yield('modals')
 <script>
 
@@ -205,6 +207,8 @@ $subDomain = explode('.', request()->getHost());
     })
 </script>
 @yield('scripts-footer')
+<?= $siteConfig->scripts_footer ?>
+
 </body>
 
 </html>

@@ -8,7 +8,10 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
 Route::get('/fak', function () {
-
+dd(defaultDateFormat(strtotime("2024-02-28 11:21:16.000000")));
+    $phoneNumberUtil = \libphonenumber\PhoneNumberUtil::getInstance();
+    $phoneNumberObject = $phoneNumberUtil->parse('+5575992426909', null);
+    dd($phoneNumberUtil->isValidNumber($phoneNumberObject));
     return "Aooba";
 
 });
@@ -58,25 +61,15 @@ Route::get('/session_pg', function () {
 
 });
 Route::middleware(['check', 'subDomain'])->group(function () {
-
     Route::prefix('area-afiliado')->group(function () {
         require_once base_path('routes/groups/affiliate.php');
     });
-
     Route::group(['middleware' => ['auth', 'isAdmin']], function () {
         require_once base_path('routes/groups/admin.php');
     });
-
     require_once base_path('routes/groups/public.php');
 
 
 });
 
 
-Route::get('admin/products', [\App\Http\Controllers\Admin\ProductsController::class, 'index'])->name('admin.products.index');
-Route::get('admin/products/create', [\App\Http\Controllers\Admin\ProductsController::class, 'create'])->name('admin.products.create');
-Route::post('admin/products', [\App\Http\Controllers\Admin\ProductsController::class, 'store'])->name('admin.products.store');
-Route::get('admin/products/{pk}', [\App\Http\Controllers\Admin\ProductsController::class, 'show'])->name('admin.products.show');
-Route::get('admin/products/{pk}/edit', [\App\Http\Controllers\Admin\ProductsController::class, 'edit'])->name('admin.products.edit');
-Route::put('admin/products/{pk}', [\App\Http\Controllers\Admin\ProductsController::class, 'update'])->name('admin.products.update');
-Route::delete('admin/products/{pk}', [\App\Http\Controllers\Admin\ProductsController::class, 'destroy'])->name('admin.products.destroy');

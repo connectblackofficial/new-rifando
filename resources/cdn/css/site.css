@@ -441,6 +441,10 @@ img {
     color: #fff !important;
 }
 
+.qty-numbers-zeros-3 a.number, .qty-numbers-zeros-3 a.number-selected {
+    width: 10% !important;
+}
+
 .qty-numbers-zeros-4 a.number, .qty-numbers-zeros-4 a.number-selected {
     width: 20% !important;
 }
@@ -455,6 +459,13 @@ img {
 
 .qty-numbers-zeros-7 a.number, .qty-numbers-zeros-7 a.number-selected {
     width: 21% !important;
+}
+
+@media screen and (max-width: 1224px) {
+    .qty-numbers-zeros-3 a.number, .qty-numbers-zeros-3 a.number-selected {
+        width: 15% !important;
+    }
+
 }
 
 #pg-product-route {
@@ -956,7 +967,8 @@ img {
     width: 100%;
     margin-top: 22px;
 }
-#pg-product-route{
+
+#pg-product-route {
     .title-rifa-destaque {
         background: #fff;
         border-bottom-right-radius: 20px;
@@ -1001,4 +1013,35 @@ img {
     .data-sorteio.dark {
         color: #fff !important;
     }
+}
+
+.pg-content {
+    margin-top: 100px;
+}
+
+.custom-phone {
+    background-color: #fff;
+    border: none;
+    color: #333;
+
+}
+
+.full-btn-modal {
+    width: 100%;
+}
+
+.checkout-step input {
+    background-color: #fff;
+    border: none;
+    color: #333;
+}
+
+.checkout-step label {
+    color: #000;
+}
+
+#checkout-step3 #customer-photo {
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
 }

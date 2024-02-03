@@ -51,6 +51,9 @@ class CheckoutService
             $siteConfig = $this->siteConfig;
             $customerService = new CustomerService($siteConfig);
             $customer = $customerService->createOrGet($requestData);
+            if (!isset($customer['id'])) {
+                throw UserErrorException::customerNotFound();
+            }
             $cart = Cart::whereUuid($requestData['cart_uuid'])->first();
             if (!isset($cart['id'])) {
                 throw new UserErrorException("Checkout inválido.");
@@ -78,10 +81,11 @@ class CheckoutService
                 'name' => $customer->nome,
                 'telephone' => $customer->telephone,
                 'email' => $customer->email,
+                'ddi' => $customer->ddi,
                 'cpf' => $customer->cpf,
                 'valor' => $total,
                 'reservados' => $cart->getNumbersQty(),
-                'product_id' => $customer['id'],
+                'product_id' => $product['id'],
                 'numbers' => json_encode($numbers)
             ]);
             $cart->participant_id = $participant->id;

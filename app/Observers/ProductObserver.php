@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Events\ProductCreated;
 use App\Events\ProductUpdated;
+use App\Models\Faq;
 use App\Models\Product;
 
 class ProductObserver
@@ -16,7 +17,7 @@ class ProductObserver
      */
     public function created(Product $product)
     {
-
+        Faq::createProductFaqRelationsByProduct($product);
     }
 
     /**

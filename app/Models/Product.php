@@ -5,10 +5,12 @@ namespace App\Models;
 use App\Enums\CacheExpiresInEnum;
 use App\Enums\ProductStatusEnum;
 use App\Enums\RaffleTypeEnum;
+use App\Enums\YesNoAsIntEnum;
 use App\Traits\HasEloquentCacheTrait;
 use App\Traits\ModelSearchTrait;
 use App\Traits\ModelSiteOwnerTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 
 class Product extends Model
@@ -16,6 +18,7 @@ class Product extends Model
     use ModelSiteOwnerTrait;
     use HasEloquentCacheTrait;
     use ModelSearchTrait;
+    use SoftDeletes;
 
 
     protected $fillable = ['name', 'pix_account_id', 'uuid', 'subname', 'parcial', 'expiracao', 'qtd_ranking', 'qtd_zeros', 'product', 'slug', 'price', 'ganho_afiliado', 'status', 'qtd', 'numbers', 'processado', 'type_raffles', 'favoritar', 'modo_de_jogo', 'minimo', 'maximo', 'user_id', 'draw_prediction', 'draw_date', 'winner', 'visible', 'gateway'];
@@ -355,11 +358,19 @@ class Product extends Model
             ]);
         }
     }
-    public function prizeDraws2()
+
+    public function paidPrizeDraws()
     {
-        return  $this->hasMany(PrizeDraw::class, 'product_id', 'id')->orderBy('ordem', 'asc');
+        return $this->hasMany(PrizeDraw::class, 'product_id', 'id')->where('descricao', '!=', '')->whereNotNull('participant_id')->orderBy('ordem', 'asc');
 
     }
+
+    public function prizeDraws2()
+    {
+        return $this->hasMany(PrizeDraw::class, 'product_id', 'id')->orderBy('ordem', 'asc');
+
+    }
+
     public function prizeDraws()
     {
         $premios = $this->hasMany(PrizeDraw::class, 'product_id', 'id')->orderBy('ordem', 'asc')->get();
@@ -513,7 +524,7 @@ class Product extends Model
 
     public static function getResumeCache($productId, $forceUpdate = false)
     {
-        $key = "product_resume_13_" . $productId;
+        $key = "product_resume_14_" . $productId;
         $callBack = function () use ($productId) {
             $product = Product::whereId($productId)->firstOrFail();
             $productAsArray = convertToArray($product);
@@ -524,13 +535,15 @@ class Product extends Model
                 'free' => $product->qtdNumerosDisponiveis(),
                 'percentage' => $product->porcentagem(),
                 'promos' => $product->promos()->get(),
+                'active_promos' => $product->promos()->where('qtdNumeros', '>', 0)->get(),
                 'free_numbers' => convertToArray($product->getFreeNumbers()),
                 'product' => $productAsArray,
                 'description' => $product->descriptions()->select('description', 'video')->first(),
                 'images' => $product->images()->get(),
                 'shopping_suggestions' => $product->shoppingSuggestions()->get(),
                 'prizeDraws' => $product->prizeDraws2()->where('descricao', '!=', '')->get(),
-                'cache_date' => date("Y-m-d H:i:s")
+                'cache_date' => date("Y-m-d H:i:s"),
+                'faqs' => $product->getFaqs()
             ];
         };
 
@@ -643,5 +656,15 @@ class Product extends Model
         return [
             'status' => ProductStatusEnum::getValuesAsSelect()
         ];
+    }
+
+    public function getFaqs()
+    {
+        $faqs = [];
+        foreach (ProductFaq::whereProductId($this->id)->whereShow(YesNoAsIntEnum::Yes)->orderBy("order", "asc")->get() as $f) {
+            $faqs[] = $f->faq()->first();
+        }
+        return $faqs;
+
     }
 }

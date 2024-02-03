@@ -23,6 +23,35 @@ function getCrudData($crudName, $viewName, $routeGroup)
 
 }
 
+function submitBtn($text, $id, $color = true, $buttonClass = "", $containerClass = true)
+{
+    return btn($text, $id, $color, "submit", $buttonClass, $containerClass);
+}
+
+function buttonBtn($text, $id, $color = true, $buttonClass = "", $containerClass = true)
+{
+    return btn($text, $id, $color, "button", $buttonClass, $containerClass);
+}
+
+function btn($text, $id, $color = true, $type = "button", $buttonClass = "", $containerClass = true)
+{
+    if ($color === true) {
+        $color = "btn-primary";
+    }
+    if ($containerClass === true) {
+        $containerClass = "col-md-12";
+    }
+    $pageData = [
+        'text' => $text,
+        'id' => $id,
+        'type' => $type,
+        'buttonClass' => $buttonClass,
+        'containerClass' => $containerClass,
+        'color' => $color
+    ];
+    return view('crud.layout.full-modal-btn', $pageData)->render();
+}
+
 function selectField($name, $options, $currentData = [], $attrs = [])
 {
     return view('crud.fields.select', ['attrs' => $attrs, 'name' => $name, 'options' => $options, 'currentData' => $currentData])->render();
@@ -76,6 +105,15 @@ function phoneField($name, $label = "", $currentData = [])
     return view('crud.fields.phone-input', ['name' => $name, 'label' => $label, 'fieldValue' => $fieldValue])->render();
 }
 
+function validateUrl($url)
+{
+    $path = parse_url($url, PHP_URL_PATH);
+    $encoded_path = array_map('urlencode', explode('/', $path));
+    $url = str_replace($path, implode('/', $encoded_path), $url);
+
+    return filter_var($url, FILTER_VALIDATE_URL) ? true : false;
+}
+
 function inputField($name, $type, $currentData = [], $attrs = [])
 {
     $fieldValue = "";
@@ -91,6 +129,19 @@ function inputText($name, $currentData = [], $attrs = [])
     return inputField($name, $type, $currentData, $attrs);
 }
 
+function getWhatsAppShortLink($phone, $ddi, $message = '', $icon = false)
+{
+    $ddi = str_replace(["+", " "], "", $ddi);
+    $wppPhone = $ddi . $phone;
+
+    $messageParam = $message ? '&text=' . urlencode($message) : '';
+    $txt = "";
+    if ($icon) {
+        $txt = '<i class="fab fa-whatsapp text-green hidden-xs-down"></i>';
+    }
+    return "<a class='wpp-short-link' target='_blank' href='https://wa.me/$wppPhone$messageParam'>{$txt}{$phone}</a>";
+}
+
 function itemRowView($formatFieldsFn, $item, $index)
 {
 
@@ -98,7 +149,7 @@ function itemRowView($formatFieldsFn, $item, $index)
         $fn = $formatFieldsFn[$index];
 
         if (is_callable($fn)) {
-            return $fn($item->{$index});
+            return $fn($item->{$index}, $item);
         }
         return '';
     } else {
@@ -110,7 +161,7 @@ function itemRowView($formatFieldsFn, $item, $index)
 function createSlug($string)
 {
     $chars = [":", " "];
-    $string = str_replace($chars,"-",$string);
+    $string = str_replace($chars, "-", $string);
     $table = array(
         'Š' => 'S', 'š' => 's', 'Đ' => 'Dj', 'đ' => 'dj', 'Ž' => 'Z', 'ž' => 'z', 'Č' => 'C', 'č' => 'c', 'Ć' => 'C', 'ć' => 'c',
         'À' => 'A', 'Á' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 'Å' => 'A', 'Æ' => 'A', 'Ç' => 'C', 'È' => 'E', 'É' => 'E',
@@ -219,6 +270,14 @@ function imageAsset($image)
     return asset('storage/' . $image);
 }
 
+function defaultDateFormat($date)
+{
+    if (!is_numeric($date)) {
+        $date = strtotime($date);
+    }
+    return date("d/m/Y H:i", $date);
+}
+
 function getSiteOwnerId()
 {
     $siteEnv = \Session::get('siteEnv');
@@ -319,7 +378,8 @@ function getSiteJsRoutes()
         'product.site.numbers' => $hasNotParams,
         'cart.destroy' => $hasNotParams,
         'site.checkout' => $hasParam,
-        "getCustomer" => $hasNotParams
+        "getCustomer" => $hasNotParams,
+        'site.participant.check' => $hasNotParams
     ];
     return routesToJs($routes);
 }
@@ -512,4 +572,52 @@ function allowedDdiAsList()
 function modal($id, $title, $content, $extraData = [])
 {
     return view("layouts.default-modal", ['modalId' => $id, 'title' => $title, 'content' => $content, 'extraData' => $extraData]);
+}
+
+function productRankingModal($productName, $ranking, $extraData = [])
+{
+
+    $id = "modal-ranking";
+    $title = '<img src="' . cdnImageAsset('treofeu.png') . '" alt=""> Top Compradores';
+    $pageData = ['ranking' => $ranking, 'productName' => $productName];
+    $content = view("site.product.ranking-modal", $pageData);
+    return view("layouts.default-modal", ['modalId' => $id, 'title' => $title, 'content' => $content, 'extraData' => $extraData]);
+}
+
+function prizeDrawModal($productName, $prizeDraws, $extraData = [])
+{
+
+    $id = "modal-premios";
+    $title = 'PRÊMIOS';
+    $pageData = ['prizeDraws' => $prizeDraws, 'productName' => $productName];
+    $content = view("site.product.prize-draw-modal", $pageData);
+    return view("layouts.default-modal", ['modalId' => $id, 'title' => $title, 'content' => $content, 'extraData' => $extraData]);
+}
+
+function faqColapse($faqs, Site $site)
+{
+    return view("site.faqs.colapse", ['faqs' => $faqs, 'config' => $site]);
+}
+
+function getBadgeByStatus($status)
+{
+    $c = "primary";
+    $colors = [];
+    $lStatus = strtolower($status);
+    $colors['warning'] = ['agendado'];
+    $colors['success'] = ['active', 'ativo', 'pago', 'aprovado'];
+    $colors['secondary'] = ['inativo'];
+    $colors['info'] = ['finalizado'];
+    $colors['danger'] = ['recusado', 'cancelado'];
+
+    foreach ($colors as $k => $l) {
+        if (in_array($lStatus, $l)) {
+            $c = $k;
+            break;
+        }
+    }
+
+    //    $colors['primary'] = ['pendente', 'pending'];
+    return '<span class="badge badge-' . $c . '">' . htmlLabel($status) . '</span>';
+
 }

@@ -6,6 +6,7 @@ use App\Enums\CacheKeysEnum;
 use App\Exceptions\UserErrorException;
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
+use App\Models\PrizeDraw;
 use App\Models\Product;
 use App\Services\CartService;
 use App\Services\ProductService;
@@ -38,9 +39,7 @@ class ProductController extends Controller
         }
         $user = getSiteOwnerUser();
 
-
         $productResume = Product::getResumeCache($productData['id']);
-
         $productDetail = $productData;
         $imagens = $productResume['images'];
 
@@ -67,8 +66,10 @@ class ProductController extends Controller
             'config' => $config,
             'activePromos' => $activePromo,
             'cart' => $cart,
-            'productResume'=>$productResume
+            'productResume' => $productResume,
+            'productFromCache' => $productResume['product']
         ];
+
         return view('site.product.details', $arrayProducts);
     }
 
@@ -88,7 +89,7 @@ class ProductController extends Controller
             if (isset($postData['cart_uuid'])) {
                 $cart = Cart::whereProductId($productData->id)->whereUuid($postData['cart_uuid'])->first();
             }
-            $currentCart=CartService::currentCart($productData->id);
+            $currentCart = CartService::currentCart($productData->id);
             $productId = $productData->id;
 
             $qtyPagesKey = CacheKeysEnum::getQtyPaginationPageKey($productId);
@@ -106,7 +107,7 @@ class ProductController extends Controller
                 throw  UserErrorException::pageNotFound(__LINE__);
             }
 
-            $productService = new ProductService(getSiteConfig(),$currentCart);
+            $productService = new ProductService(getSiteConfig(), $currentCart);
             $rows = [\Cache::store('file')->get($pageKey)];
             $links = $productService->getPagination($rows, $qtyPages, 1, $page);
             $response = ['html_page' => $links . $rows[0] . $links, 'current_page' => $page, 'total_pages' => $qtyPages];
@@ -121,4 +122,23 @@ class ProductController extends Controller
         return $this->processAjaxResponse($request->all(), $rules, $action);
     }
 
+    public function index()
+    {
+        $ganhadores = PrizeDraw::where('descricao', '!=', null)->where('ganhador', '!=', '')->get();
+
+        $products = Product::where('visible', '=', 1)->orderBy('id', 'desc')->get();
+
+        $winners = Product::winners()->get();
+
+        $config = getSiteConfig();
+
+        return view('sorteios', [
+            'products' => $products,
+            'winners' => $winners,
+            'ganhadores' => $ganhadores,
+            'user' => getSiteOwnerUser(),
+            'productModel' => Product::getByIdWithSiteCheck(4),
+            'config' => $config
+        ]);
+    }
 }

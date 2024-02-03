@@ -298,10 +298,9 @@ class CheckoutController extends Controller
         $rifas = [];
 
         foreach ($participante as $reserva) {
-            $rifa = $reserva->firstProduct();
+            $rifa = $reserva->product()->select("id", "name")->first();
             $rifas[$rifa->id] = $rifa->name;
         }
-
 
         $config = getSiteConfig();
 

@@ -10,35 +10,32 @@
        onblur="numerosAleatorio();" onkeyup="numerosAleatorio()" class="form-control" placeholder="Quantidade de cotas">
 
 <div class="d-flex justify-content-between font-weight-600 mb-2">
-    <div class="seletor-item rounded d-flex justify-content-between box-shadow-08 font-xs" style="cursor: pointer;"
-         onclick="showNumbers('disponivel')">
+    <div class="seletor-item rounded d-flex justify-content-between box-shadow-08 font-xs" style="cursor: pointer;" >
         <div class="nome bg-white rounded-start text-dark p-2">
             Livres
         </div>
         <div class="num text-white p-2 rounded-end product-number-free">
-            {{ $productModel->qtdNumerosDisponiveis() }}
+            {{ $productResume['free'] }}
         </div>
     </div>
 
     <div class="seletor-item rounded d-flex justify-content-between box-shadow-08 font-xs product-number-reserved"
-         style="cursor: pointer;"
-         onclick="showNumbers('reservado')">
+         style="cursor: pointer;">
         <div class="nome bg-white rounded-start text-dark p-2">
-            Reserv
+            Reservados
         </div>
         <div class="num text-white p-2 rounded-end product-number-reserved">
-            {{ $productModel->qtdNumerosReservados() }}
+            {{ $productResume['reserved'] }}
         </div>
     </div>
 
     <div class="seletor-item rounded d-flex justify-content-between box-shadow-08 font-xs product-number-paid"
-         style="cursor: pointer;"
-         onclick="showNumbers('pago')">
+         style="cursor: pointer;">
         <div class="nome bg-white rounded-start text-dark p-2">
             Pagos
         </div>
         <div class="num text-white p-2 rounded-end product-paid-reserved">
-            {{ $productModel->qtdNumerosPagos() }}
+            {{ $productResume['paid'] }}
         </div>
     </div>
 </div>

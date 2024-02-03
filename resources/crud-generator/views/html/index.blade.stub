@@ -18,7 +18,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach($%%crudName%% as $item)
+                        @foreach($rows as $item)
                         <tr>
                             <td>{{ $item->id }}</td>
                             %%formBodyHtml%%

@@ -1,17 +1,9 @@
-<form action="{{ route('bookProductManualy') }}" id="form-checkout" method="POST">
-    {{ csrf_field() }}
-    <div class="form-group">
-        <label style="color: #000">
-            <strong>Informe seu telefone</strong>
-        </label>
-        <input type="text" class="form-control numbermask"
-               style="background-color: #fff;border: none;color: #333;" name="telephone" id="telephone1"
-               placeholder="(00) 90000-0000" maxlength="15" required>
+<div class="form-group">
+    <div class="alert alert-warning" role="alert">
+        <i class="fas fa-info-circle"></i>&nbsp;
+        <span>Informe seu telefone para continuar.</span>
     </div>
-    <div class="form-group">
-        <button class="btn btn-block btn-primary"
-                type="button">
-            <strong >Continuar</strong>
-        </button>
-    </div>
-</form>
+</div>
+@include("site.customer.phone")
+
+<?= buttonBtn('Continuar <i class="bi bi-arrow-right-circle"></i>', 'btn-checkout-continue') ?>

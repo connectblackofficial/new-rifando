@@ -38,7 +38,7 @@ class ProductController extends Controller
 
         $config = getSiteConfig();
 
-        return view('welcome', [
+        return view('site.index', [
             'products' => $products,
             'winners' => $winners,
             'ganhadores' => $ganhadores,

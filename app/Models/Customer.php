@@ -56,4 +56,10 @@ class Customer extends Model
             'ddi' => getCountriesDdi()
         ];
     }
+
+    public function participants()
+    {
+        return $this->hasMany(Participant::class, 'customer_id', 'id');
+    }
+
 }

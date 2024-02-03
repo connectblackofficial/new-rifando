@@ -2,6 +2,13 @@ function link(url) {
     window.location.href = url;
 }
 
+function sendFormAfterConfirm(form) {
+    deleteConfirm(function () {
+        return sendForm(form);
+    })
+    return false;
+}
+
 function loading() {
     var el = document.getElementById('loadingSystem');
     el.classList.toggle("d-none");
@@ -97,6 +104,7 @@ function getLinkAfiliado(el) {
 
 function removeFocusRed(input) {
     element = $(input).removeAttr("style")
+    $(input).removeClass("is-invalid");
 }
 
 function modal(title, content) {
@@ -153,11 +161,16 @@ function loadUrlBigModal(title, url) {
 
 
 function startLoading() {
+
+
     $("#modalLoadingMsg").show();
     $("#modalMsgBody").hide();
+    $(".btn-block-text").show();
 }
 
 function endLoading() {
+
+
     $("#modalLoadingMsg").hide();
     $("#modalMsgBody").show();
 }
@@ -173,7 +186,6 @@ function loadRouteModal(title, url, route, size) {
 
     return loadUrlModal(title, url, size);
 }
-
 
 
 function updateGatewayPix() {

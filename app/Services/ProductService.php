@@ -12,8 +12,10 @@ use App\Events\ProductCreated;
 use App\Events\ProductUpdated;
 use App\Exceptions\UserErrorException;
 use App\Helpers\FileUploadHelper;
+use App\Http\Requests\Admin\FaqRequest;
 use App\Models\PixAccount;
 use App\Models\Product;
+use App\Models\ProductFaq;
 use App\Models\ProductImage;
 use App\Models\Promo;
 use App\Models\Raffle;
@@ -25,6 +27,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Arr;
 
 class ProductService
 {
@@ -180,6 +183,7 @@ class ProductService
 
     public function update(Product $product, array $updateData)
     {
+
         if ($updateData['favoritar_rifa'] && $product->favoritar == 1) {
             $product->favoritar = 0;
             $product->saveOrFail();
@@ -199,7 +203,6 @@ class ProductService
             'status' => $updateData['status'],
             'expiracao' => $updateData['expiracao'],
             'parcial' => $updateData['parcial'],
-            'slug' => $updateData['slug'],
             'visible' => $updateData['visible'],
             'favoritar' => $updateData['favoritar_rifa'],
             'winner' => $updateData['cadastrar_ganhador'],
@@ -211,6 +214,9 @@ class ProductService
             'gateway' => $updateData['gateway'],
             'type_raffles' => $tipoReserva,
         ];
+        if (isset($updateData['slug'])) {
+            $newUpdateData['slug'] = $updateData['slug'];
+        }
         if (isset($updateData['pix_account_id'])) {
             $this->validatePixGateway($updateData['gateway'], $updateData['pix_account_id'], $product['user_id']);
             $newUpdateData['pix_account_id'] = $updateData['pix_account_id'];
@@ -228,7 +234,7 @@ class ProductService
         $this->updateOrCreatePromos($product, $updateData['numPromocao'], $updateData['valPromocao']);
         $this->updateAutoBuy($product, $updateData);
         $this->updatePremium($product, $updateData);
-
+        $this->updateFaqs($product, $updateData);
         event(new ProductUpdated($product));
         return $product;
     }
@@ -404,6 +410,24 @@ class ProductService
             ['path' => request()->url(), 'query' => request()->query()]
         );
         return $paginator->links('vendor.pagination.ajax_bootstrap_4')->toHtml();
+    }
+
+    public function updateFaqs(Product $product, array $productData)
+    {
+        $rules = (new FaqRequest())->rules();
+        $faqRules = Arr::only($rules, ['show', 'order']);
+        if (isset($productData['faq']) && is_array($productData['faq'])) {
+            foreach ($productData['faq'] as $productFaqId => $faqData) {
+                $validatedData = validateOrFails($faqRules, $faqData);
+                $productFaq = ProductFaq::whereProductId($product->id)->where("id", $productFaqId)->first();
+                if (isset($productFaq['id'])) {
+                    $productFaq->show = $validatedData['show'];
+                    $productFaq->order = $validatedData['order'];
+                    $productFaq->saveOrFail();
+                }
+            }
+        }
+
     }
 
 }

@@ -6,7 +6,9 @@ use App\Exceptions\UserErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SiteProductFastStoreRequest;
 use App\Http\Requests\SiteProductUpdateRequest;
+use App\Models\Faq;
 use App\Models\Product;
+use App\Models\ProductFaq;
 use App\Models\ProductImage;
 use App\Services\ProductService;
 use App\Traits\CrudTrait;
@@ -32,7 +34,9 @@ class ProductsController extends Controller
     public function edit($id)
     {
         $product = Product::getByIdWithSiteCheckOrFail($id);
-        return view('product.edit', ['product' => $product]);
+        Faq::createProductFaqRelationsByProduct($product);
+        $faqs = ProductFaq::getProductFaqRelations($id);
+        return view('admin.products.edit', ['product' => $product, 'faqs' => $faqs]);
     }
 
     public function index(Request $request)
@@ -62,10 +66,14 @@ class ProductsController extends Controller
     public function update(Request $request, $id)
     {
         $rules = (new SiteProductUpdateRequest())->rules();
+        $product = Product::getByIdWithSiteCheckOrFail($id);
         $postData = $request->all();
         $postData['slug'] = createSlug($postData['slug']);
-        $update = function () use ($id, $request,$postData) {
-            $product = Product::getByIdWithSiteCheckOrFail($id);
+        if (isset($product['slug']) && $product['slug'] == $postData['slug']) {
+            unset($rules['slug']);
+            unset($postData['slug']);
+        }
+        $update = function () use ($id, $request, $postData, $product) {
             $productService = new ProductService(getSiteConfig());
             $productService->update($product, $postData);
             return true;
