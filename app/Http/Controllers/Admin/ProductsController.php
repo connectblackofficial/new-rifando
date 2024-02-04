@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Exceptions\UserErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\SiteProductFastStoreRequest;
-use App\Http\Requests\SiteProductUpdateRequest;
+use App\Http\Requests\Admin\SiteProductFastStoreRequest;
+use App\Http\Requests\Admin\SiteProductUpdateRequest;
 use App\Models\Faq;
 use App\Models\Product;
 use App\Models\ProductFaq;
-use App\Models\ProductImage;
 use App\Services\ProductService;
 use App\Traits\CrudTrait;
 use Illuminate\Http\Request;

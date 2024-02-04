@@ -1,0 +1,350 @@
+{
+  "fields": [
+    {
+      "name": "id",
+      "type": "integer"
+    },
+    {
+      "name": "uuid",
+      "type": "string"
+    },
+    {
+      "name": "subdomain",
+      "type": "string"
+    },
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "tema",
+      "type": "string"
+    },
+    {
+      "name": "facebook",
+      "type": "string"
+    },
+    {
+      "name": "instagram",
+      "type": "string"
+    },
+    {
+      "name": "token_api_wpp",
+      "type": "string"
+    },
+    {
+      "name": "key_pix",
+      "type": "string"
+    },
+    {
+      "name": "key_pix_public",
+      "type": "text"
+    },
+    {
+      "name": "paggue_client_secret",
+      "type": "string"
+    },
+    {
+      "name": "paggue_client_key",
+      "type": "string"
+    },
+    {
+      "name": "token_asaas",
+      "type": "string"
+    },
+    {
+      "name": "pixel",
+      "type": "text"
+    },
+    {
+      "name": "verify_domain_fb",
+      "type": "text"
+    },
+    {
+      "name": "group_whats",
+      "type": "string"
+    },
+    {
+      "name": "logo",
+      "type": "string"
+    },
+    {
+      "name": "footer",
+      "type": "text"
+    },
+    {
+      "name": "user_id",
+      "type": "integer"
+    },
+    {
+      "name": "active",
+      "type": "select",
+      "options": {
+        "0": "No",
+        "1": "Yes"
+      }
+    },
+    {
+      "name": "regulation",
+      "type": "text"
+    },
+    {
+      "name": "user_term",
+      "type": "text"
+    },
+    {
+      "name": "policy_privay",
+      "type": "text"
+    },
+    {
+      "name": "scripts_footer",
+      "type": "text"
+    },
+    {
+      "name": "scripts_top",
+      "type": "text"
+    },
+    {
+      "name": "hide_winners",
+      "type": "select",
+      "options": {
+        "0": "No",
+        "1": "Yes"
+      }
+    },
+    {
+      "name": "enable_affiliates",
+      "type": "select",
+      "options": {
+        "0": "No",
+        "1": "Yes"
+      }
+    },
+    {
+      "name": "cpf_required",
+      "type": "select",
+      "options": {
+        "0": "No",
+        "1": "Yes"
+      }
+    },
+    {
+      "name": "email_required",
+      "type": "select",
+      "options": {
+        "0": "No",
+        "1": "Yes"
+      }
+    },
+    {
+      "name": "show_faqs",
+      "type": "select",
+      "options": {
+        "0": "No",
+        "1": "Yes"
+      }
+    },
+    {
+      "name": "email",
+      "type": "string"
+    },
+    {
+      "name": "whatsapp",
+      "type": "string"
+    },
+    {
+      "name": "description",
+      "type": "string"
+    },
+    {
+      "name": "og_image",
+      "type": "string"
+    },
+    {
+      "name": "banner",
+      "type": "string"
+    },
+    {
+      "name": "require_user_terms_acept",
+      "type": "select",
+      "options": {
+        "0": "No",
+        "1": "Yes"
+      }
+    },
+    {
+      "name": "show_purchase_notifications",
+      "type": "select",
+      "options": {
+        "0": "No",
+        "1": "Yes"
+      }
+    },
+    {
+      "name": "created_at",
+      "type": "datetime"
+    },
+    {
+      "name": "updated_at",
+      "type": "datetime"
+    }
+  ],
+  "validations": [
+    {
+      "field": "id",
+      "rules": "required"
+    },
+    {
+      "field": "uuid",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "subdomain",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "name",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "tema",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "facebook",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "instagram",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "token_api_wpp",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "key_pix",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "key_pix_public",
+      "rules": "required"
+    },
+    {
+      "field": "paggue_client_secret",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "paggue_client_key",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "token_asaas",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "pixel",
+      "rules": "required"
+    },
+    {
+      "field": "verify_domain_fb",
+      "rules": "required"
+    },
+    {
+      "field": "group_whats",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "logo",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "footer",
+      "rules": "required"
+    },
+    {
+      "field": "user_id",
+      "rules": "required"
+    },
+    {
+      "field": "active",
+      "rules": "required|in:0,1"
+    },
+    {
+      "field": "regulation",
+      "rules": "required"
+    },
+    {
+      "field": "user_term",
+      "rules": "required"
+    },
+    {
+      "field": "policy_privay",
+      "rules": "required"
+    },
+    {
+      "field": "scripts_footer",
+      "rules": "required"
+    },
+    {
+      "field": "scripts_top",
+      "rules": "required"
+    },
+    {
+      "field": "hide_winners",
+      "rules": "required|in:0,1"
+    },
+    {
+      "field": "enable_affiliates",
+      "rules": "required|in:0,1"
+    },
+    {
+      "field": "cpf_required",
+      "rules": "required|in:0,1"
+    },
+    {
+      "field": "email_required",
+      "rules": "required|in:0,1"
+    },
+    {
+      "field": "show_faqs",
+      "rules": "required|in:0,1"
+    },
+    {
+      "field": "email",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "whatsapp",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "description",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "og_image",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "banner",
+      "rules": "required|max:196"
+    },
+    {
+      "field": "require_user_terms_acept",
+      "rules": "required|in:0,1"
+    },
+    {
+      "field": "show_purchase_notifications",
+      "rules": "required|in:0,1"
+    },
+    {
+      "field": "created_at",
+      "rules": "required"
+    },
+    {
+      "field": "updated_at",
+      "rules": "required"
+    }
+  ]
+}

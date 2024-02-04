@@ -32,4 +32,16 @@ trait EnumTrait
         }
         return $values;
     }
+
+    public static function getSelectCrudFormat(): array
+    {
+        $arr = self::toSelectArray();
+        $newArr = [];
+        foreach ($arr as $k => $v) {
+            $newK=(string)$k;
+            $newArr[$newK] = strtolower($v);
+        }
+
+        return $newArr;
+    }
 }

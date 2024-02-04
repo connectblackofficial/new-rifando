@@ -6,20 +6,16 @@ namespace App\Http\Controllers;
 use App\Enums\FileUploadTypeEnum;
 use App\Exceptions\UserErrorException;
 use App\Helpers\FileUploadHelper;
-use App\Http\Requests\SiteProductStoreRequest;
+use App\Http\Requests\Admin\SiteProductStoreRequest;
 use App\Models\PrizeDraw;
 use App\Models\Product;
 use App\Models\Product as ModelsProduct;
-use App\Models\ProductDescription;
-use App\Models\ProductImage;
 use App\Models\Promo;
-use App\Models\Raffle;
 use App\Services\ProductService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redirect;
 
 class ProductAdminController extends Controller
 {
@@ -36,7 +32,6 @@ class ProductAdminController extends Controller
 
     public function addProduct(SiteProductStoreRequest $request)
     {
-dd($request->file('images'));
         $storeProduct = function () use ($request) {
             $productService = new ProductService();
             dd($request->file('images'));

@@ -29,7 +29,6 @@ class UserUpdateRequest extends FormRequest
         $rules = (new UserStoreRequest())->rules();
         $rules['email'] = 'required|email';
         $rules['password'] = 'nullable|min:8|max:191';
-
         return $rules;
     }
 }

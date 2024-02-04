@@ -1,11 +1,8 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Admin;
 
 use App\Enums\GameModeEnum;
-use App\Enums\PaymentGatewayEnum;
-use App\Enums\ProductStatusEnum;
-use App\Enums\RaffleTypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SiteProductFastStoreRequest extends FormRequest

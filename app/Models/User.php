@@ -46,10 +46,6 @@ class User extends Authenticatable
             'status' => [
                 '0' => 'inactive',
                 '1' => 'active'
-            ],
-            'afiliado' => [
-                '0' => 'yes',
-                '1' => 'no'
             ]
         ];
     }

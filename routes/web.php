@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SuperAdmin\SitesController;
 use App\Models\Participant;
 use App\Models\Raffle;
 use App\Services\CartService;
@@ -15,9 +16,11 @@ Route::middleware(['check', 'subDomain'])->group(function () {
     Route::group(['middleware' => ['auth', 'isAdmin']], function () {
         require_once base_path('routes/groups/admin.php');
     });
+    Route::group(['middleware' => ['auth', 'isSuperAdmin']], function () {
+        require_once base_path('routes/groups/super-admin.php');
+    });
     require_once base_path('routes/groups/public.php');
 
 
 });
-
 

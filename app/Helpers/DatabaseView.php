@@ -12,7 +12,12 @@ class DatabaseView
         DB::statement("DROP VIEW IF EXISTS $viewName;");
         DB::statement("CREATE VIEW $viewName as $sqlView;");
     }
+    public function sitesWithUsers()
+    {
+        $sqlView="SELECT sites.*,users.name as user_name,users.email as user_email,users.cpf as user_cpf FROM `sites` INNER join users on users.id=sites.user_id";
+        $this->recreate('sites_with_users', $sqlView);
 
+    }
     public function paymentReceiptsWithParticipants()
     {
         $viewName = "payment_receipts_with_participants";

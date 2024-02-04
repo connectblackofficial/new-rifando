@@ -2,18 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Exceptions\UserErrorException;
-use App\Http\Requests\Admin\PixAccountRequest;
-use App\Http\Requests;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\PhoneRequest;
-use App\Models\Customer;
+use App\Http\Requests;
+use App\Http\Requests\Admin\PaymentReceiptRequest;
 use App\Models\PaymentReceipt;
 use App\Models\PaymentReceiptView;
 use App\Services\PaymentReceiptService;
-use Illuminate\Http\Request;
 use App\Traits\CrudTrait;
-use App\Http\Requests\Admin\PaymentReceiptRequest;
+use Illuminate\Http\Request;
 
 class PaymentReceiptsController extends Controller
 {

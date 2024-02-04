@@ -118,7 +118,7 @@ trait CrudTrait
 
     }
 
-    private function getModelEumFiels()
+    private function getModelEumFields()
     {
         if (count($this->modelEnumFiels) == 0) {
             $this->modelEnumFiels = $this->modelClass::getEnumFields();
@@ -183,7 +183,7 @@ trait CrudTrait
 
     private function formatFieldsFn()
     {
-        foreach ($this->getModelEumFiels() as $fName => $field) {
+        foreach ($this->getModelEumFields() as $fName => $field) {
             $this->formatFieldsFn[$fName] = function ($value) use ($field) {
                 if (isset($field[$value])) {
                     return htmlLabel($field[$value]);
@@ -228,7 +228,12 @@ trait CrudTrait
         $this->formatFieldsFn[$c] = function ($value, $item) use ($c) {
             return formatMoney($value);
         };
-        $this->formatFieldsFn['status'] = function ($value, $item) use ($c) {
+        $c = "status";
+        $enumFields = $this->getModelEumFields();
+        $this->formatFieldsFn[$c] = function ($value, $item) use ($c, $enumFields) {
+            if (is_numeric($value) && isset($enumFields[$c][$value])) {
+                $value = __($enumFields[$c][$value]);
+            }
             return getBadgeByStatus($value);
         };
     }
@@ -443,7 +448,9 @@ trait CrudTrait
             $fillable = (new $this->modelClass)->getFillable();
 
             if (in_array('user_id', $fillable)) {
-                $requestData['user_id'] = getSiteOwnerId();
+                if (\Auth::user()->isSuperAdmin()) {
+                    $requestData['user_id'] = getSiteOwnerId();
+                }
             }
             $this->modelClass::create($requestData);
             $instance->afterStore();
@@ -482,7 +489,7 @@ trait CrudTrait
                     $fields[$fName] = ['type' => 'text'];
                 }
             }
-            foreach ($this->getModelEumFiels() as $fName => $options) {
+            foreach ($this->getModelEumFields() as $fName => $options) {
                 if (in_array($fName, $this->removedFromAdvancedSearch)) {
                     continue;
                 }
@@ -529,7 +536,7 @@ trait CrudTrait
                 if (isset($requestData['orderType']) && !empty($requestData['orderType']) && in_array($requestData['orderType'], ['desc', 'asc'])) {
                     $orderDir = $requestData['orderType'];
                 }
-                $searchModel = $instance->modelClass::siteOwner();
+                $searchModel = $instance->getBaseQueryAccess();
                 if (count($this->indexExtraWhere) > 0) {
                     $searchModel = $searchModel->where($this->indexExtraWhere);
                 }
@@ -537,7 +544,7 @@ trait CrudTrait
 
                 $pageData[$instance->crudName] = $rows;
             } else {
-                $searchModel = $instance->modelClass::siteOwner();
+                $searchModel = $instance->getBaseQueryAccess();
                 if (count($this->indexExtraWhere) > 0) {
                     $searchModel = $searchModel->where($this->indexExtraWhere);
                 }
@@ -575,15 +582,13 @@ trait CrudTrait
 
     public function show($id)
     {
-
         $showPageFn = function (self $instance) use ($id) {
             $instance->hasPermissionOrFail('show');
-
             $instance->beforeRenderShowPage($id);
             $view = $instance->getGroup() . '.' . $this->crudName . '.show';
             $pageData = [];
-
-            $pageData[$this->crudNameSingular] = $this->modelClass::siteOwner()->where($instance->getPkModelCol(), $id)->firstOrFail();
+            $baseQuery = $instance->getBaseQueryAccess();
+            $pageData[$this->crudNameSingular] = $baseQuery->where($instance->getPkModelCol(), $id)->firstOrFail();
             $pageData['pgTitle'] = htmlLabel($instance->crudName . '_show');;
 
             return $this->parseViewCi($view, $pageData);
@@ -599,7 +604,9 @@ trait CrudTrait
             $instance->beforeRenderEditPage($id);
             $view = $instance->getGroup() . '.' . $this->crudName . '.edit';
             $pageData = [];
-            $pageData[$this->crudNameSingular] = $this->modelClass::siteOwner()->where($instance->getPkModelCol(), $id)->firstOrFail();
+
+            $baseQuery = $instance->getBaseQueryAccess();
+            $pageData[$this->crudNameSingular] = $baseQuery->where($instance->getPkModelCol(), $id)->firstOrFail();
             $pageData['row'] = $pageData[$this->crudNameSingular];
             $pageData['pgTitle'] = htmlLabel($instance->crudName . '_edit');;
 
@@ -623,23 +630,12 @@ trait CrudTrait
         return $this->modelClass;
     }
 
-    private function validatePhoneOnUpdate($requestData)
+    public function getBaseQueryAccess()
     {
-
-        if (isset($requestData['ddi'])) {
-            $ddi = $requestData['ddi'];
-        } elseif (isset($this->currentUpdateData['ddi'])) {
-            $ddi = $this->currentUpdateData['ddi'];
+        if (\Auth::user()->isSuperAdmin()) {
+            return new $this->modelClass;
         } else {
-            throw new UserErrorException("DDI  inválido.");
-        }
-        if (isset($requestData['telephone'])) {
-            $phone = $requestData['telephone'];
-        } else {
-            $phone = $this->currentUpdateData['telephone'];
-        }
-        if (Customer::siteOwner()->where("ddi", $ddi)->whereTelephone(removePhoneMask($phone))->count() >= 1) {
-            throw new UserErrorException("Este telefone já esta sendo utilizado por outro usuário.");
+            return $this->modelClass::siteOwner();
         }
     }
 }

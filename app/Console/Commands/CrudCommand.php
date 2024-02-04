@@ -353,6 +353,7 @@ Route::delete('admin/user/{user}', 'App\Http\Controllers\SuperAdmin\UserControll
 
         $validationsString = '';
         foreach ($fields->validations as $validation) {
+
             $validationsString .= $validation->field . '#' . $validation->rules . ';';
         }
 

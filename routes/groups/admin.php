@@ -102,13 +102,6 @@ Route::get('/product/{id}', [ProductAdmController::class, 'edit'])->name('produc
 Route::post('/product/{id}', [ProductAdmController::class, 'update'])->name('product.update');
 
 
-Route::get('super-admin/users', [UsersController::class, 'index'])->name('super-admin.users.index');
-Route::get('super-admin/users/create', [UsersController::class, 'create'])->name('super-admin.users.create');
-Route::post('super-admin/users', [UsersController::class, 'store'])->name('super-admin.users.store');
-Route::get('super-admin/users/{pk}', [UsersController::class, 'show'])->name('super-admin.users.show');
-Route::get('super-admin/users/{pk}/edit', [UsersController::class, 'edit'])->name('super-admin.users.edit');
-Route::put('super-admin/users/{pk}', [UsersController::class, 'update'])->name('super-admin.users.update');
-Route::delete('super-admin/users/{pk}', [UsersController::class, 'destroy'])->name('super-admin.users.destroy');
 
 
 Route::get('admin/pix-accounts', [PixAccountsController::class, 'index'])->name('admin.pixaccounts.index');

@@ -14,7 +14,8 @@ final class YesNoAsIntEnum extends Enum
 {
     use EnumTrait;
 
-    const No =   0;
-    const Yes =   1;
+    const No = '0';
+    const Yes = '1';
+
 
 }

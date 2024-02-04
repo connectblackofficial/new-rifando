@@ -2,17 +2,11 @@
 
 namespace App\Http\Controllers\Site;
 
-use App\Enums\CacheKeysEnum;
 use App\Exceptions\UserErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\PhoneRequest;
-use App\Models\Cart;
+use App\Http\Requests\Admin\PhoneRequest;
 use App\Models\Customer;
-use App\Models\Product;
-use App\Services\CartService;
-use App\Services\ProductService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 
 class ParticipantsController extends Controller
 {

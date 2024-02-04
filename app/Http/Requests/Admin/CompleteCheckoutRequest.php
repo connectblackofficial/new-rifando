@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class PhoneRequest extends FormRequest
+class CompleteCheckoutRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,9 +23,9 @@ class PhoneRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'phone' => config('constants.phone_rule'),
-            'ddi' => config("constants.ddi_rule")
-        ];
+        $rules = (new PhoneRequest())->rules();
+        $rules['cart_uuid'] = config("constants.cart_uuid");
+        return $rules;
     }
+
 }

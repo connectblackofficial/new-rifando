@@ -1,13 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Admin;
 
-use App\Models\Customer;
-use App\Models\Site;
-use App\Rules\CpfValidation;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CompleteCheckoutRequest extends FormRequest
+class PhoneRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,9 +23,9 @@ class CompleteCheckoutRequest extends FormRequest
      */
     public function rules()
     {
-        $rules = (new PhoneRequest())->rules();
-        $rules['cart_uuid'] = config("constants.cart_uuid");
-        return $rules;
+        return [
+            'phone' => config('constants.phone_rule'),
+            'ddi' => config("constants.ddi_rule")
+        ];
     }
-
 }

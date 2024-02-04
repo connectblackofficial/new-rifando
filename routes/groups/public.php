@@ -11,6 +11,9 @@ use App\Http\Controllers\TermsOfUse;
 use Illuminate\Support\Facades\Route;
 
 Route::get('home', function () {
+    if (Auth::user()->isSuperAdmin()) {
+        return redirect(route("super-admin.users.index"));
+    }
     return redirect(route("home"));
 })->name('homeRedirect');
 

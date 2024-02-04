@@ -601,6 +601,7 @@ function faqColapse($faqs, Site $site)
 
 function getBadgeByStatus($status)
 {
+
     $c = "primary";
     $colors = [];
     $lStatus = strtolower($status);

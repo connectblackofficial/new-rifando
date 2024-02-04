@@ -31,7 +31,6 @@ class UserStoreRequest extends FormRequest
             'name' => 'required|max:191',
             'telephone' => 'required|numeric',
             'status' => 'required|in:0,1',
-            'afiliado' => 'required|in:0,1',
             'email' => 'required|email|unique:users',
             'pix' => 'max:191',
             'cpf' => 'required|max:191',

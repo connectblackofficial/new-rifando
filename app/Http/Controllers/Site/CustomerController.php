@@ -4,11 +4,9 @@ namespace App\Http\Controllers\Site;
 
 use App\Exceptions\UserErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\PhoneRequest;
+use App\Http\Requests\Admin\PhoneRequest;
 use App\Models\Customer;
-use App\Models\Product;
 use App\Services\ParticipantService;
-use App\Services\ProductService;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller

@@ -9,6 +9,7 @@ trait ModelSiteOwnerTrait
 {
     public function scopeSiteOwner($query)
     {
+
         return $query->where("user_id", getSiteOwnerId());
 
     }

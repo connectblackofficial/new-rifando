@@ -12,18 +12,24 @@
                             <tr>
                                 <th>#</th>
                                 <th><?= htmlLabel("name") ?></th>
-                                <th><?= htmlLabel("telephone") ?></th>
-                                <th><?= htmlLabel("status") ?></th>
+                                <th><?= htmlLabel("subdomain") ?></th>
+                                <th><?= htmlLabel("user_name") ?></th>
+                                <th><?= htmlLabel("user_email") ?></th>
+                                <th><?= htmlLabel("user_cpf") ?></th>
+                                <th><?= htmlLabel("active") ?></th>
                                 <th>@lang("actions")</th>
                             </tr>
                             </thead>
                             <tbody>
-                            @foreach($users as $item)
+                            @foreach($rows as $item)
                                 <tr>
-                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $item->id }}</td>
                                     <td><?= itemRowView($formatFieldsFn, $item, 'name') ?></td>
-                                    <td><?= itemRowView($formatFieldsFn, $item, 'telephone') ?></td>
-                                    <td><?= itemRowView($formatFieldsFn, $item, 'status') ?></td>
+                                    <td><?= itemRowView($formatFieldsFn, $item, 'subdomain') ?></td>
+                                    <td><?= itemRowView($formatFieldsFn, $item, 'user_name') ?></td>
+                                    <td><?= itemRowView($formatFieldsFn, $item, 'user_email') ?></td>
+                                    <td><?= itemRowView($formatFieldsFn, $item, 'user_cpf') ?></td>
+                                    <td><?= itemRowView($formatFieldsFn, $item, 'active') ?></td>
                                     <td>
                                         @include("crud.layout.actions")
                                     </td>
@@ -31,6 +37,8 @@
                             @endforeach
                             </tbody>
                         </table>
+
+
                         <div class="pagination-wrapper"> {!! $rows->appends(['search' => Request::get('search')])->render()
                         !!}
                         </div>
