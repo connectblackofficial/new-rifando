@@ -62,7 +62,7 @@ $siteConfig = getSiteConfig();
 
 </head>
 
-<body id="pg-{{routeAsDivId()}}-route">
+<body id="pg-{{routeAsDivId()}}-route" >
 @section('sidebar')
 @show
 <?php

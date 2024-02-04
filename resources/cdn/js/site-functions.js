@@ -142,47 +142,7 @@ function loadUrlModal2(title, url, size) {
 }
 
 function loadUrlModal(title, url, size) {
-    loading();
-    var modalUrl = $("#modal_url");
-    if (size) {
-        modalUrl.find('.modal-dialog').addClass(size);
-    }
-    modalUrl.attr("data-title", title);
-    modalUrl.attr("data-url", url);
-    $("#modalMsgTitle").html(title);
-    modalUrl.removeData('.bs.modal');
-
-    return fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Erro: ${response.status} ${response.statusText}`);
-            }
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                return response.json();
-            } else {
-                return response.text();
-            }
-        })
-        .then(data => {
-            if (typeof data === 'object') {
-                var hasErrors = processAjaxError(data);
-                if (!hasErrors) {
-                    $("#modalMsgBody").html(data.data.html);
-                    $('#modal_url').modal('show');
-                }
-            } else {
-                // Manipular HTML
-                $("#modalMsgBody").html(data);
-                $('#modal_url').modal('show');
-            }
-            loading();
-        })
-        .catch(error => {
-            errorMsg(`Houve um erro ao carregar o conteúdo: ${error}`);
-            $('#modal_url').modal('hide');
-            loading();
-        });
+    return superLoadUrlModal(title, url, size);
 }
 
 

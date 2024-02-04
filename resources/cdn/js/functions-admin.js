@@ -367,6 +367,11 @@ function initPage() {
             $('#form-foto').submit();
         });
     }
+    $('[data-toggle="tooltip"]').tooltip({
+        trigger: 'click',
+        container: 'body',
+        html:true
+    });
 
 
 }

@@ -26,7 +26,7 @@ $configSite = getSiteConfig();
     @endsection
 </head>
 
-<body class="sidebar-mini layout-fixed layout-navbar-fixed" style="height: auto;">
+<body class="sidebar-mini layout-fixed layout-navbar-fixed" style="height: auto; position: relative">
 
 <div id="loadingSystem" class="d-none"></div>
 <div class="wrapper">

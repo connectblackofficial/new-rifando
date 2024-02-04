@@ -81,3 +81,4 @@ Route::post('/site/customer/get', [\App\Http\Controllers\Site\CustomerController
 
 Route::get('site/participant/check', [\App\Http\Controllers\Site\ParticipantsController::class, 'check'])->name('site.participant.check');
 Route::post('site/participant/check', [\App\Http\Controllers\Site\ParticipantsController::class, 'processCheck'])->name('site.participant.process_check');
+Route::get('image', [\App\Http\Controllers\ImageController::class, 'index'])->name('image.index');

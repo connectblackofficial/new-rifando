@@ -210,18 +210,19 @@ class CheckoutService
             return $response;
         }
 
-        $codeKeyPIX = getSiteConfig();
+        $codeKeyPIX = $this->siteConfig;
         $productDesc = $participante->getDescription();
         $externalReferencee = $participante->id;
+
         if ($product->gateway == 'mp') {
-            $mpLib = new MpLib($codeKeyPIX->key_pix);
+            $mpLib = new MpLib($siteConfig);
             return $mpLib->getPix($resultPricePIX, $name, $email, $productDesc, $externalReferencee);
         } else if ($product->gateway == 'asaas') {
-            $assasHelper = new AsaasLib($codeKeyPIX->token_asaas);
+            $assasHelper = new AsaasLib($siteConfig->token_asaas);
             $idCliente = $assasHelper->getOrCreateClienteAsaas($name, $email, $cpf, $telefone);
             return $assasHelper->getPix($product, $idCliente, $resultPricePIX, $productDesc, $externalReferencee);
         } else if ($product->gateway == 'paggue') {
-            $pagLib = new PaggueLib($codeKeyPIX->paggue_client_key, $codeKeyPIX->paggue_client_secret);
+            $pagLib = new PaggueLib($siteConfig->paggue_client_key, $siteConfig->paggue_client_secret);
             return $pagLib->getPix($name, $resultPricePIX, $productDesc, $externalReferencee);
         } else {
             /** @var PixAccount $pixAccount */

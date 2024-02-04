@@ -123,9 +123,36 @@ function inputField($name, $type, $currentData = [], $attrs = [])
     return view('crud.fields.input', ['attrs' => $attrs, 'fieldValue' => $fieldValue, 'name' => $name, 'type' => $type, 'currentData' => $currentData])->render();
 }
 
+function inputGroup($name, $text, $currentData = [], $attrs = [])
+{
+    $fieldValue = "";
+    if (isset($currentData[$name])) {
+        $fieldValue = $currentData[$name];
+    }
+    return view('crud.fields.input-group', ['groupText' => $text, 'attrs' => $attrs, 'fieldValue' => $fieldValue, 'name' => $name, 'currentData' => $currentData])->render();
+}
+
 function inputText($name, $currentData = [], $attrs = [])
 {
     $type = "text";
+    return inputField($name, $type, $currentData, $attrs);
+}
+
+function inputColor($name, $currentData = [], $attrs = [])
+{
+    $type = "color";
+    return inputField($name, $type, $currentData, $attrs);
+}
+
+function imageInput($name, $currentData = [], $attrs = [])
+{
+    $type = "image";
+    return inputField($name, $type, $currentData, $attrs);
+}
+
+function textarea($name, $currentData = [], $attrs = [])
+{
+    $type = "textarea";
     return inputField($name, $type, $currentData, $attrs);
 }
 
@@ -360,7 +387,8 @@ function getJsRoutes()
         'verGanhadores' => $hasNotParams,
         'definirGanhador' => $hasNotParams,
         'ranking.admin' => $hasNotParams,
-        'product.create' => $hasNotParams
+        'product.create' => $hasNotParams,
+        'image.index' => $hasNotParams
     ];
     return routesToJs($routes);
 }
@@ -379,7 +407,9 @@ function getSiteJsRoutes()
         'cart.destroy' => $hasNotParams,
         'site.checkout' => $hasParam,
         "getCustomer" => $hasNotParams,
-        'site.participant.check' => $hasNotParams
+        'site.participant.check' => $hasNotParams,
+        'image.index' => $hasNotParams
+
     ];
     return routesToJs($routes);
 }
@@ -621,4 +651,19 @@ function getBadgeByStatus($status)
     //    $colors['primary'] = ['pendente', 'pending'];
     return '<span class="badge badge-' . $c . '">' . htmlLabel($status) . '</span>';
 
+}
+
+function tabConfig($name, $include)
+{
+    return ['name' => $name, 'title' => htmlLabel("tab_" . $name), 'inc' => $include];
+}
+
+function getIfExistsLang($key)
+{
+    $lang = __($key);
+
+    if (!empty($lang) && $lang != $key) {
+        return $lang;
+    }
+    return false;
 }

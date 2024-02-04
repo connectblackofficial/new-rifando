@@ -19,7 +19,7 @@ class SubdomainMiddleware
         if (!isset($_SERVER['HTTP_HOST'])) {
             abort(404);
         }
-        $host = $_SERVER['HTTP_HOST'];
+        $host = str_replace(".".env("BASE_DOMAIN"), '',$_SERVER['HTTP_HOST']) ;
         $siteEnv = Site::where('subdomain', $host)->where("active", 1)->first();
         if (!isset($siteEnv['id'])) {
             abort(404);

@@ -17,15 +17,4 @@ class AddColToViews extends Migration
         $dbView->sitesWithUsers();
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
-    {
-        Schema::table('views', function (Blueprint $table) {
-            //
-        });
-    }
 }

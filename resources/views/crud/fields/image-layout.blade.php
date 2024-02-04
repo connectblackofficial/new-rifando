@@ -1,0 +1,1 @@
+<img src="<?=imageAsset($image)?>" class="img-fluid"/>

@@ -2,10 +2,8 @@
 
 @section('content')
     <!-- <img src="<?= cdnImageAsset('bg-2.jpg') ?>" class="rounded-md"> -->
-    <img src="<?=cdnImageAsset('banner2-desktop.webp')?>"
+    <img src="<?=cdnImageAsset($config->banner)?>"
          class="rounded-md" style="filter: hue-rotate(15deg);">
-
-
     <div class="row" style="margin-top: 25px; margin-bottom: 25px;">
         <div class="col-md-3">
             <div class="d-flex" style="column-gap: 15px; background: #ffffff9c; border-radius: 10px; padding: 10px;">

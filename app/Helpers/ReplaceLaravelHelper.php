@@ -2,6 +2,7 @@
 function checkAutoTrans($key, $autoCreate = true)
 {
     $env = env('APP_ENV');
+
     if (!is_null($key) && $env != 'production' && $autoCreate && !str_contains($key, '.')) {
         $fileDir = resource_path("lang/pt-BR.json");
         $json = file_get_contents($fileDir);

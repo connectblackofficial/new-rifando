@@ -56,3 +56,8 @@ a {
         display: none !important;
     }
 }
+
+.advanced-tab-container nav {
+    margin-top: 10px !important;
+
+}

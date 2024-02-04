@@ -30,7 +30,13 @@ class Site extends Model
      *
      * @var array
      */
-    protected $fillable = ['id', 'uuid', 'subdomain', 'name', 'tema', 'facebook', 'instagram', 'token_api_wpp', 'key_pix', 'key_pix_public', 'paggue_client_secret', 'paggue_client_key', 'token_asaas', 'pixel', 'verify_domain_fb', 'group_whats', 'logo', 'footer', 'user_id', 'active', 'regulation', 'user_term', 'policy_privay', 'scripts_footer', 'scripts_top', 'hide_winners', 'enable_affiliates', 'cpf_required', 'email_required', 'show_faqs', 'email', 'whatsapp', 'description', 'og_image', 'banner', 'require_user_terms_acept', 'show_purchase_notifications', 'created_at', 'updated_at'];
+    protected $fillable = ['id', 'uuid', 'subdomain', 'name', 'tema', 'facebook', 'instagram', 'token_api_wpp', 'key_pix',
+        'key_pix_public', 'paggue_client_secret', 'paggue_client_key', 'token_asaas', 'pixel', 'verify_domain_fb', 'group_whats',
+        'logo', 'footer', 'user_id', 'active', 'regulation', 'user_term', 'policy_privay', 'scripts_footer', 'scripts_top',
+        'hide_winners', 'enable_affiliates', 'cpf_required', 'email_required', 'show_faqs', 'email', 'whatsapp', 'description',
+        'og_image', 'banner', 'require_user_terms_acept', 'show_purchase_notifications', 'brand-color', 'btn-free-color',
+        'btn-reserved-color', 'btn-paid-color', 'brand-bg-color', 'secondary-bg-color', 'secondary-bg-text-color',
+        'created_at', 'updated_at'];
 
 
     public function user()
@@ -42,6 +48,7 @@ class Site extends Model
     {
         return ['show_purchase_notifications' => $this->show_purchase_notifications];
     }
+
     public static function getEnumFields()
     {
         return [
