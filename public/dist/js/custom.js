@@ -35,3 +35,29 @@ function changeIcon() {
 
 document.querySelector('#sideBtn').addEventListener('click', changeIcon);
 
+// SIDEBAR
+
+$(function(e) {
+  $.ajaxSetup({
+      headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+      }
+  });
+})
+
+var url_atual = window.location.pathname;
+
+if (url_atual == '/dashboard') {
+  var d = document.getElementById("home");
+  d.className += " active";
+} else if (url_atual == '/adicionar-sorteio') {
+  var d = document.getElementById("adicionar-sorteio");
+  d.className += " active";
+} else if (url_atual == '/meus-sorteios') {
+  var d = document.getElementById("meus-sorteios");
+  d.className += " active";
+} else if (url_atual == '/perfil') {
+  var d = document.getElementById("perfil");
+  d.className += " active";
+}
+

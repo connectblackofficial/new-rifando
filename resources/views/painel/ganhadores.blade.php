@@ -1,9 +1,9 @@
 @extends('layouts.admin')
 
 @section('content')
-    <div class="container mt-3" style="max-width:100%;min-height:100%;">
+    <div class="container mt-3">
         <div class="col d-flex justify-content-center">
-            <h2>Ganhadores</h2>
+            <h2 class="dashboard-title">Ganhadores</h2>
         </div>
 
         @if ($errors->any())
@@ -30,14 +30,14 @@
             <input type="file" name="foto" id="btnFoto" accept="image/png, image/jpeg">
         </form>
 
-        <table class="table table-striped table-bordered table-responsive-md table-hover align=center" id="table_rifas">
+        <table class="dashboard-table" id="table_rifas">
             <thead>
                 <tr>
                     <th>Foto</th>
                     <th>Nome</th>
                     <th>Ação</th>
                     <th>Prêmio</th>
-                    <th>Acões</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -55,9 +55,9 @@
                         <td style="vertical-align: middle">{{ $ganhador->descricao }}</td>
                         <td style="vertical-align: middle">
                             <div class="dropdown">
-                                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button"
+                                <button class="regular-btn" type="button"
                                     data-toggle="dropdown" aria-expanded="false">
-                                    Ações
+                                    Ações <i class="fa-solid fa-caret-down"></i>
                                 </button>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item" style="cursor: pointer" data-id="{{ $ganhador->id }}"

@@ -48,7 +48,7 @@
                                 </form>
                             </div>
                         </div>
-                        <table class="table table-striped table-bordered table-responsive-md table-hover align=center"
+                        <table class="dashboard-table "
                             id="table_rifas">
                             <thead>
                                 <tr>
@@ -58,7 +58,7 @@
                                     <th>Data Sorteio</th>
                                     <th>Valor</th>
                                     {{-- <th>Lista</th> --}}
-                                    <th>Acões</th>
+                                    <th>Ações</th>
                                     <div id="copy-link"></div>
                                 </tr>
                             </thead>
@@ -86,8 +86,8 @@
                                                 <span class="badge bg-warning">Processando...</span>
                                             @else
                                                 <div class="dropdown">
-                                                    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                                                    Ações
+                                                    <button class="regular-btn" type="button" data-toggle="dropdown" aria-expanded="false">
+                                                    Ações <i class="fa-solid fa-caret-down"></i>
                                                     </button>
                                                         <div class="dropdown-menu">
                                                         <a class="dropdown-item" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#modal_editar_rifa{{ $product->id }}"><i class="bi bi-pencil-square"></i>&nbsp;Editar</a>

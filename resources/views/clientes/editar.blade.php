@@ -4,7 +4,7 @@
     <div class="container mt-3" style="max-width:100%;min-height:100%;">
         <div class="table-wrapper ">
             <div class="table-title">
-                <form action="{{ route('clientes.update', $cliente->id) }}" method="POST">
+                <form class="editar-clientes-table" action="{{ route('clientes.update', $cliente->id) }}" method="POST">
                     @csrf
                     @method('PUT')
                     <div class="row mb-3">
@@ -37,7 +37,7 @@
                         </div>
                     </div>
 
-                    <button class="button btn-block btn-sm btn-success mt-3">Salvar</button>
+                    <button class="regular-btn">Salvar</button>
                 </form>
             </div>
         </div>

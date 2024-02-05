@@ -6,7 +6,7 @@
             <div class="table-title">
                 <div class="row mb-3">
                     <div class="col d-flex justify-content-center">
-                        <h2>Whatsapp <b>Mensagens</b></h2>
+                        <h2>Whatsapp Mensagens</h2>
                     </div>
                 </div>
 
@@ -31,22 +31,28 @@
         </div>
 
         <div class="row d-flex justify-content-center">
-            <div class="col-md-3 p-2 rounded" style="background-color: darkblue; color: #fff">
-                <center><h4>Varíaveis</h4></center>
-                <span>{id}: Código da compra</span> <br>
-                <span>{nome}: Nome do cliente</span> <br>
-                <span>{valor}: Valor por cota</span> <br>
-                <span>{total}: Total da compra</span> <br>
-                <span>{cotas}: Cotas da compra</span> <br>
-                <span>{sorteio}: Título do sorteio</span> <br>
-                <span>{link}: Link de pagamento</span> <br>
-            </div>
+            <details open="open" class="var-box">
+                <summary>Variáveis
+                    <i class="fa-solid fa-xmark control-icon control-icon-close"></i>
+                    <i class="fa-solid fa-chevron-down control-icon control-icon-expand"></i>
+                </summary>
+                <p>
+                    <span>{id}: Código da compra</span> <br>
+                    <span>{nome}: Nome do cliente</span> <br>
+                    <span>{valor}: Valor por cota</span> <br>
+                    <span>{total}: Total da compra</span> <br>
+                    <span>{cotas}: Cotas da compra</span> <br>
+                    <span>{sorteio}: Título do sorteio</span> <br>
+                    <span>{link}: Link de pagamento</span> <br>
+                </p>
+                
+            </details>
         </div>
 
-        <form action="{{ route('wpp.salvar') }}" method="POST">
+        <form class="wpp-msg-form" action="{{ route('wpp.salvar') }}" method="POST">
             @csrf
-            <div class="row">
-                <div class="col-12">
+            
+                <div class="wpp-content-wrapper">
                     <nav>
                         <ul class="nav nav-tabs" id="myTab" role="tablist" style="font-size: 12px;">
                             <li class="nav-item" >
@@ -105,9 +111,9 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                
 
             </div>
-            <button type="submit" class="btn btn-sm btn-success mt-2 mb-4 float-right">Salvar</button>
+            <button type="submit" class="regular-btn">Salvar</button>
         </form>
     @endsection

@@ -69,7 +69,7 @@
                                 @endif
                             </div>
 
-                            <h3 class="profile-username text-center"><button class="btn btn-sm btn-success"
+                            <h3 class="profile-username text-center"><button class="regular-btn"
                                     onclick="alteraLogo()">Alterar Logo</button></h3>
                             <center>
                                 <p>3 x 1.5 (cm)</p>
@@ -149,7 +149,7 @@
                                                 value="{{ $users->token_asaas }}" placeholder="">
                                         </div>
                                         <div class="form-group bg-info rounded p-2">
-                                            <strong style="color: #000">IMPORTANTE!</strong>
+                                            <strong>IMPORTANTE!</strong>
                                             <br>
                                             Inserir o link abaixo na aba Webhook no site da Paggue. Ele é o responsável pala
                                             baixa automática.
@@ -182,7 +182,7 @@
                                                 placeholder="Senha">
                                         </div>
                                         <div class="form-group">
-                                            <button type="submit" class="btn btn-danger">Alterar</button>
+                                            <button type="submit" class="regular-btn">Alterar</button>
                                         </div>
                                     </form>
                                 </div>
@@ -202,7 +202,7 @@
                                             <textarea class="form-control" name="pixel" rows="20" style="resize: none;" required>{{ $users->pixel }}</textarea>
                                         </div>
                                         <div class="form-group">
-                                            <button type="submit" class="btn btn-danger">Cadastrar</button>
+                                            <button type="submit" class="regular-btn">Cadastrar</button>
                                         </div>
                                     </form>
                                 </div>

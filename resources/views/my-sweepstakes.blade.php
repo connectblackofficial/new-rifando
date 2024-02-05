@@ -79,7 +79,7 @@
                                     <th>Data Sorteio</th>
                                     <th>Valor</th>
                                     {{-- <th>Lista</th> --}}
-                                    <th>Acões</th>
+                                    <th>Ações</th>
                                     <div id="copy-link"></div>
                                 </tr>
                             </thead>

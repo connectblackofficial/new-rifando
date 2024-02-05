@@ -25,7 +25,7 @@
                                 <th>Sorteio</th>
                                 <th>Valor da Cota</th>
                                 <th>% Afiliado</th>
-                                <th>Acões</th>
+                                <th>Ações</th>
                                 <div id="copy-link"></div>
                             </tr>
                         </thead>

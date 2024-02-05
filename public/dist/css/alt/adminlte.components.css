@@ -2947,7 +2947,7 @@ body.text-sm .input-group-text {
 }
 
 .navbar-dark .btn-navbar:hover {
-  background-color: #454d55;
+  background-color: #373B3E;
 }
 
 .navbar-dark .btn-navbar:focus {
@@ -3016,15 +3016,15 @@ body.text-sm .input-group-text {
 }
 
 .dark-mode .custom-range::-webkit-slider-runnable-track {
-  background-color: #454d55;
+  background-color: #373B3E;
 }
 
 .dark-mode .custom-range::-moz-range-track {
-  background-color: #454d55;
+  background-color: #373B3E;
 }
 
 .dark-mode .custom-range::-ms-track {
-  background-color: #454d55;
+  background-color: #373B3E;
 }
 
 .dark-mode .custom-range.custom-range-primary:focus {
@@ -5563,7 +5563,7 @@ body.text-sm .input-group-text {
 }
 
 .dark-mode .progress {
-  background: #454d55;
+  background: #373B3E;
 }
 
 .card-primary:not(.card-outline) > .card-header {
@@ -9988,12 +9988,12 @@ html.maximized-card {
 }
 
 .dark-mode .card-comments .card-comment {
-  border-bottom-color: #454d55;
+  border-bottom-color: #373B3E;
 }
 
 .dark-mode .todo-list > li {
   background-color: #3f474e;
-  border-color: #454d55;
+  border-color: #373B3E;
   color: #fff;
 }
 
@@ -11023,7 +11023,7 @@ html.maximized-card {
 }
 
 .dark-mode .btn-light {
-  background-color: #454d55;
+  background-color: #373B3E;
   color: #fff;
   border-color: #6c757d;
 }

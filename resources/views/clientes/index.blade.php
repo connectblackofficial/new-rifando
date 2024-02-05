@@ -40,23 +40,23 @@
                     <div class="table-title">
                         <div class="row mb-3">
                             <div class="col d-flex justify-content-center">
-                                <h2>Clientes</h2>
+                                <h2 class="dashboard-title">Clientes</h2>
                             </div>
-                            <div class="row-12 mb-3 d-flex" style="justify-content: space-between;">
+                            <div class="search-wrap" style="justify-content: space-between;">
 
-                                <form method="GET" action="{{ route('clientes') }}" class="form-inline my-2 my-lg-0">
+                                <form method="GET" action="{{ route('clientes') }}" class="inline-search">
                                     <input type="text" class="form-control" name="search" placeholder="Search..." value="{{ request('search') }}">
-                                    <button class="btn btn-outline-secondary my-2 my-sm-0 border border-secondary text-dark" type="submit">Buscar</button>
+                                    <button class="outiline-btn" type="submit">Buscar</button>
                                 </form>
                             </div>
                         </div>
-                        <table class="table table-striped table-bordered table-responsive-sm table-hover align=center"
+                        <table class="dashboard-table"
                             id="table_rifas">
                             <thead>
                                 <tr>
                                     <th>Nome</th>
                                     <th>Telefone</th>
-                                    <th style="width: 10%">Acões</th>
+                                    <th style="width: 10%">Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -64,7 +64,7 @@
                                     <tr>
                                         <td>{{ $cliente->nome }}</td>
                                         <td>{{ $cliente->telephone }}</td>
-                                        <td><a href="{{ route('clientes.editar', $cliente->id) }}" class="btn btn-sm btn-warning">Editar</a></td>
+                                        <td><a href="{{ route('clientes.editar', $cliente->id) }}" class="regular-btn">Editar</a></td>
                                     </tr>
                                 @endforeach
                             </tbody>

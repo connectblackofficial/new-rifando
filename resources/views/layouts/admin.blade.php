@@ -19,6 +19,9 @@
         href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{{ asset('/plugins/fontawesome-free/css/all.min.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="{{ asset('/dist/css/adminlte.min.css') }}" rel="stylesheet">
     <link href="{{ asset('/plugins/summernote/summernote-bs4.min.css') }}" rel="stylesheet">
     <link href="{{ asset('/plugins/codemirror/codemirror.css') }}" rel="stylesheet">
@@ -97,10 +100,10 @@
         <!-- /.navbar -->
 
         <!-- Main Sidebar Container -->
-        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <aside class="main-sidebar elevation-4">
             <!-- Brand Logo -->
             <a href="../../home" class="brand-link text-center"
-                style="background: #212529; text-decoration: none">
+                style="text-decoration: none">
                 <span class="brand-text font-weight-light">Painel</span>
             </a>
 
@@ -249,29 +252,7 @@
     @stack('scripts')
 
     <script>
-        $(function(e) {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-        })
-
-        var url_atual = window.location.pathname;
-
-        if (url_atual == '/home') {
-            var d = document.getElementById("home");
-            d.className += " active";
-        } else if (url_atual == '/adicionar-sorteio') {
-            var d = document.getElementById("adicionar-sorteio");
-            d.className += " active";
-        } else if (url_atual == '/meus-sorteios') {
-            var d = document.getElementById("meus-sorteios");
-            d.className += " active";
-        } else if (url_atual == '/perfil') {
-            var d = document.getElementById("perfil");
-            d.className += " active";
-        }
+        
 
         //console.log(url_atual);
     </script>

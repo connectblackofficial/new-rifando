@@ -42,14 +42,14 @@
                                 <h2>Lista <b>Afiliados</b></h2>
                             </div>
                         </div>
-                        <table class="table table-striped table-bordered table-responsive-sm table-hover align=center"
+                        <table class="dashboard-table"
                             id="table_rifas">
                             <thead>
                                 <tr>
                                     <th>Nome</th>
                                     <th>Data de Cadastro</th>
                                     <th>Total de Ganhos</th>
-                                    <th>Acões</th>
+                                    <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -60,8 +60,8 @@
                                         <td>R$ {{ number_format($afiliado->totalGanhos(), 2, ",", ".") }}</td>
                                         <td>
                                             <div class="dropdown">
-                                                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                                                Ações
+                                                <button class="regular-btn" type="button" data-toggle="dropdown" aria-expanded="false">
+                                                Ações <i class="fa-solid fa-caret-down"></i>
                                                 </button>
                                                 <div class="dropdown-menu">
                                                     <a class="dropdown-item" href="{{ route('painel.excluirAfiliado', $afiliado->id) }}"><i class="bi bi-trash3"></i>&nbsp;Excluir</a>

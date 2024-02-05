@@ -1390,49 +1390,49 @@
       }
     };
 
-    _proto.removeActiveTab = function removeActiveTab(type, element) {
-      if (type == 'all') {
-        $__default["default"](SELECTOR_TAB_NAVBAR_NAV_ITEM).remove();
-        $__default["default"](SELECTOR_TAB_PANE).remove();
-        $__default["default"](SELECTOR_TAB_EMPTY).show();
-      } else if (type == 'all-other') {
-        $__default["default"](SELECTOR_TAB_NAVBAR_NAV_ITEM + ":not(.active)").remove();
-        $__default["default"](SELECTOR_TAB_PANE + ":not(.active)").remove();
-      } else if (type == 'only-this') {
-        var $navClose = $__default["default"](element);
-        var $navItem = $navClose.parent('.nav-item');
-        var $navItemParent = $navItem.parent();
-        var navItemIndex = $navItem.index();
-        var tabId = $navClose.siblings('.nav-link').attr('aria-controls');
-        $navItem.remove();
-        $__default["default"]("#" + tabId).remove();
+    // _proto.removeActiveTab = function removeActiveTab(type, element) {
+    //   if (type == 'all') {
+    //     $__default["default"](SELECTOR_TAB_NAVBAR_NAV_ITEM).remove();
+    //     $__default["default"](SELECTOR_TAB_PANE).remove();
+    //     $__default["default"](SELECTOR_TAB_EMPTY).show();
+    //   } else if (type == 'all-other') {
+    //     $__default["default"](SELECTOR_TAB_NAVBAR_NAV_ITEM + ":not(.active)").remove();
+    //     $__default["default"](SELECTOR_TAB_PANE + ":not(.active)").remove();
+    //   } else if (type == 'only-this') {
+    //     var $navClose = $__default["default"](element);
+    //     var $navItem = $navClose.parent('.nav-item');
+    //     var $navItemParent = $navItem.parent();
+    //     var navItemIndex = $navItem.index();
+    //     var tabId = $navClose.siblings('.nav-link').attr('aria-controls');
+    //     $navItem.remove();
+    //     $__default["default"]("#" + tabId).remove();
 
-        if ($__default["default"](SELECTOR_TAB_CONTENT).children().length == $__default["default"](SELECTOR_TAB_EMPTY + ", " + SELECTOR_TAB_LOADING).length) {
-          $__default["default"](SELECTOR_TAB_EMPTY).show();
-        } else {
-          var prevNavItemIndex = navItemIndex - 1;
-          this.switchTab($navItemParent.children().eq(prevNavItemIndex).find('a.nav-link'));
-        }
-      } else {
-        var _$navItem = $__default["default"](SELECTOR_TAB_NAVBAR_NAV_ITEM + ".active");
+    //     if ($__default["default"](SELECTOR_TAB_CONTENT).children().length == $__default["default"](SELECTOR_TAB_EMPTY + ", " + SELECTOR_TAB_LOADING).length) {
+    //       $__default["default"](SELECTOR_TAB_EMPTY).show();
+    //     } else {
+    //       var prevNavItemIndex = navItemIndex - 1;
+    //       this.switchTab($navItemParent.children().eq(prevNavItemIndex).find('a.nav-link'));
+    //     }
+    //   } else {
+    //     var _$navItem = $__default["default"](SELECTOR_TAB_NAVBAR_NAV_ITEM + ".active");
 
-        var _$navItemParent = _$navItem.parent();
+    //     var _$navItemParent = _$navItem.parent();
 
-        var _navItemIndex = _$navItem.index();
+    //     var _navItemIndex = _$navItem.index();
 
-        _$navItem.remove();
+    //     _$navItem.remove();
 
-        $__default["default"](SELECTOR_TAB_PANE + ".active").remove();
+    //     $__default["default"](SELECTOR_TAB_PANE + ".active").remove();
 
-        if ($__default["default"](SELECTOR_TAB_CONTENT).children().length == $__default["default"](SELECTOR_TAB_EMPTY + ", " + SELECTOR_TAB_LOADING).length) {
-          $__default["default"](SELECTOR_TAB_EMPTY).show();
-        } else {
-          var _prevNavItemIndex = _navItemIndex - 1;
+    //     if ($__default["default"](SELECTOR_TAB_CONTENT).children().length == $__default["default"](SELECTOR_TAB_EMPTY + ", " + SELECTOR_TAB_LOADING).length) {
+    //       $__default["default"](SELECTOR_TAB_EMPTY).show();
+    //     } else {
+    //       var _prevNavItemIndex = _navItemIndex - 1;
 
-          this.switchTab(_$navItemParent.children().eq(_prevNavItemIndex).find('a.nav-link'));
-        }
-      }
-    };
+    //       this.switchTab(_$navItemParent.children().eq(_prevNavItemIndex).find('a.nav-link'));
+    //     }
+    //   }
+    // };
 
     _proto.toggleFullscreen = function toggleFullscreen() {
       if ($__default["default"]('body').hasClass(CLASS_NAME_FULLSCREEN_MODE)) {
