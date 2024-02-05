@@ -39,7 +39,6 @@ class MpLib
             "external_reference" => $externalReferencee,
         ];
 
-
         $payment_data = json_encode($payment_data);
 
 

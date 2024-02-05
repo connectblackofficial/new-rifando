@@ -3,15 +3,17 @@ services:
   nginx:
     image: nginx:latest
     ports:
-      - "80:80"
-      - "443:443"
+      - "8180:80"
+      - "8443:443"
     volumes:
       - ./:/var/www/rifando
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/default.conf:/etc/nginx/sites-available/default
+      - ./docker/fullchain.pem:/etc/nginx/fullchain.pem
+      - ./docker/privkey.pem:/etc/nginx/privkey.pem
   php-fpm:
     image: php:7.4-fpm
     volumes:
-      - ./php/php.ini:/usr/local/etc/php/php.ini
       - ./:/var/www/rifando
 volumes:
   public:
